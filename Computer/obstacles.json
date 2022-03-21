@@ -1,0 +1,28 @@
+{
+  "obstacles": [
+    {
+      "id": 0,
+      "center": {
+        "x": 250,
+        "y": 150
+      },
+      "rotation": 0
+    },
+    {
+      "id": 1,
+      "center": {
+        "x": 500,
+        "y": 800
+      },
+      "rotation": 0
+    },
+    {
+      "id": 2,
+      "center": {
+        "x": 1328,
+        "y": 976
+      },
+      "rotation": 0
+    }
+  ]
+}

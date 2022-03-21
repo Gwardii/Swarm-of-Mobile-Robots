@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{f64dcae7-1353-4c54-88f6-d4a1ec4b12d3}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>main.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>MSBuild|venv-swarm-computer|$(MSBuildProjectFullPath)</InterpreterId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="budowanie mapy.drawio.png" />
+    <Content Include="figures.json" />
+    <Content Include="modele\OldVersions\stol_1.0001.ipt" />
+    <Content Include="modele\OldVersions\stoł_2.0004.iam" />
+    <Content Include="modele\Part3.ipt" />
+    <Content Include="modele\stol.fbx" />
+    <Content Include="modele\stol_1.ipt" />
+    <Content Include="modele\stol_1.mtl" />
+    <Content Include="modele\stol_1.obj" />
+    <Content Include="modele\stoł_2.iam" />
+    <Content Include="modele\stoł_2\Frame\Frame 1647020232368.iam" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020233901.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020233947.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020233997.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234043.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234088.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234135.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234181.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234225.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234270.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234319.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234366.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020234412.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624364.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624416.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624467.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624518.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624568.ipt" />
+    <Content Include="modele\stoł_2\Frame\ISO 10799-2 40x40x2 1647020624614.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\Frame 1647020232368.0001.iam" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234181.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234225.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234270.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234319.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234366.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\OldVersions\ISO 10799-2 40x40x2 1647020234412.0001.ipt" />
+    <Content Include="modele\stoł_2\Frame\Skeleton 1647020232369.ipt" />
+    <Content Include="obstacles.json" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="main.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="modele\" />
+    <Folder Include="modele\OldVersions\" />
+    <Folder Include="modele\stoł_2\" />
+    <Folder Include="modele\stoł_2\Frame\" />
+    <Folder Include="modele\stoł_2\Frame\OldVersions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="venv-swarm-computer\">
+      <Id>venv-swarm-computer</Id>
+      <Version>3.9</Version>
+      <Description>venv-swarm-computer (Python 3.9 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
