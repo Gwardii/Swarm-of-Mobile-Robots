@@ -95,9 +95,9 @@ class _FigureType(enum.Enum):
     
 if __name__ == '__main__':
     import json
-    with open("figures.json") as f:
+    with open(".\Computer\\figures.json") as f:
         figures=json.load(f)['figures']
-    with open("obstacles.json") as o:
+    with open(".\Computer\obstacles.json") as o:
         obstacles=json.load(o)['obstacles']
     dict_of_obstacles = load_obstacles(obstacles, figures)
     print(dict_of_obstacles[2].get_vertices())
