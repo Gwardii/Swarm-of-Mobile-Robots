@@ -1,5 +1,6 @@
 import tkinter as tk
 import json
+from traceback import print_tb
 from matplotlib import scale
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,10 +10,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import ImageTk, Image
 import cv2
 import threading
-import os
 import time
-
-from sympy import true
+from map import obstacles as obs
 
 class GUI:
     def __init__(self,figure_width=6,figure_height=4,N=10):
@@ -20,17 +19,17 @@ class GUI:
         self.map=plt.Figure(figsize=(figure_width,figure_height),dpi=100)
         self.ax=self.map.add_subplot(111)
         self.camera_label= tk.Label(fg="white",bg="black",width=600,height=400)
-
         self.is_map_drawed=False
         #communication status
         self.is_robot_connected=False
         self.is_rpi_connected=False
         self.robot_communicaton_label_text=tk.Label(text="Robot communication status: ",bg="white",fg="black",font=16)
         self.rpi_communicaton_label_text=tk.Label(text="Raspberry PI communication status: ",bg="white",fg="black",font=16)
-        self.diode={"green":ImageTk.PhotoImage(Image.open(".\Computer\green_diode.png").resize((28,28),
-        Image.ANTIALIAS)),"red":ImageTk.PhotoImage(Image.open(".\Computer\\red_diode.png").resize((28,28),Image.ANTIALIAS))}
+        self.diode={"green":ImageTk.PhotoImage(Image.open(".\Computer\img\green_diode.png").resize((28,28),
+        Image.ANTIALIAS)),"red":ImageTk.PhotoImage(Image.open(".\Computer\img\\red_diode.png").resize((28,28),Image.ANTIALIAS))}
         self.robot_diode=tk.Label(image=self.diode["red"],)
         self.rpi_diode=tk.Label(image=self.diode["green"])
+
         #robot control - entry
         self.robot_position=np.array([1000,800,90]) #potem się to rozszerzy na N robotow
         self.coord_entry=tk.Entry(fg='black',bg='white',width=20)
@@ -73,6 +72,7 @@ class GUI:
 
         self.camera_Thread=threading.Thread(target=self.video_stream)
         self.camera_Thread.start()
+        
         self.robot_thread=threading.Thread(target=self.robot_thread)
         self.robot_thread.start()
 
@@ -121,6 +121,7 @@ class GUI:
             if(self.command!="" and self.command!=last):
                 print(self.command)
             last=self.command
+
     def draw_figure(self,x_lim=2000,y_lim=1600,axis_step=100): #tworzenie pola do wykresów, skalowanie osi itp
         self.ax.set_xlim([0,x_lim])
         self.ax.set_ylim([0,y_lim])
@@ -157,34 +158,15 @@ class GUI:
             self.camera_label.update()
 
     def read_data(self): #funkcja do odczytu plikow
-        f=open(".\Computer\\figures.json")
-        o=open(".\Computer\obstacles.json")
-        figures=json.load(f)
-        obstacles=json.load(o)
-        f.close()
-        o.close()
-        return figures, obstacles
-
-    def draw_obstacles(self): # odczytuje pliki .json i na podstawie zawartych danych rysuje przefszkody
-        figures,obstacles=self.read_data()
-        for i in obstacles["obstacles"]:
-            obstacle_id=i["id"]
-            obstacle_center=[i["center"]["x"],i["center"]["y"]]
-            obstacle_rotation=i["rotation"]
-            for j in figures["figures"]:
-                if j["id"]==obstacle_id:
-                    if j["type"]=="triangle":
-                        points=np.zeros((3,2))
-                        points=[[j["point_1"]["x"],j["point_1"]["y"]],[j["point_2"]["x"],j["point_2"]["y"]],[j["point_3"]["x"],j["point_3"]["y"]]]
-                        self.draw_triangle(obstacle_center,points,obstacle_rotation)
-                    elif j["type"]=="circle":
-                        self.draw_circle(obstacle_center,j["radius"])
-                    elif j["type"]=="rectangle":
-                        self.draw_rectangle(obstacle_center,j["length_x"],j["length_y"],obstacle_rotation)
+        with open(".\Computer\\resources\\figures.json") as f:
+            figures=json.load(f)['figures']
+        with open(".\Computer\\resources\obstacles.json") as o:
+            obstacles=json.load(o)['obstacles']
+        dict_of_obstacles = obs.load_obstacles(obstacles, figures)
+        return dict_of_obstacles
 
     def robot_thread(self): # chwilowo to wyglada tak, ze robot pojawia sie w miejscu zadanym w tym polu "Enter target coord.."
         while(True):
-            #robot=self.draw_robot([random.random()*2000,random.random()*1600],random.random()*180,1)
             d_p=20# co ile ma sie poruszac robot po osiach, obraca sie o 3 razy mniej
             if self.is_forward_pressed:
                 R=self.rotation_matrix(self.robot_position[2]-90)
@@ -203,18 +185,11 @@ class GUI:
 
             robot=self.draw_robot(self.robot_position[0:2],self.robot_position[2],self.controlled_robot_id)
             self.map.canvas.draw()
-            time.sleep(0.5)
+            #time.sleep(0.5)
             robot[0].pop(0).remove()
             robot[1].remove()
             robot[2].remove()
             self.map.canvas.draw()
-
-    def draw_circle(self,center,radius,color='blue'):#rysuje kolo
-        theta = np.linspace(0, 2*np.pi, 100)
-        x = center[0]+radius*np.cos(theta)
-        y = center[1]+radius*np.sin(theta)
-        circle=self.ax.plot(x,y,color=color)
-        return circle
 
     def draw_robot(self,position,rotation,id):
         circle=self.draw_circle([position[0], position[1]], radius=75, color='red') #rysoanie kola ktore bedzei podstawa robota
@@ -235,32 +210,26 @@ class GUI:
         robot=[circle,arrow,label]
         return robot
 
-    def draw_rectangle(self, center, lenght_x, lenght_y,rotation,color='blue'): #jest gotowa funkcja na prostokąt ale tam jest problem z rotacją. Łatwiej zrobić samemu mnozac przez macierz rotacji
-        R=self.rotation_matrix(rotation)
-        final_points=np.zeros((4,2)) #macierz do przechowywania wierzcholkow po obrocie
-        local_vectors=np.zeros((4,2)) #lokalne wspolrzedne prostokata
-        local_vectors[0][:]=[-lenght_x/2,-lenght_y/2] #przypisanie wierzcholkow na podstawie wymiarow prostokata
-        local_vectors[1][:]=[-lenght_x/2,lenght_y/2]
-        local_vectors[2][:]=[lenght_x/2,lenght_y/2]
-        local_vectors[3][:]=[lenght_x/2,-lenght_y/2]
-        for i in range(4): #obliczenie obroonych wektorow marcierz rotacji te sprawy
-            final_points[i][:]=R.dot(local_vectors[i][:])
-            for j in range(2):
-                final_points[i][j]=final_points[i][j]+center[j]
-        rectangle=Polygon(final_points,color=color)
-        self.ax.add_patch(rectangle)#dodanie figury do wykresu
+    def draw_circle(self,center,radius,color='blue'):#rysuje kolo
+        theta = np.linspace(0, 2*np.pi, 100)
+        x = center[0]+radius*np.cos(theta)
+        y = center[1]+radius*np.sin(theta)
+        circle=self.ax.plot(x,y,color=color)
+        return circle
 
-    def draw_triangle(self,center,points,rotation,color='blue'):
-        R=self.rotation_matrix(rotation)
-        final_points=np.zeros((3,2))#macierz na koncowe wspołrzedne 
-        for i in range(3):#obliczanie obroconych wektorow
-            final_points[i][:]=R.dot(points[i][:])
-            for j in range(2):
-                final_points[i][j]=final_points[i][j]+center[j]
-        triangle=Polygon(final_points,color=color)
-        self.ax.add_patch(triangle)#dodanie figury do wykresu
+    def draw_polygon(self,vertices,color="blue"):
+        rectangle=Polygon(vertices,color=color)
+        self.ax.add_patch(rectangle)
 
-    def rotation_matrix(self,angle):
+    def draw_obstacles(self):
+        dict_of_obstacles=self.read_data()
+        for i in dict_of_obstacles:
+            if (isinstance(dict_of_obstacles[i],obs.Polygon)):
+                self.draw_polygon(dict_of_obstacles[i].get_vertices())
+            elif(isinstance(dict_of_obstacles[i],obs.Circle)):
+                self.draw_circle(dict_of_obstacles[i].get_center(),dict_of_obstacles[i].get_radius())
+    
+    def rotation_matrix(self,angle): # na razie wątek robota jej uzywa poczekam az filip zrobi klase
         R=np.array([[np.cos(angle*np.pi/180), -np.sin(angle*np.pi/180)],[np.sin(angle*np.pi/180),np.cos(angle*np.pi/180)]])
         return R
     

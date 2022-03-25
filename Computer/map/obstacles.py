@@ -1,5 +1,6 @@
 import enum
 import numpy as np
+import math
 
 class Obstacle(object):
     def __init__(self, obstacle_id: int, center: list[float], rotation: float)-> None:
@@ -17,6 +18,7 @@ class Polygon(Obstacle):
         super().__init__(obstacle_id, center, rotation)
         self._vertices = Polygon.rotate(points, rotation)
         self._vertices += np.asarray([center]).transpose()
+        self._vertices=self._vertices.transpose()
         return None
 
     def get_vertices(self) -> np.ndarray:
@@ -34,15 +36,15 @@ class Triangle(Polygon):
         points_np = np.asarray(points).transpose()
         super().__init__(obstacle_id, center, rotation, points_np)
         return None
-
+                                                                               
 class Rectangle(Polygon):
     def __init__(self, obstacle_id: int, center: list[float], rotation: float, lengths: list[float])-> None:
         self._lengths = np.asarray(lengths)
         temp_0 = np.array([[.5, .5]]) * lengths
         temp_0 = temp_0.transpose()
-        temp_90 = Polygon.rotate(temp_0,np.pi/2)
+        temp_90 = Polygon.rotate(temp_0,2*math.tan(temp_0[0]/temp_0[1]))# np.pi/2)
         temp_180 = Polygon.rotate(temp_0,np.pi)
-        temp_270 = Polygon.rotate(temp_0,np.pi*3/2)
+        temp_270 = Polygon.rotate(temp_0,np.pi+2*math.tan(temp_0[0]/temp_0[1]))
         points_np = np.concatenate((temp_0, temp_90, temp_180, temp_270), axis=1)
         super().__init__(obstacle_id, center, rotation, points_np)
         return None
