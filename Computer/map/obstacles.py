@@ -42,9 +42,9 @@ class Rectangle(Polygon):
         self._lengths = np.asarray(lengths)
         temp_0 = np.array([[.5, .5]]) * lengths
         temp_0 = temp_0.transpose()
-        temp_90 = Polygon.rotate(temp_0,2*math.tan(temp_0[0]/temp_0[1]))# np.pi/2)
+        temp_90 = Polygon.rotate(temp_0,2*math.atan(temp_0[0]/temp_0[1]))# np.pi/2)
         temp_180 = Polygon.rotate(temp_0,np.pi)
-        temp_270 = Polygon.rotate(temp_0,np.pi+2*math.tan(temp_0[0]/temp_0[1]))
+        temp_270 = Polygon.rotate(temp_0,np.pi+2*math.atan(temp_0[0]/temp_0[1]))
         points_np = np.concatenate((temp_0, temp_90, temp_180, temp_270), axis=1)
         super().__init__(obstacle_id, center, rotation, points_np)
         return None
