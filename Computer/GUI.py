@@ -11,7 +11,7 @@ from PIL import ImageTk, Image
 import cv2
 import threading
 import time
-from map import obstacles as obs
+from map import obstacles as obs, working_area, map_generator
 
 class GUI:
     def __init__(self,figure_width=6,figure_height=4,N=10):
@@ -163,7 +163,10 @@ class GUI:
         with open(".\Computer\\resources\obstacles.json") as o:
             obstacles=json.load(o)['obstacles']
         dict_of_obstacles = obs.load_obstacles(obstacles, figures)
-        return dict_of_obstacles
+        with open(".\Computer\\resources\\area.json") as a:
+            area = json.load(a)['area']
+        wa = working_area.WorkingArea(area)
+        return dict_of_obstacles, wa
 
     def robot_thread(self): # chwilowo to wyglada tak, ze robot pojawia sie w miejscu zadanym w tym polu "Enter target coord.."
         while(True):
@@ -210,19 +213,31 @@ class GUI:
         robot=[circle,arrow,label]
         return robot
 
-    def draw_circle(self,center,radius,color='blue'):#rysuje kolo
+    def draw_circle(self,center,radius,color='black'):#rysuje kolo
         theta = np.linspace(0, 2*np.pi, 100)
         x = center[0]+radius*np.cos(theta)
         y = center[1]+radius*np.sin(theta)
         circle=self.ax.plot(x,y,color=color)
         return circle
 
-    def draw_polygon(self,vertices,color="blue"):
-        rectangle=Polygon(vertices,color=color)
+    def draw_polygon(self,vertices,color="black"):
+        rectangle=Polygon(vertices.transpose(),fill = False,ec=color)
         self.ax.add_patch(rectangle)
 
     def draw_obstacles(self):
-        dict_of_obstacles=self.read_data()
+        dict_of_obstacles, wa = self.read_data()
+        raster_map = map_generator.MapGenerator(100, wa, dict_of_obstacles)
+        for cell in raster_map.get_closed_cells():
+            cell_size = 100
+            center = tuple(i * cell_size for i in cell)
+            square = Rectangle(center, cell_size, cell_size, fc = 'red')
+            self.ax.add_patch(square)
+        for cell in raster_map.get_free_cells():
+            cell_size = 100
+            center = tuple(i * cell_size for i in cell)
+            square = Rectangle(center, cell_size, cell_size, fc = 'blue')
+            self.ax.add_patch(square)
+        self.draw_polygon(wa.get_vertices())
         for i in dict_of_obstacles:
             if (isinstance(dict_of_obstacles[i],obs.Polygon)):
                 self.draw_polygon(dict_of_obstacles[i].get_vertices())

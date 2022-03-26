@@ -1,3 +1,4 @@
 import GUI
+import os
 
-GUI.start()
+GUI.main()

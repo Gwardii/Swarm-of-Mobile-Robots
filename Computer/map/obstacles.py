@@ -18,7 +18,6 @@ class Polygon(Obstacle):
         super().__init__(obstacle_id, center, rotation)
         self._vertices = Polygon.rotate(points, rotation)
         self._vertices += np.asarray([center]).transpose()
-        self._vertices=self._vertices.transpose()
         return None
 
     def get_vertices(self) -> np.ndarray:
@@ -63,7 +62,7 @@ def load_obstacles(obstacles: list, figures: list)-> dict[int:Obstacle]:
     for obstacle in obstacles:
         obstacle_id = obstacle['id']
         center      = list(obstacle['center'].values())
-        rotation    = obstacle['rotation']
+        rotation    = np.radians(obstacle['rotation'])
         for figure in figures:
             if figure['id'] == obstacle_id:
                 obstacle_figure = _FigureType(figure['type'])
