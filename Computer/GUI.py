@@ -11,6 +11,7 @@ import cv2
 import threading
 import os
 import time
+from Computer.map import obstacles
 from map import obstacles as obs, working_area, map_generator
 from communication.RPI_server import RPI_Communication_Server
 
@@ -93,9 +94,9 @@ class GUI:
         self.window.geometry("%dx%d" % (width, height))
         self.window.title("Robotic swarm control application")
         #adding map as a plot 
-       
-        self._draw_figure()
         self._communications_status()
+
+        self._draw_figure()
         self._draw_obstacles()
         self.is_map_drawed=True 
         self.camera_Thread.start()#odpalamy watek kamery dopiero jak narysowana jest mapa
@@ -160,7 +161,7 @@ class GUI:
         ax=FigureCanvasTkAgg(self.map,self.window)
         ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
 
-    def _communications_status(self):
+    def _communications_status(self): # na razie ustalone na stałe jaka jest kolejnosc danych
         while self.rpi_server.is_rpi_connected==False:
             print("Waiting for communication")
         self.robot_communicaton_label_text.place(x=650,y=15)
@@ -168,6 +169,25 @@ class GUI:
         self.robot_diode.place(x=1000,y=15)
         self.rpi_diode.place(x=1000,y=45)
         self.rpi_diode.configure(image=self.diode["green"])
+        # is_area_received=False
+        # area_json=None
+        # obstacles_json=None
+        # is_obstacle_received=False
+        # while not is_area_received:
+        #     if self.rpi_server.message_received==True:
+        #         area_json=self.rpi_server.get_buffer()
+        #         is_area_received=True
+        #         break
+        # while not is_obstacle_received:
+        #     if self.rpi_server.message_received==True:
+        #         obstacles_json=self.rpi_server.get_buffer()
+        #         is_obstacle_received=True
+        #         break
+        # with open(".\Computer\\resources\\obstacles.json","w") as af:
+        #     json.dump(area_json,af)
+        # with open(".\Computer\\resources\\area.json","w") as af:
+        #     json.dump(obstacles_json,af)
+
         
     def _video_stream(self):
         #funkcja do przechwytywania obrazu z kamery i rzutowania go na label, cv2.VideoCapture(0) - oznacza, że rzutuje obraz z kamery w laptopie

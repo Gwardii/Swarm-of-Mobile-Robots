@@ -7,6 +7,7 @@ class RPI_Communication_Client():
         self.port = port
         self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.buffer=""
+        self.message_sended=False
 
     def send_json(self,json_message):
         # local_ip=socket.gethostbyname(socket.gethostname())
@@ -15,10 +16,12 @@ class RPI_Communication_Client():
         return json_data    
 
     def _send_message(self,data):
+        self.message_sended=False
         self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.rpi_client_socket.connect((self.host, self.port))
         self.rpi_client_socket.sendall(data.encode())
         self.rpi_client_socket.close()
+        self.message_sended=True
         
     def _client_listen(self):
         print("Client listening")
@@ -26,33 +29,33 @@ class RPI_Communication_Client():
         print("Received: ",repr(self.buffer))
 
 
-client=RPI_Communication_Client()
+# client=RPI_Communication_Client()
 
-data={"obstacles": [
-{
-    "id": 0,
-    "center": {
-    "x": 250,
-    "y": 150
-    },
-    "rotation": 0
-},
-{
-    "id": 1,
-    "center": {
-    "x": 1000,
-    "y": 100
-    },
-    "rotation": 0
-},
-{
-    "id": 2,
-    "center": {
-    "x": 1328,
-    "y": 976
-    },
-    "rotation": 45
-}
-]
-}
-client.send_json(data)
+# data={"obstacles": [
+# {
+#     "id": 0,
+#     "center": {
+#     "x": 250,
+#     "y": 150
+#     },
+#     "rotation": 0
+# },
+# {
+#     "id": 1,
+#     "center": {
+#     "x": 1000,
+#     "y": 100
+#     },
+#     "rotation": 0
+# },
+# {
+#     "id": 2,
+#     "center": {
+#     "x": 1328,
+#     "y": 976
+#     },
+#     "rotation": 45
+# }
+# ]
+# }
+# client.send_json(data)
