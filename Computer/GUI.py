@@ -1,7 +1,5 @@
 import tkinter as tk
 import json
-from traceback import print_tb
-from matplotlib import scale
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,9 +12,10 @@ import threading
 import os
 import time
 from map import obstacles as obs, working_area, map_generator
+from communication.RPI_server import RPI_Communication_Server
 
 class GUI:
-    def __init__(self,cell_size=50,number_of_robots=10):
+    def __init__(self,cell_size=50,number_of_robots=10,rpi_ip="localhost",rpi_port=9999):
         self.window = tk.Tk()
         self.window.protocol("WM_DELETE_WINDOW",self._close_app)
         self.map=plt.Figure(figsize=(6,4),dpi=100)
@@ -25,14 +24,17 @@ class GUI:
         self.cell_size=cell_size
         self.is_map_drawed=False
         #communication status
+        self.rpi_ip=rpi_ip
+        self.rpi_server=RPI_Communication_Server(host=self.rpi_ip)
+        self.rpi_communication_port=rpi_port
+
         self.is_robot_connected=False
-        self.is_rpi_connected=False
         self.robot_communicaton_label_text=tk.Label(text="Robot communication status: ",bg="white",fg="black",font=16)
         self.rpi_communicaton_label_text=tk.Label(text="Raspberry PI communication status: ",bg="white",fg="black",font=16)
         self.diode={"green":ImageTk.PhotoImage(Image.open(".\Computer\img\green_diode.png").resize((28,28),
         Image.ANTIALIAS)),"red":ImageTk.PhotoImage(Image.open(".\Computer\img\\red_diode.png").resize((28,28),Image.ANTIALIAS))}
         self.robot_diode=tk.Label(image=self.diode["red"],)
-        self.rpi_diode=tk.Label(image=self.diode["green"])
+        self.rpi_diode=tk.Label(image=self.diode["red"])
 
         #robot control - entry
         self.robot_position=np.array([1000.,800.,90.]) #potem się to rozszerzy na N robotow
@@ -77,14 +79,9 @@ class GUI:
         self.command=""
         self.line=1
 
-        self.camera_Thread=threading.Thread(target=self._video_stream)
-        #self.camera_Thread.start()
-        
+        self.camera_Thread=threading.Thread(target=self._video_stream)   
         self.robot_Thread=threading.Thread(target=self._robot_thread_function)
-        # self.robot_Thread.start()
-
         self.console_Thread=threading.Thread(target=self._console_function)
-        # self.console_Thread.start()
     
     def _close_app(self):# narazie watki sa niezalezne od siebie wiec ich nie lacze
         os._exit(1)
@@ -96,18 +93,20 @@ class GUI:
         self.window.geometry("%dx%d" % (width, height))
         self.window.title("Robotic swarm control application")
         #adding map as a plot 
+       
         self._draw_figure()
+        self._communications_status()
         self._draw_obstacles()
         self.is_map_drawed=True 
-        self.camera_Thread.start()#odpalamy watek kamery dopiero jak narysowana jest maoa
-        self._communications_status()
+        self.camera_Thread.start()#odpalamy watek kamery dopiero jak narysowana jest mapa
+
+        
         self._place_coord_entry()
         self._place_controll_buttons()
         self.robot_Thread.start()
         self.console_Thread.start()
 
     def _robot_selected(self,*args):
-        # self.controlled_robot_id=self.robots_id.get()
         self.controlled_robot_id=self.robots_id.get().split("_")[1]
 
     def _get_target_coord(self):
@@ -161,13 +160,15 @@ class GUI:
         ax=FigureCanvasTkAgg(self.map,self.window)
         ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
 
-    def _communications_status(self): #wyswietlanie napisu i diody z aktualnym stanem - połaczono lub nie, narazei bez sprawdzenia zadnego po prostu zielone i czerwone
-        #sprawdzenie sie wymyśli jak bedzie komunikacja
+    def _communications_status(self):
+        while self.rpi_server.is_rpi_connected==False:
+            print("Waiting for communication")
         self.robot_communicaton_label_text.place(x=650,y=15)
         self.rpi_communicaton_label_text.place(x=650,y=45)
         self.robot_diode.place(x=1000,y=15)
         self.rpi_diode.place(x=1000,y=45)
-
+        self.rpi_diode.configure(image=self.diode["green"])
+        
     def _video_stream(self):
         #funkcja do przechwytywania obrazu z kamery i rzutowania go na label, cv2.VideoCapture(0) - oznacza, że rzutuje obraz z kamery w laptopie
         #Jak ktos ma podpieta dodatkowa kamera to podaje kolejny numer. docelowo bedziemy podawac IP websocket-a z RPI
