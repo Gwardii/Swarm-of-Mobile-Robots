@@ -287,6 +287,13 @@ class GUI:
             center = tuple(i * cell_size for i in cell)
             square = Rectangle(center, cell_size, cell_size, fc = 'cornflowerblue')
             self.ax.add_patch(square)
+        for cell, distance in raster_map.get_distance_cells().items():
+            if distance[1] is not None:
+                if  0 != distance[1] >= 3:
+                    cell_size = size
+                    center = tuple(i * cell_size for i in cell)
+                    square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
+                    self.ax.add_patch(square)
         self._draw_polygon(wa.get_vertices())#rysuje kontur stolu 
         for i in dict_of_obstacles:
             if (isinstance(dict_of_obstacles[i],obs.Polygon)):
