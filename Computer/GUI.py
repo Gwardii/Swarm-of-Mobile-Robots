@@ -11,7 +11,7 @@ import cv2
 import threading
 import os
 import time
-from Computer.map import obstacles
+from map import obstacles
 from map import obstacles as obs, working_area, map_generator
 from communication.RPI_server import RPI_Communication_Server
 
@@ -100,8 +100,6 @@ class GUI:
         self._draw_obstacles()
         self.is_map_drawed=True 
         self.camera_Thread.start()#odpalamy watek kamery dopiero jak narysowana jest mapa
-
-        
         self._place_coord_entry()
         self._place_controll_buttons()
         self.robot_Thread.start()
@@ -160,6 +158,7 @@ class GUI:
         self.ax.grid(color='k',linestyle="-.",linewidth=0.5,axis='both')
         ax=FigureCanvasTkAgg(self.map,self.window)
         ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
+
 
     def _communications_status(self): # na razie ustalone na stałe jaka jest kolejnosc danych
         while self.rpi_server.is_rpi_connected==False:
