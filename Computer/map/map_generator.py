@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import linalg as LA
+from numpy.core.multiarray import empty
 from map import working_area
 from map import obstacles
 
@@ -9,19 +10,20 @@ class MapGenerator(object):
         self._cell_size = cell_size
         self._working_area = working_area_obj
         self._x_min, self._x_max, self._y_min, self._y_max = working_area_obj.get_extremes()
-        x_space = np.arange(cell_size/2, self._x_max - self._x_min, cell_size, dtype=float)
+        x_space = np.arange(cell_size/2, self._x_max - self._x_min - cell_size/2, cell_size, dtype=float)
         y_space = np.arange(cell_size/2, self._y_max - self._y_min, cell_size, dtype=float) #may lose some working area
         self._cells_coordinates = MapGenerator._cartesian_product(x_space, y_space)
-        self._max_node_x = len(self._cells_coordinates) - 1 
-        self._max_node_y = len(self._cells_coordinates[0]) - 1
+        self._max_cell_x = len(self._cells_coordinates) 
+        self._max_cell_y = len(self._cells_coordinates[0])
         self._cells = set()
-        for x_index in range(self._max_node_x + 1):
-            for y_index in range(self._max_node_y + 1):
+        for x_index in range(self._max_cell_x):
+            for y_index in range(self._max_cell_y):
                 self._cells.add((x_index, y_index))
         self._closed_cells = self._rasterize_borders()
         self._closed_cells = self._closed_cells.union(self._rasterize_obstacles(obstacles.values()))
         self._free_cells = self._cells.difference(self._closed_cells)
-
+        self._distance_cells = self._distance_meter()
+        print(sorted(self._distance_cells.items()))
         return None
 
     def get_free_cells(self) -> dict:
@@ -29,6 +31,9 @@ class MapGenerator(object):
 
     def get_closed_cells(self) -> dict:
         return self._closed_cells
+
+    def get_distance_cells(self):
+        return self._distance_cells
 
     def _rasterize_borders(self) -> set:
         '''Rasterizes borders into node indexes which contain boundery of working area.\
@@ -124,22 +129,22 @@ class MapGenerator(object):
                 point = [i * self._cell_size, j * self._cell_size]
                 if function(argument, point):
                     if i == 0:
-                        if j < self._max_node_y:
+                        if j < self._max_cell_y:
                             boundary.append((i,j))
                         elif j > 0:
                             boundary.append((i, j - 1))
                     elif j == 0:
-                        if i < self._max_node_x:
+                        if i < self._max_cell_x:
                             boundary.append((i, j))
                         elif i > 0:
                             boundary.append((i - 1, j))
-                    elif i == self._max_node_x:
-                        if j < self._max_node_y:
+                    elif i == self._max_cell_x:
+                        if j < self._max_cell_y:
                             boundary.append((i - 1, j))
                         elif i > 0:
                             boundary.append((i - 1, j - 1))
-                    elif j == self._max_node_y:
-                        if i < self._max_node_x:
+                    elif j == self._max_cell_y:
+                        if i < self._max_cell_x:
                             boundary.append((i, j - 1))
                         elif i > 0:
                             boundary.append((i - 1, j - 1))
@@ -159,4 +164,65 @@ class MapGenerator(object):
             product.append(partial_product)
         return product
 
-        
+    def _distance_meter(self) -> dict:
+        def vector_norm(vector):
+            norm = (vector[0]**2 + vector[1]**2)**.5
+            return norm
+
+        def check_neighbours(cell):
+            current_cell = cells_distance[cell]
+            neighbours = [(1, 0), (1, 1), (0, 1), (-1,1), (-1, 0), (-1,-1), (0, -1), (1, -1)]
+            changed_cells = []
+            for neighbour in neighbours:
+                neighbour_cell = (cell[0] + neighbour[0], cell[1] + neighbour[1])
+                if neighbour_cell not in self._free_cells:
+                    continue
+                neighbour_cell_distance = cells_distance[neighbour_cell]
+                distance = [current_cell[0][0] + neighbour[0], current_cell[0][1] + neighbour[1]]
+                distance_norm = vector_norm(distance)
+                if neighbour_cell_distance[1] is None:
+                    cells_distance[neighbour_cell] = [distance, distance_norm]
+                    changed_cells.append([neighbour_cell, distance_norm])
+                elif neighbour_cell_distance[1] > distance_norm:
+                    cells_distance[neighbour_cell] = [distance, distance_norm]
+                    changed_cells.append([neighbour_cell, distance_norm])
+            return changed_cells
+
+        cells_distance = {cell: [None, None] for cell in self._cells}
+        for cell in self._closed_cells:
+            cells_distance[cell] = [[0, 0], 0]
+        cells_to_check = dict()
+        for cell in self._free_cells:
+            if cell[0] == 0:
+                cells_distance[cell] = [[1, 0], 1]
+                cells_to_check[cell] = 1
+            if cell[0] == self._max_cell_x:
+                cells_distance[cell] = [[-1, 0], 1]
+                cells_to_check[cell] = 1
+            if cell[1] == 0:
+                cells_distance[cell] = [[0, 1], 1]
+                cells_to_check[cell] = 1
+            if cell[1] == self._max_cell_y:
+                cells_distance[cell] = [[0, -1], 1]
+                cells_to_check[cell] = 1
+        for cell in self._closed_cells:
+            _changed_cells = check_neighbours(cell)
+            for _changed_cell in _changed_cells:
+                cells_to_check[_changed_cell[0]] = _changed_cell[1]
+        while len(cells_to_check) > 0:
+            min_distance_norm = min(cells_to_check.values())
+            cells_to_check_items = list(cells_to_check.items())
+            for cell, _distance_norm in cells_to_check_items:
+                if _distance_norm == min_distance_norm:
+                    _changed_cells = check_neighbours(cell)
+                    for _changed_cell in _changed_cells:
+                        cells_to_check[_changed_cell[0]] = _changed_cell[1]
+                    cells_to_check.pop(cell)
+        return cells_distance
+
+
+
+
+
+
+    

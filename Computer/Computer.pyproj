@@ -65,11 +65,12 @@
   <ItemGroup>
     <Compile Include="GUI.py" />
     <Compile Include="map\map_generator.py" />
-    <Compile Include="map\moduł1.py" />
     <Compile Include="map\obstacles.py" />
+    <Compile Include="map\path_planner.py" />
     <Compile Include="map\working_area.py" />
     <Compile Include="map\__init__.py" />
     <Compile Include="map\__main__.py" />
+    <Compile Include="robot_handler.py" />
     <Compile Include="__main__.py" />
   </ItemGroup>
   <ItemGroup>

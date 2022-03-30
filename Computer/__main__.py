@@ -1,4 +1,4 @@
 import GUI
-import os
+import map
 
 GUI.main()
