@@ -53,11 +53,11 @@ class PathPlanner(object):
                         _prime_neighbours.update(_neighbour_cell)
                     _neighbour_cell = self._add_tuples(cell, _DIAGONAL_NEIGHBOURS[i])
                     if _neighbour_cell in available_cells:
-                        diagonal_neighbours.update(_neighbour_cell)
+                        _diagonal_neighbours.update(_neighbour_cell)
                     i = i + 1
                     _neighbour_cell = self._add_tuples(cell, _DIAGONAL_NEIGHBOURS[i])
                     if _neighbour_cell in available_cells:
-                        diagonal_neighbours.update(_neighbour_cell)
+                        _diagonal_neighbours.update(_neighbour_cell)
             return _prime_neighbours, _diagonal_neighbours
 
         def rate_cells(parent_rate, _prime_neighbours, _diagonal_neighbours):

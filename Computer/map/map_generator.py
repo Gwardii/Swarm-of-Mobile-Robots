@@ -22,8 +22,8 @@ class MapGenerator(object):
         self._closed_cells = self._rasterize_borders()
         self._closed_cells = self._closed_cells.union(self._rasterize_obstacles(obstacles.values()))
         self._free_cells = self._cells.difference(self._closed_cells)
-        self._distance_cells = self._distance_meter()
-        print(sorted(self._distance_cells.items()))
+        self._distance_cells = self._distance_meter() ##dic{cell coordinates, closest neighbour relative coordinate, distance }
+        # print(sorted(self._distance_cells.items()))
         return None
 
     def get_free_cells(self) -> dict:
