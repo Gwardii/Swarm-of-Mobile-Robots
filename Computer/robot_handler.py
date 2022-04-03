@@ -1,7 +1,7 @@
 from map import obstacles
 
 class Robot(object):
-    def __init__(self, robot_id: int, position: list[int], orientation: float, radius: float = 100) -> None:
+    def __init__(self, robot_id: int, position: list[float], orientation: float, radius: float = 100) -> None:
         super().__init__()
         self._id = robot_id
         self._position = position

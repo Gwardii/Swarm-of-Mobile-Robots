@@ -22,8 +22,7 @@ class MapGenerator(object):
         self._closed_cells = self._rasterize_borders()
         self._closed_cells = self._closed_cells.union(self._rasterize_obstacles(obstacles.values()))
         self._free_cells = self._cells.difference(self._closed_cells)
-        self._distance_cells = self._distance_meter() ##dic{cell coordinates, closest neighbour relative coordinate, distance }
-        # print(sorted(self._distance_cells.items()))
+        self._distance_cells = self._distance_meter()
         return None
 
     def get_free_cells(self) -> dict:
@@ -131,22 +130,22 @@ class MapGenerator(object):
                     if i == 0:
                         if j < self._max_cell_y:
                             boundary.append((i,j))
-                        elif j > 0:
+                        if j > 0:
                             boundary.append((i, j - 1))
                     elif j == 0:
                         if i < self._max_cell_x:
                             boundary.append((i, j))
-                        elif i > 0:
+                        if i > 0:
                             boundary.append((i - 1, j))
                     elif i == self._max_cell_x:
                         if j < self._max_cell_y:
                             boundary.append((i - 1, j))
-                        elif i > 0:
+                        if i > 0:
                             boundary.append((i - 1, j - 1))
                     elif j == self._max_cell_y:
                         if i < self._max_cell_x:
                             boundary.append((i, j - 1))
-                        elif i > 0:
+                        if i > 0:
                             boundary.append((i - 1, j - 1))
                     else:
                         boundary.append((i,j))
