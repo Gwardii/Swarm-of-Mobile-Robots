@@ -299,6 +299,8 @@ class GUI:
         _robot = robot_handler.Robot(0,[800, 200],0)
         _robot.set_target([1000,1000])
         _rated_cells, _ = pather.get_rated_cells(_robot)
+        pather.add_robot(0, _robot)
+        pather._determine_paths()
         for cell, rating in _rated_cells.items():
             if rating is not None:
                 cell_size = size

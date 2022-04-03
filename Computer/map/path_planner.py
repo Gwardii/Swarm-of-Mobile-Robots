@@ -2,7 +2,7 @@ from map import map_generator
 import robot_handler
 
 class PathPlanner(object):
-    def __init__(self, raster_map: map_generator.MapGenerator = None, robots: dict[int, robot_handler.Robot] = None, margin = 0) -> None:
+    def __init__(self, raster_map: map_generator.MapGenerator = None, robots: dict[int, robot_handler.Robot] = dict(), margin = 0) -> None:
         super().__init__()
         self._map = raster_map
         self._robots = robots
@@ -38,6 +38,7 @@ class PathPlanner(object):
         unreachable_target_robots = list()
         for robot_id, robot in self._robots.items():
             rated_cells, is_target_reachable = self._rate_cells(robot)
+            self._find_path(robot, rated_cells)
 
     def _rate_cells(self, robot):
         def neighbours(cell):
@@ -74,7 +75,7 @@ class PathPlanner(object):
         cell_size = self._map._cell_size
         min_distance = robot._radius / (cell_size + self._margin)
         available_cells = {cell for cell, distance in self._map._distance_cells.items() if distance[1] >= min_distance}
-        target_cell = self._position_to_cell(robot._position)
+        target_cell = self._position_to_cell(robot._target[0])
         is_target_reachable = target_cell in available_cells
         if is_target_reachable:
             rated_cells[target_cell] = max_potential
@@ -92,6 +93,7 @@ class PathPlanner(object):
         return rated_cells, is_target_reachable
 
     def _find_path(self, robot, rated_cells):
+        _NEIGHBOURS = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (-1, -1), (1, -1)]
         class Node():
             def __init__(self, cell = None, prev_node = None) -> None:
                 self._next_nodes = None
@@ -103,20 +105,39 @@ class PathPlanner(object):
                 self._first_node = first_node
                 self._last_nodes = [first_node]
                 return None
-            def _add_nodes(self, cells, prev_node):
-                prev_node._next_nodes = [Node(cell, prev_node) for cell in cells]
-                self._last_nodes.remove(prev_node)
-                self._last_nodes.extend(prev.node._next_nodes)
+            def _add_nodes(self, nodes):
+                nodes[0]._prev_node._next_nodes = nodes
+                self._last_nodes.remove(nodes[0]._prev_node)
+                self._last_nodes.extend(nodes)
                 return None
+            def _to_list(self, node):
+                _cells_list = [node._cell]
+                while node._prev_node is not None:
+                    node = node._prev_node
+                    _cells_list.append(node._cell)
+                _cells_list.reverse()
+                return _cells_list
+
 
         starting_cell = self._position_to_cell(robot.get_coordinates()[0])
         paths = PathTree(Node(starting_cell, None))
-        active_nodes = paths._last_nodes
+        active_nodes = paths._last_nodes.copy()
         while bool(active_nodes):
+            next_active_nodes = list()
             for node in active_nodes:
-                pass
-
-
+                cell = node._cell
+                neighbours = [self._add_tuples(cell, _neighbour) for _neighbour in _NEIGHBOURS]
+                neighbours = [neighbour for neighbour in neighbours if neighbour in rated_cells]
+                if bool(neighbours):
+                    ratings = [rated_cells[neighbour] for neighbour in neighbours]
+                    max_rating = max(ratings)
+                    if max_rating >= rated_cells[node._cell]:
+                        _nodes_to_add = [Node(neighbour, node) for neighbour in neighbours if rated_cells[neighbour] == max_rating]
+                        paths._add_nodes(_nodes_to_add)
+                        next_active_nodes.extend(_nodes_to_add)
+            active_nodes = next_active_nodes
+        for node in paths._last_nodes:
+            print(paths._to_list(node))
 
 
     def _position_to_cell(self, position):
