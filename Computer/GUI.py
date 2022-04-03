@@ -2,6 +2,7 @@ import tkinter as tk
 import json
 import matplotlib
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as plticker
 from matplotlib.patches import Rectangle, Polygon, Circle, FancyArrow
@@ -11,9 +12,11 @@ import cv2
 import threading
 import os
 import time
-from map import obstacles as obs, working_area, map_generator, path_planner
-import robot_handler
+from map import obstacles
+from map import obstacles as obs, working_area, map_generator,path_planner
 from communication.RPI_server import RPI_Communication_Server
+from robot_handler import Robot
+import robot_handler
 
 class GUI:
     def __init__(self,cell_size=50,number_of_robots=10,rpi_ip="localhost",rpi_port=9999):
@@ -80,6 +83,11 @@ class GUI:
         self.command=""
         self.line=1
 
+        self.robots={"1":Robot(robot_id=1,position=[1000.,800.],orientation=90)}
+
+        self.path_planner=path_planner.PathPlanner(raster_map=None,robots=self.robots)
+
+
         self.camera_Thread=threading.Thread(target=self._video_stream)   
         self.robot_Thread=threading.Thread(target=self._robot_thread_function)
         self.console_Thread=threading.Thread(target=self._console_function)
@@ -114,8 +122,14 @@ class GUI:
             for i in "()":
                 coord_str=coord_str.replace(i,"")
             temp=coord_str.split(",")
-            self.robot_position=[float(x) for x in temp]
+            target=[float(x) for x in temp]
+            # self.robot_position=[float(x) for x in temp]
+            id_with_target=tuple([self.controlled_robot_id,target])
+            self.path_planner.set_robots_targets(id_with_target)
             self.coord_entry.delete(0,tk.END)
+
+    def debug(self,message):
+        self.console.insert(tk.END,str(message)+'\n')
 
     def _get_command(self):
         temp=str(self.line)+".0"
@@ -187,7 +201,6 @@ class GUI:
         # with open(".\Computer\\resources\\area.json","w") as af:
         #     json.dump(obstacles_json,af)
 
-        
     def _video_stream(self):
         #funkcja do przechwytywania obrazu z kamery i rzutowania go na label, cv2.VideoCapture(0) - oznacza, że rzutuje obraz z kamery w laptopie
         #Jak ktos ma podpieta dodatkowa kamera to podaje kolejny numer. docelowo bedziemy podawac IP websocket-a z RPI
@@ -217,6 +230,7 @@ class GUI:
         self.map.canvas.draw()
         self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
         while(True):
+
             if self.is_forward_pressed:
                 R=self._rotation_matrix(self.robot_position[2]-90)
                 local_vector=[0,2]
@@ -276,6 +290,7 @@ class GUI:
         dict_of_obstacles, wa = self._read_data()
         size=self.cell_size 
         raster_map = map_generator.MapGenerator(size, wa, dict_of_obstacles)
+        self.path_planner.change_map(raster_map)
         for cell in raster_map.get_closed_cells():
             cell_size = size
             center = tuple(i * cell_size for i in cell)
@@ -284,13 +299,23 @@ class GUI:
         for cell in raster_map.get_free_cells():
             cell_size = size
             center = tuple(i * cell_size for i in cell)
-            square = Rectangle(center, cell_size, cell_size, fc = 'cornflowerblue')
+            square = Rectangle(center, cell_size, cell_size, fc = (255/255,120/255,0))
             self.ax.add_patch(square)
+        max_distance=max([distance for cell, distance in raster_map.get_distance_cells().values()])
+
+        def colorFader(mix=0): #fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
+            c1=(255/255,100/255,0)
+            c2=(25/255,255/255,0/255)
+            c1=np.array(mpl.colors.to_rgb(c1))
+            c2=np.array(mpl.colors.to_rgb(c2))
+            return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
+
         for cell, distance in raster_map.get_distance_cells().items():
             if distance[1] is not None:
                 cell_size = size
                 center = tuple(i * cell_size for i in cell)
-                #square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
+                square = Rectangle(center, cell_size, cell_size, fc = colorFader(distance[1]/max_distance))
+                self.ax.add_patch(square)
                 #.ax.annotate(round(distance[1]), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
 
         self._draw_polygon(wa.get_vertices())#rysuje kontur stolu 
@@ -306,7 +331,7 @@ class GUI:
                 cell_size = size
                 center = tuple(i * cell_size for i in cell)
                 #square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
-                self.ax.annotate(round(rating), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
+                # self.ax.annotate(round(rating), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
 
         for i in dict_of_obstacles:
             if (isinstance(dict_of_obstacles[i],obs.Polygon)):
@@ -355,7 +380,7 @@ class GUI:
         self.is_rotate_left_pressed=False
 
 def main():
-    App=GUI()
+    App=GUI(cell_size=35)
     App._window_configuration()
     App.window.mainloop()
     
