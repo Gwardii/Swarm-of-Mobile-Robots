@@ -41,7 +41,7 @@ class GUI:
         self.rpi_diode=tk.Label(image=self.diode["red"])
 
         #robot control - entry
-        self.robot_position=np.array([1000.,800.,90.]) #potem się to rozszerzy na N robotow
+        self.robot_position=np.array([800.,200.,90.]) #potem się to rozszerzy na N robotow
         self.coord_entry=tk.Entry(fg='black',bg='white',width=20)
         self.coord_label=tk.Label(text="Enter target coordinates (x,y,rot):",bg="white",fg="black",font=12)
         self.coord_confirm_button=tk.Button(text="Confirm coordinates",width=20,command=self._get_target_coord)
@@ -301,7 +301,16 @@ class GUI:
             center = tuple(i * cell_size for i in cell)
             square = Rectangle(center, cell_size, cell_size, fc = (255/255,120/255,0))
             self.ax.add_patch(square)
-        max_distance=max([distance for cell, distance in raster_map.get_distance_cells().values()])
+       
+        self._draw_polygon(wa.get_vertices())#rysuje kontur stolu 
+
+        pather = path_planner.PathPlanner(raster_map)
+        _robot = robot_handler.Robot(0,[800, 200],0)
+        _robot.set_target([150,800])
+        _rated_cells, _ = pather.get_rated_cells(_robot)
+        pather.add_robot(0, _robot)
+        pather._determine_paths()
+        path=pather.get_paths()
 
         def colorFader(mix=0): #fade (linear interpolate) from color c1 (at mix=0) to c2 (mix=1)
             c1=(255/255,100/255,0)
@@ -310,29 +319,34 @@ class GUI:
             c2=np.array(mpl.colors.to_rgb(c2))
             return mpl.colors.to_hex((1-mix)*c1 + mix*c2)
 
+        #gradient depended on distance to the obstacle 
+        max_distance=max([distance for cell, distance in raster_map.get_distance_cells().values()])
         for cell, distance in raster_map.get_distance_cells().items():
-            if distance[1] is not None:
+            if distance[1] is not None and distance[1]>=2:
                 cell_size = size
                 center = tuple(i * cell_size for i in cell)
                 square = Rectangle(center, cell_size, cell_size, fc = colorFader(distance[1]/max_distance))
                 self.ax.add_patch(square)
                 #.ax.annotate(round(distance[1]), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
+        
+        #gradient depended on rated cells of raster map
+        # max_rating=max(_rated_cells.values())
+        # for cell, rating in _rated_cells.items():
+        #     if rating is not None:
+        #         cell_size = size
+        #         center = tuple(i * cell_size for i in cell)
+        #         square = Rectangle(center, cell_size, cell_size, fc = colorFader(rating/max_rating))
+        #         self.ax.add_patch(square)
+        #         # self.ax.annotate(round(rating), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
 
-        self._draw_polygon(wa.get_vertices())#rysuje kontur stolu 
-
-        pather = path_planner.PathPlanner(raster_map)
-        _robot = robot_handler.Robot(0,[800, 200],0)
-        _robot.set_target([1000,1000])
-        _rated_cells, _ = pather.get_rated_cells(_robot)
-        pather.add_robot(0, _robot)
-        pather._determine_paths()
-        for cell, rating in _rated_cells.items():
-            if rating is not None:
-                cell_size = size
-                center = tuple(i * cell_size for i in cell)
-                #square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
-                # self.ax.annotate(round(rating), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
-
+        for i in range(1,len(path)):
+            cell_size=self.cell_size
+            center_i=tuple(i * cell_size for i in path[i])
+            center_i_1=tuple(i*cell_size for i in path[i-1])
+            x_data=[center_i_1[0],center_i[0]]
+            y_data=[center_i_1[1],center_i[1]]
+            self.ax.plot(x_data,y_data,color=(0,0/255,128/255),linestyle="--")
+        
         for i in dict_of_obstacles:
             if (isinstance(dict_of_obstacles[i],obs.Polygon)):
                 self._draw_polygon(dict_of_obstacles[i].get_vertices())

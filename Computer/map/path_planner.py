@@ -7,7 +7,7 @@ class PathPlanner(object):
         self._map = raster_map
         self._robots = robots
         self._margin = margin
-
+        self._paths=None
         return None
 
     def change_map(self, new_map):
@@ -137,8 +137,8 @@ class PathPlanner(object):
                         next_active_nodes.extend(_nodes_to_add)
             active_nodes = next_active_nodes
         for node in paths._last_nodes:
-            print(paths._to_list(node))
-
+            # print(paths._to_list(node))
+            self._paths=paths._to_list(node)
 
     def _position_to_cell(self, position):
         x = int(position[0] / self._map._cell_size)
