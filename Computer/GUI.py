@@ -11,8 +11,8 @@ import cv2
 import threading
 import os
 import time
-from map import obstacles
-from map import obstacles as obs, working_area, map_generator
+from map import obstacles as obs, working_area, map_generator, path_planner
+import robot_handler
 from communication.RPI_server import RPI_Communication_Server
 
 class GUI:
@@ -288,12 +288,24 @@ class GUI:
             self.ax.add_patch(square)
         for cell, distance in raster_map.get_distance_cells().items():
             if distance[1] is not None:
-                if  0 != distance[1] >= 3:
-                    cell_size = size
-                    center = tuple(i * cell_size for i in cell)
-                    square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
-                    self.ax.add_patch(square)
+                cell_size = size
+                center = tuple(i * cell_size for i in cell)
+                #square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
+                #.ax.annotate(round(distance[1]), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
+
         self._draw_polygon(wa.get_vertices())#rysuje kontur stolu 
+
+        pather = path_planner.PathPlanner(raster_map)
+        _robot = robot_handler.Robot(0,[800, 200],0)
+        _robot.set_target([1000,1000])
+        _rated_cells, _ = pather.get_rated_cells(_robot)
+        for cell, rating in _rated_cells.items():
+            if rating is not None:
+                cell_size = size
+                center = tuple(i * cell_size for i in cell)
+                #square = Rectangle(center, cell_size, cell_size, fc = 'yellow')
+                self.ax.annotate(round(rating), xy=((cell[0] + 0.5) * cell_size, (cell[1] + .5) * cell_size), fontsize=6, ha="center",va="center")
+
         for i in dict_of_obstacles:
             if (isinstance(dict_of_obstacles[i],obs.Polygon)):
                 self._draw_polygon(dict_of_obstacles[i].get_vertices())
