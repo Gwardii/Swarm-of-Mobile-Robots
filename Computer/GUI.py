@@ -221,7 +221,7 @@ class GUI:
         if self.is_rotate_left_pressed:
             self.robot_position[2]=float(self.robot_position[2]+0.5)
         self.map.canvas.restore_region(self.background)
-        self.robot_artist=self._draw_robot(self.robot_position[0:2],self.robot_position[2],self.controlled_robot_id)
+        self.robot_artist=self._draw_robot([coord  + self.cell_size/2 for coord in self.robot_position[0:2]],self.robot_position[2],self.controlled_robot_id)
         self.ax.draw_artist(self.robot_artist[0])
         self.ax.draw_artist(self.robot_artist[1])
         self.ax.draw_artist(self.robot_artist[2])
@@ -234,7 +234,7 @@ class GUI:
         self.robot._orientation=self.robot_position[2]
 
     def _draw_robot(self,position,rotation,id):
-        circle=self._draw_circle([position[0], position[1]], radius=75, color='red') #rysoanie kola ktore bedzei podstawa robota
+        circle=self._draw_circle([position[0], position[1]], radius = 100, color='red') #rysoanie kola ktore bedzei podstawa robota
         R=self._rotation_matrix(float(rotation-90))
         #reczy do rysowania strzalki, strzalka przyjmuje wspolrzedne pozatku i dlugosci x,y wzgledem poczatku
         #tworzenie localnych wektorow i ich obracanie, nic ciekawego generalnie 
@@ -314,8 +314,8 @@ class GUI:
         self.background=self.background_without_path
         for i in range(1,len(path)):
             cell_size=self.cell_size
-            center_i=tuple(i * cell_size for i in path[i])
-            center_i_1=tuple(i*cell_size for i in path[i-1])
+            center_i=tuple((j + 0.5) * cell_size for j in path[i])
+            center_i_1=tuple((j + 0.5) * cell_size for j in path[i-1])
             x_data=[center_i_1[0],center_i[0]]
             y_data=[center_i_1[1],center_i[1]]
             self.map.canvas.restore_region(self.background)

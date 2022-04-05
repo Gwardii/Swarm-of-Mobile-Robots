@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{f64dcae7-1353-4c54-88f6-d4a1ec4b12d3}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>__main__.py</StartupFile>
+    <StartupFile>application.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.\..</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -20,6 +20,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="communication\__pycache__\RPI_server.cpython-39.pyc" />
     <Content Include="img\green_diode.png" />
     <Content Include="img\red_diode.png" />
     <Content Include="modele\OldVersions\stol_1.0001.ipt" />
@@ -61,8 +62,11 @@
     <Content Include="resources\area.json" />
     <Content Include="resources\figures.json" />
     <Content Include="resources\obstacles.json" />
+    <Content Include="resources\robots.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="application.py" />
+    <Compile Include="communication\RPI_server.py" />
     <Compile Include="GUI.py" />
     <Compile Include="map\map_generator.py" />
     <Compile Include="map\obstacles.py" />
@@ -71,9 +75,13 @@
     <Compile Include="map\__init__.py" />
     <Compile Include="map\__main__.py" />
     <Compile Include="robot_handler.py" />
+    <Compile Include="states.py" />
+    <Compile Include="state_machine.py" />
     <Compile Include="__main__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="communication\" />
+    <Folder Include="communication\__pycache__\" />
     <Folder Include="img\" />
     <Folder Include="modele\" />
     <Folder Include="modele\OldVersions\" />

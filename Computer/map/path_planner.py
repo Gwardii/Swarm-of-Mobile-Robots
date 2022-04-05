@@ -73,7 +73,7 @@ class PathPlanner(object):
         diagonal_step = 3
         rated_cells = dict()
         cell_size = self._map._cell_size
-        min_distance = robot._radius / (cell_size + self._margin)
+        min_distance = robot._radius / (cell_size + self._margin) + .5
         available_cells = {cell for cell, distance in self._map._distance_cells.items() if distance[1] >= min_distance}
         target_cell = self._position_to_cell(robot._target[0])
         is_target_reachable = target_cell in available_cells
