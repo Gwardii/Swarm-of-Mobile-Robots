@@ -42,6 +42,7 @@ class GUI:
         self.robot = robot_handler.Robot(0,[800, 200],0)
         self.robot_target=[150,800]
         self.robot.set_target(self.robot_target)
+        self.new_robot_target=False
 
         #robot control - entry
         self.robot_position=np.array([800.,200.,90.]) #potem się to rozszerzy na N robotow
@@ -80,6 +81,7 @@ class GUI:
 
         self.robot_artist=None
         self.background=None
+        self.background_without_path=None
         #console - prealpha
         self.console=tk.Text(height=20,width=110,bg='white',fg='black')
         self.console_button=tk.Button(text="Execute line",width=10,font=12,command=self._get_command)
@@ -89,6 +91,7 @@ class GUI:
         # self.camera_Thread=threading.Thread(target=self.video_stream)
         # self.camera_Thread.setDaemon(True)   
         # self.robot_Thread=threading.Thread(target=self._robot_thread_function)
+        # self.robot_Thread.setDaemon(True)
         # self.console_Thread=threading.Thread(target=self._console_function)
     
     def _close_app(self):# narazie watki sa niezalezne od siebie wiec ich nie lacze
@@ -107,15 +110,13 @@ class GUI:
         self.controlled_robot_id=self.robots_id.get().split("_")[1]
 
     def _get_target_coord(self):
+        self.new_robot_target=True
         coord_str=self.coord_entry.get()
         if(coord_str !=""):
             for i in "()":
                 coord_str=coord_str.replace(i,"")
             temp=coord_str.split(",")
-            target=[float(x) for x in temp]
-            # self.robot_position=[float(x) for x in temp]
-            id_with_target=tuple([self.controlled_robot_id,target])
-            self.path_planner.set_robots_targets(id_with_target)
+            self.robot_target=[float(x) for x in temp]
             self.coord_entry.delete(0,tk.END)
 
     def debug(self,message):
@@ -211,32 +212,32 @@ class GUI:
         return dict_of_obstacles, wa
 
     def robot_control(self):
-        self.map.canvas.draw()
-        self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
-        while(True):
-            if self.is_forward_pressed:
-                R=self._rotation_matrix(self.robot_position[2]-90)
-                local_vector=[0,2]
-                local_vector=R.dot(local_vector)
-                self.robot_position[0:2]=[self.robot_position[0]+local_vector[0],self.robot_position[1]+local_vector[1]]
-            if self.is_backward_pressed:
-                R=self._rotation_matrix(self.robot_position[2]-90)
-                local_vector=[0,-2]
-                local_vector=R.dot(local_vector)
-                self.robot_position[0:2]=[self.robot_position[0]+local_vector[0],self.robot_position[1]+local_vector[1]]
-            if self.is_rotate_right_pressed:
-                self.robot_position[2]=float(self.robot_position[2]-0.5)
-            if self.is_rotate_left_pressed:
-                self.robot_position[2]=float(self.robot_position[2]+0.5)
-            self.map.canvas.restore_region(self.background)
-            self.robot_artist=self._draw_robot(self.robot_position[0:2],self.robot_position[2],self.controlled_robot_id)
-            self.ax.draw_artist(self.robot_artist[0])
-            self.ax.draw_artist(self.robot_artist[1])
-            self.ax.draw_artist(self.robot_artist[2])
-            self.map.canvas.blit(self.ax.bbox)
-            self.robot_artist[0].remove()
-            self.robot_artist[1].remove()
-            self.robot_artist[2].remove()
+        if self.is_forward_pressed:
+            R=self._rotation_matrix(self.robot_position[2]-90)
+            local_vector=[0,2]
+            local_vector=R.dot(local_vector)
+            self.robot_position[0:2]=[self.robot_position[0]+local_vector[0],self.robot_position[1]+local_vector[1]]
+        if self.is_backward_pressed:
+            R=self._rotation_matrix(self.robot_position[2]-90)
+            local_vector=[0,-2]
+            local_vector=R.dot(local_vector)
+            self.robot_position[0:2]=[self.robot_position[0]+local_vector[0],self.robot_position[1]+local_vector[1]]
+        if self.is_rotate_right_pressed:
+            self.robot_position[2]=float(self.robot_position[2]-0.5)
+        if self.is_rotate_left_pressed:
+            self.robot_position[2]=float(self.robot_position[2]+0.5)
+        self.map.canvas.restore_region(self.background)
+        self.robot_artist=self._draw_robot(self.robot_position[0:2],self.robot_position[2],self.controlled_robot_id)
+        self.ax.draw_artist(self.robot_artist[0])
+        self.ax.draw_artist(self.robot_artist[1])
+        self.ax.draw_artist(self.robot_artist[2])
+        self.map.canvas.blit(self.ax.bbox)
+        self.robot_artist[0].remove()
+        self.robot_artist[1].remove()
+        self.robot_artist[2].remove()
+
+        self.robot._position=self.robot_position[0:2]
+        self.robot._orientation=self.robot_position[2]
 
     def _draw_robot(self,position,rotation,id):
         circle=self._draw_circle([position[0], position[1]], radius=75, color='red') #rysoanie kola ktore bedzei podstawa robota
@@ -306,6 +307,8 @@ class GUI:
                 self.ax.add_patch(square)
 
         self.map.canvas.draw()
+        self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
+        self.background_without_path=self.map.canvas.copy_from_bbox(self.ax.bbox)
 
     def draw_path(self):
         self.robot.set_target(self.robot_target)
@@ -313,8 +316,9 @@ class GUI:
         self.pather.add_robot(0,self.robot)
         self.pather._determine_paths()
         path=self.pather.get_paths()
+        self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
+        self.background=self.background_without_path
         for i in range(1,len(path)):
-            self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
             cell_size=self.cell_size
             center_i=tuple(i * cell_size for i in path[i])
             center_i_1=tuple(i*cell_size for i in path[i-1])
@@ -324,8 +328,11 @@ class GUI:
             (temp,)=self.ax.plot(x_data,y_data,color=(0,0/255,128/255),linestyle="--")
             self.ax.draw_artist(temp)
             self.map.canvas.blit(self.ax.bbox)
+            self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
+        self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
+        self.new_robot_target=False
        
-    def _rotation_matrix(self,angle): # na razie wątek robota jej uzywa poczekam az filip zrobi klase
+    def _rotation_matrix(self,angle): 
         R=np.array([[np.cos(angle*np.pi/180), -np.sin(angle*np.pi/180)],[np.sin(angle*np.pi/180),np.cos(angle*np.pi/180)]])
         return R
 

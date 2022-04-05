@@ -148,9 +148,11 @@ class RobotControl(State):
         self.gui.robot_control()
 
 class SetTarget(State):
+    def __init__(self,gui:GUI) -> None:
+        self.gui=gui
     def Execute(self):
-        pass
-        # print("ustalam nowy cel i obliczam nowa sciezke")
+        self.gui.background=self.gui.background_without_path
+        self.gui.draw_path()
 
 class SendDataToRobot(State):
     def Execute(self):
@@ -167,6 +169,7 @@ class AllStates():
     update_camera="update_camera"
     draw_obstacles="draw_obstacles"
     draw_path="draw_path"
+    robot_control="robot_control"
 #===========================================
 # Add a new transition to this struct for easier usage in application's main function
 class AllTransition():
@@ -177,6 +180,7 @@ class AllTransition():
     update_camera="update_camera"
     draw_obstacles="draw_obstacles"
     draw_path="draw_path"
+    robot_control="robot_control"
 
 #==========================================
 class Transition(object):
