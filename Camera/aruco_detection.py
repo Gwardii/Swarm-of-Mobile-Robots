@@ -13,7 +13,7 @@ marker_real_size = 35
 def camera_setup(cap):
     
     # load calibration values:
-    with open('./camera_calibration.npy', 'rb') as f:
+    with open('./Camera/camera_calibration.npy', 'rb') as f:
         camera_matrix = np.load(f)
         camera_distortion = np.load(f)
 
@@ -149,62 +149,27 @@ def augment_Aruco(bbox, id, img, imgAug, drawId=True):
     return imgOut
 
 def save_Aruco_json(ids, markers_coordinats, markers_orientation):
-    triangles_list_ids = [4, 5, 6]
-    circles_list_ids = [7, 8, 9]
-    rectangles_list_ids = [10, 11, 12]
+    obstacles_list_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
     area_list_ids = [0, 1, 2, 3]
     robots_list_ids = [13, 14, 15]
 
     if ids is None:
         return
 
-    obstacles_data = {"figures": []}
+    obstacles_data = {"obstacles": []}
     robots_data = {"robots": []}
     area_data = {"area": []}
 
     for nr in range(len(ids)):
-        if ids[nr] in triangles_list_ids:
-            obstacles_data["figures"].append({
-                "id":0,
-                "type": "triangle",
-                "point_1": {
-                    "x": markers_coordinats[nr][0][0],
-                    "y": markers_coordinats[nr][0][1]+10,
-                },
-                "point_2": {
-                    "x": markers_coordinats[nr][0][0]+10,
-                    "y": markers_coordinats[nr][0][1]-10,
-                },
-                "point_3": {
-                    "x": markers_coordinats[nr][0][0]-10,
-                    "y": markers_coordinats[nr][0][1]-10,
-                }
-                }
-            )
-        elif ids[nr] in circles_list_ids:
-           obstacles_data["figures"].append(
-                {
-                "id":1,
-                "type": "circle",
+        if ids[nr] in obstacles_list_ids:
+            obstacles_data["obstacles"].append({
+                "id": int(ids[nr]),
                 "center": {
                     "x": markers_coordinats[nr][0][0],
                     "y": markers_coordinats[nr][0][1]
                 },
-                "radius": 200
-                }
-           )
-        elif ids[nr] in rectangles_list_ids:
-            obstacles_data["figures"].append({
-                "id":2,
-                "type": "rectangle",
-                "center": {
-                    "x": markers_coordinats[nr][0][0],
-                    "y": markers_coordinats[nr][0][1]
-                },
-                "orientation": markers_orientation[nr][0][2],
-                "length_x": 150,
-                "length_y": 200
-                })
+                "rotation": markers_orientation[nr][0][2]
+            })
         elif ids[nr] in robots_list_ids:
             robots_data["robots"].append({
                 "id": int(ids[nr]),
@@ -218,7 +183,7 @@ def save_Aruco_json(ids, markers_coordinats, markers_orientation):
             )
         elif ids[nr] in area_list_ids:
             area_data["area"].append({
-                "id":0,
+                "id":int(ids[nr]),
                 "type": "corner",
                 "position": {
                     "x": markers_coordinats[nr][0][0],
@@ -232,13 +197,13 @@ def save_Aruco_json(ids, markers_coordinats, markers_orientation):
 
 
     # save data into files     
-    with open('./TGS_obstackles.json', 'w') as f:
+    with open('./Computer/resources/obstacles.json', 'w') as f:
         json.dump(obstacles_data, f, indent=2)
         f.close()
-    with open('./TGS_robots.json', 'w') as f:
+    with open('./Computer/resources/robots.json', 'w') as f:
         json.dump(robots_data, f, indent=2)
         f.close()
-    with open('./TGS_area.json', 'w') as f:
+    with open('./Computer/resources/area.json', 'w') as f:
         json.dump(area_data, f, indent=2)
         f.close()
 
@@ -250,7 +215,7 @@ def main():
 
 
     # load images to augment  
-    augDics = load_Aug_Images("images")
+    augDics = load_Aug_Images("./Camera/images")
 
 
     print("press:\n\r- q to quit")

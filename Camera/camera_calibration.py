@@ -35,7 +35,9 @@ objectp3d[0, :, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-
 # Extracting path of individual image stored
 # in a given directory. Since no path is
 # specified, it will take current directory
-images = glob.glob('./captured_frames/*.png')
+images = glob.glob('./Camera/captured_frames/*.png')
+
+print(images)
 
 for filename in images:
 
@@ -81,7 +83,7 @@ h, w = image.shape[:2]
 ret, matrix, distortion, r_vecs, t_vecs = cv2.calibrateCamera(threedpoints, twodpoints, grayColor.shape[::-1], None, None)
                                                               
 # save calibration into file
-with open('camera_calibration.npy', 'wb') as f:
+with open('./Camera/camera_calibration.npy', 'wb') as f:
     np.save(f,matrix)
     np.save(f,distortion)      
 
