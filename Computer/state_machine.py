@@ -17,7 +17,7 @@ class StateMachine(object):
 
     def Execute(self):
         if(self.current_transition):
-            self.current_transition.Execute()
+            # self.current_transition.Execute()
             self.Set_state(self.current_transition.to_state)
             self.current_transition=None
         self.current_state.Execute()

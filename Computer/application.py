@@ -1,3 +1,4 @@
+from re import S
 from states import *
 from state_machine import *
 import time 
@@ -9,6 +10,7 @@ class Application(object):
         #application parameters
         self.cell_size=cell_size
         self.number_of_robots=number_of_robots
+        self.gui=GUI(cell_size=cell_size,number_of_robots=number_of_robots)
         self.rpi_ip=rpi_ip
         self.rpi_port=rpi_port
 
@@ -21,15 +23,21 @@ class Application(object):
 
     def _states_initialization(self, states:AllStates)->None:
         self.state_machine.states[states.rpi_communication]=RPI_Communication(rpi_ip=self.rpi_ip,port=self.rpi_port)
-        self.state_machine.states[states.initialization]=Initialization()
+        self.state_machine.states[states.initialization]=Initialization(self.gui)
         self.state_machine.states[states.set_target]=SetTarget()
         self.state_machine.states[states.robot_communication]=SendDataToRobot()
+        self.state_machine.states[states.update_camera]=CameraUpdate(self.gui)
+        self.state_machine.states[states.draw_obstacles]=DrawObstacles(self.gui)
+        self.state_machine.states[states.draw_path]=DrawPath(self.gui)
 
     def _transition_initalization(self,states:AllStates,transitions:AllTransition)->None:
         self.state_machine.transitions[transitions.start_rpi_communication]=Transition(states.rpi_communication)
         self.state_machine.transitions[transitions.start_init]=Transition(states.initialization)
         self.state_machine.transitions[transitions.set_target]=Transition(states.set_target)
         self.state_machine.transitions[transitions.start_robot_communication]=Transition(states.robot_communication)
+        self.state_machine.transitions[transitions.update_camera]=Transition(states.update_camera)
+        self.state_machine.transitions[transitions.draw_obstacles]=Transition(states.draw_obstacles)
+        self.state_machine.transitions[transitions.draw_path]=Transition(states.draw_path)
 
     def change_state(self,transition:str)->None:
         self.state_machine.Transition(transition)
@@ -42,14 +50,23 @@ if __name__ == "__main__":
     app=Application()
     
     app.set_state(app.states.rpi_communication)
-    time.sleep(1)
     app.rpi_communicatiom=True
-    app.change_state(app.transitions.start_init)
+    gui=app.change_state(app.transitions.start_init)
     app.initialization=True
-    time.sleep(1)
-    app.change_state(app.transitions.set_target)
-    app.set_target=True
-    time.sleep(1)
-    app.change_state(app.transitions.start_robot_communication)
-    app.send_data_to_robot=True
+    app.change_state(app.transitions.draw_obstacles)
+    app.change_state(app.transitions.draw_path)
+    while True:
+        #====================
+        #some if statement to update widgets
+        if app.rpi_communicatiom==True:
+            app.gui.rpi_diode.configure(image=app.gui.diode["green"])
+        
+        app.change_state(app.transitions.set_target)
+        
+        app.set_target=True
+        app.change_state(app.transitions.start_robot_communication)
+        app.send_data_to_robot=True
+        app.change_state(app.transitions.update_camera)
+        app.gui.window.update_idletasks()
+        app.gui.window.update()
 
