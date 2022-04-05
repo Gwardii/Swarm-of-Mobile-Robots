@@ -19,7 +19,7 @@ from robot_handler import Robot
 import robot_handler
 
 class GUI:
-    def __init__(self,cell_size=50,number_of_robots=10,rpi_ip="localhost",rpi_port=9999):
+    def __init__(self,cell_size:int=50,number_of_robots:int=10):
         self.window = tk.Tk()
         self.window.protocol("WM_DELETE_WINDOW",self._close_app)
         self.map=plt.Figure(figsize=(6,4),dpi=100)
@@ -27,10 +27,6 @@ class GUI:
         self.camera_label= tk.Label(fg="white",bg="black",width=600,height=400)
         self.cell_size=cell_size
         self.is_map_drawed=False
-        #communication status
-        self.rpi_ip=rpi_ip
-        self.rpi_server=RPI_Communication_Server(host=self.rpi_ip)
-        self.rpi_communication_port=rpi_port
 
         self.is_robot_connected=False
         self.robot_communicaton_label_text=tk.Label(text="Robot communication status: ",bg="white",fg="black",font=16)
@@ -95,7 +91,7 @@ class GUI:
     def _close_app(self):# narazie watki sa niezalezne od siebie wiec ich nie lacze
         os._exit(1)
     
-    def _window_configuration(self): #dodaje wszystkie elementy gui -> miejsce na kamere, pole do wykresów itp
+    def window_configuration(self): #dodaje wszystkie elementy gui -> miejsce na kamere, pole do wykresów itp
         width= self.window.winfo_screenwidth() 
         height= self.window.winfo_screenheight()
         #setting tkinter self.window size
@@ -107,11 +103,13 @@ class GUI:
         self._draw_figure()
         self._draw_obstacles()
         self.is_map_drawed=True 
-        self.camera_Thread.start()#odpalamy watek kamery dopiero jak narysowana jest mapa
+        #odpalamy watek kamery dopiero jak narysowana jest mapa
         self._place_coord_entry()
         self._place_controll_buttons()
-        self.robot_Thread.start()
-        self.console_Thread.start()
+        
+        # self.camera_Thread.start()
+        # self.robot_Thread.start()
+        # self.console_Thread.start()
 
     def _robot_selected(self,*args):
         self.controlled_robot_id=self.robots_id.get().split("_")[1]
@@ -401,7 +399,7 @@ class GUI:
 
 def main():
     App=GUI(cell_size=35)
-    App._window_configuration()
+    App.window_configuration()
     App.window.mainloop()
     
     

@@ -1,9 +1,11 @@
+from concurrent.futures import thread
 import string
 from GUI import GUI
 from communication.RPI_server import RPI_Communication_Server
 import json
 from state_machine import StateMachine
 import time
+import threading
 
 #State base class
 class State(object):
@@ -59,9 +61,24 @@ class Initialization(State):
     start_gui_initialization="start_"+gui_initialization
     start_map_initialization="start_"+gui_initialization
     start_camera_initialization="start_"+camera_initialization
+    def __init__(self,cell_size:int = 50,number_of_robots:int=10) -> None:
+        super().__init__()
+        self.state_machine=StateMachine(self)
+        self.cell_size=cell_size
+        self.number_of_robots=number_of_robots
+        self.gui = GUI(cell_size=self.cell_size,number_of_robots=self.number_of_robots)
+        self._states_initialization()
+        self._transition_initalization()
 
     class GUIInitialization(State):
+
+        def __init__(self,gui:GUI) -> None:
+            self.gui=gui
+
         def Execute(self)->None:
+            self.gui.window_configuration()
+            thread=threading.Thread(target=self.gui.window.mainloop)
+            thread.start()
             print("gui initialization")
     
     class MapInitialization(State):
@@ -78,14 +95,9 @@ class Initialization(State):
         def Execute(self):
             print("Application is switching to the next state")
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.state_machine=StateMachine(self)
-        self._states_initialization()
-        self._transition_initalization()
-
+    
     def _states_initialization(self)->None:
-        self.state_machine.states[self.gui_initialization]=self.GUIInitialization()
+        self.state_machine.states[self.gui_initialization]=self.GUIInitialization(gui=self.gui)
         self.state_machine.states[self.map_initialization]=self.MapInitialization()
         self.state_machine.states[self.camera_initialization]=self.CameraInitization()
     
@@ -117,6 +129,7 @@ class SendDataToRobot(State):
     def Execute(self):
         print("Wysylam dane do robota")
 
+
 #===========================================
 # Add a new state to this struct for easier usage in application's main function
 class AllStates():
@@ -133,7 +146,6 @@ class AllTransition():
     start_robot_communication="start_robot_communication"
 
 #==========================================
-
 class Transition(object):
     def __init__(self,to_state) -> None:
         self.to_state=to_state
