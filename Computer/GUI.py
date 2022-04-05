@@ -102,8 +102,8 @@ class GUI:
         self.window.geometry("%dx%d" % (width, height))
         self.window.title("Robotic swarm control application")
         #adding map as a plot 
-        self._communications_status()
-
+        # self._communications_status()
+        self._place_widgets()
         self._draw_figure()
         self._draw_obstacles()
         self.is_map_drawed=True 
@@ -138,8 +138,8 @@ class GUI:
         self.console.insert(tk.END,'\n')
 
     def _console_function(self): #tutaj jest bląd i srednio dziala
-        self.console.place(x=620,y=400)
-        self.console_button.place(x=620,y=725)
+        # self.console.place(x=620,y=400)
+        # self.console_button.place(x=620,y=725)
         last=self.command
         while(True):
             time.sleep(1)
@@ -173,33 +173,39 @@ class GUI:
         ax=FigureCanvasTkAgg(self.map,self.window)
         ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
 
-
-    def _communications_status(self): # na razie ustalone na stałe jaka jest kolejnosc danych
-        while self.rpi_server.is_rpi_connected==False:
-            print("Waiting for communication")
+    def _place_widgets(self):
+        #communication diodes
         self.robot_communicaton_label_text.place(x=650,y=15)
         self.rpi_communicaton_label_text.place(x=650,y=45)
         self.robot_diode.place(x=1000,y=15)
         self.rpi_diode.place(x=1000,y=45)
-        self.rpi_diode.configure(image=self.diode["green"])
-        # is_area_received=False
-        # area_json=None
-        # obstacles_json=None
-        # is_obstacle_received=False
-        # while not is_area_received:
-        #     if self.rpi_server.message_received==True:
-        #         area_json=self.rpi_server.get_buffer()
-        #         is_area_received=True
-        #         break
-        # while not is_obstacle_received:
-        #     if self.rpi_server.message_received==True:
-        #         obstacles_json=self.rpi_server.get_buffer()
-        #         is_obstacle_received=True
-        #         break
-        # with open(".\Computer\\resources\\obstacles.json","w") as af:
-        #     json.dump(area_json,af)
-        # with open(".\Computer\\resources\\area.json","w") as af:
-        #     json.dump(obstacles_json,af)
+        self.rpi_diode.configure(image=self.diode["red"])
+        #console 
+        self.console.place(x=620,y=400)
+        self.console_button.place(x=620,y=725)
+
+
+    # def _communications_status(self): # na razie ustalone na stałe jaka jest kolejnosc danych
+    #     while self.rpi_server.is_rpi_connected==False:
+    #         print("Waiting for communication")
+    #     is_area_received=False
+    #     area_json=None
+    #     obstacles_json=None
+    #     is_obstacle_received=False
+    #     while not is_area_received:
+    #         if self.rpi_server.message_received==True:
+    #             area_json=self.rpi_server.get_buffer()
+    #             is_area_received=True
+    #             break
+    #     while not is_obstacle_received:
+    #         if self.rpi_server.message_received==True:
+    #             obstacles_json=self.rpi_server.get_buffer()
+    #             is_obstacle_received=True
+    #             break
+    #     with open(".\Computer\\resources\\obstacles.json","w") as af:
+    #         json.dump(area_json,af)
+    #     with open(".\Computer\\resources\\area.json","w") as af:
+    #         json.dump(obstacles_json,af)
 
     def _video_stream(self):
         #funkcja do przechwytywania obrazu z kamery i rzutowania go na label, cv2.VideoCapture(0) - oznacza, że rzutuje obraz z kamery w laptopie

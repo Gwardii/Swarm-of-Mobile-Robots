@@ -1,11 +1,12 @@
 import socket
+import string
 import threading
 
 #Narazie komunikacja działa w jedna strone, tylko client wysyla. W tym momencie
 #wiecej nie jest potrzebne
 
 class RPI_Communication_Server:
-    def __init__(self,host="localhost",port=9999):
+    def __init__(self,host:string="localhost",port:int=9999):
         self._host=host
         self._port=port
         self._rpi_server_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM) #socket - IPv4 ,TCP protocol
