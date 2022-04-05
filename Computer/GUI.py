@@ -87,13 +87,7 @@ class GUI:
         self.console_button=tk.Button(text="Execute line",width=10,font=12,command=self._get_command)
         self.command=""
         self.line=1
-
-        # self.camera_Thread=threading.Thread(target=self.video_stream)
-        # self.camera_Thread.setDaemon(True)   
-        # self.robot_Thread=threading.Thread(target=self._robot_thread_function)
-        # self.robot_Thread.setDaemon(True)
-        # self.console_Thread=threading.Thread(target=self._console_function)
-    
+ 
     def _close_app(self):# narazie watki sa niezalezne od siebie wiec ich nie lacze
         os._exit(1)
     
