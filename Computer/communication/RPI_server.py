@@ -71,9 +71,9 @@ class RPI_Communication_Server:
         socket.sendall(encoded_command)
 
 
-server = RPI_Communication_Server('192.168.235.120')
-while True:
-    if server.get_msg()!="":
-        print(server.get_msg())
-        server.clear_last_msg()
-        server.clear_buffer()
+# server = RPI_Communication_Server('192.168.235.120')
+# while True:
+#     if server.get_msg()!="":
+#         print(server.get_msg())
+#         server.clear_last_msg()
+#         server.clear_buffer()
