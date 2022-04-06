@@ -1,4 +1,5 @@
 import socket
+import string
 import threading
 
 #Narazie komunikacja działa w jedna strone, tylko client wysyla. W tym momencie
