@@ -17,6 +17,7 @@ from map import obstacles as obs, working_area, map_generator,path_planner
 from communication.RPI_server import RPI_Communication_Server
 from robot_handler import Robot
 import robot_handler
+import math
 
 class GUI:
     def __init__(self,cell_size=50,number_of_robots=10,rpi_ip="localhost",rpi_port=9999):
@@ -229,6 +230,7 @@ class GUI:
     def _robot_thread_function(self): # chwilowo to wyglada tak, ze robot pojawia sie w miejscu zadanym w tym polu "Enter target coord.."
         self.map.canvas.draw()
         self.background=self.map.canvas.copy_from_bbox(self.ax.bbox)
+
         while(True):
 
             if self.is_forward_pressed:
@@ -245,6 +247,8 @@ class GUI:
                 self.robot_position[2]=float(self.robot_position[2]-0.5)
             if self.is_rotate_left_pressed:
                 self.robot_position[2]=float(self.robot_position[2]+0.5)
+        
+            
             # to sprawia, że aplikacja jest mega plynna. przed petla zapisuje tlo jeszcze bez robota,
             # potem je odwtarzam z tego zapisu, licze nowa pozycje i go rysuje. Porownuje to z tlem i aktualizuje tylko pozycje robota
             # wczesniej bylo kilkanascie fps a teraz jest z 200 i to przy bardzo gestej siatce d=25mm

@@ -5,10 +5,12 @@ class WorkingArea(object):
         super().__init__()
         temp = []
         for vertice in vertices:
-            temp.append(list(vertice['position'].values()))
+            temp.insert(vertice['id'], list(vertice['position'].values()))
         self._vertices = np.asarray(temp).transpose()
         self._x_max, self._y_max = np.max(self._vertices, axis = 1)
         self._x_min, self._y_min = np.min(self._vertices, axis = 1)
+        print(temp)
+        print(self._vertices)
         return None
 
     def get_x_min(self) -> float:
