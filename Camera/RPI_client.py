@@ -33,7 +33,7 @@ class RPI_Communication_Client():
         print("Received: ",repr(self.buffer))
 
 
-client=RPI_Communication_Client('192.168.235.120')
+client=RPI_Communication_Client(socket.gethostname())
 
 data={"obstacles": [
 {

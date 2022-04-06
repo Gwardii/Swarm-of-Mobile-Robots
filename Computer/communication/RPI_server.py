@@ -1,6 +1,7 @@
 import socket
 import string
 import threading
+import json
 
 #Narazie komunikacja działa w jedna strone, tylko client wysyla. W tym momencie
 #wiecej nie jest potrzebne
@@ -44,7 +45,7 @@ class RPI_Communication_Server:
                 self._buffer = conn.recv(self.buffer_size)
                 
             print("full msg recvd")
-            self.full_msg = full_msg
+            self.full_msg = full_msg[self.HEADER_SIZE:]
             full_msg = ''
             self._buffer = ''
             self.message_received=True
@@ -71,9 +72,34 @@ class RPI_Communication_Server:
         socket.sendall(encoded_command)
 
 
-server = RPI_Communication_Server('192.168.235.120')
+server = RPI_Communication_Server(socket.gethostname())
 while True:
     if server.get_msg()!="":
-        print(server.get_msg())
-        server.clear_last_msg()
+        
+        data = json.loads(str(server.get_msg()))
+
+        if ('obstacles' in data.keys()):
+
+            with open("./Computer/resources/obstacles.json",'w') as f:
+                json.dump(data, f, indent = 2)
+                f.close()
+
+        elif ('robots' in data.keys()):
+
+            with open("./Computer/resources/robots.json",'w') as f:
+                json.dump(data, f, indent = 2)
+                f.close()
+
+        elif ('area' in data.keys()):
+
+            with open("./Computer/resources/area.json",'w') as f:
+                json.dump(data, f, indent = 2)
+                f.close()
+
+        else:
+             with open("./Computer/resources/dump_data.txt",'w') as f:
+                json.dump(data, f, indent = 2)
+                f.close()
+
         server.clear_buffer()
+        server.clear_last_msg()
