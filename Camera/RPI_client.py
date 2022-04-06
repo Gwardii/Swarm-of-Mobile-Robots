@@ -2,19 +2,20 @@ import socket
 import json
 
 class RPI_Communication_Client():
-    def __init__(self,host="localhost",port=9999):
+    def __init__(self,host = "localhost", port = 9999):
         self.host=host
         self.port = port
         self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.buffer=""
         self.message_sended=False
-        self.HEADER_SIZE=10
+        self.HEADER_SIZE = 10
 
     def send_json(self,json_message):
 
         # local_ip=socket.gethostbyname(socket.gethostname())
         json_data = json.dumps(json_message, sort_keys=False, indent=2)
-        json_data=f'{len(json_data):<{self.HEADER_SIZE}}'+json_data
+        print(len(json_data))
+        json_data = f'{len(json_data):<{self.HEADER_SIZE}}' + json_data
         self._send_message(json_data)
         return json_data    
 

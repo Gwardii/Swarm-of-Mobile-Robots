@@ -17,6 +17,7 @@ from map import obstacles as obs, working_area, map_generator,path_planner
 from communication.RPI_server import RPI_Communication_Server
 from robot_handler import Robot
 import robot_handler
+import math
 
 class GUI:
     def __init__(self,cell_size:int=50,number_of_robots:int=10):

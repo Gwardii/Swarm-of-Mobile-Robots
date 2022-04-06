@@ -1,7 +1,7 @@
 {
   "figures": [
     {
-      "id":0,
+      "id":4,
       "type": "triangle",
       "point_1": {
         "x": -100,
@@ -17,15 +17,70 @@
       }
     },
     {
-      "id":1,
+      "id":5,
       "type": "circle",
       "radius": 150
     },
     {
-      "id":2,
+      "id":6,
+      "type": "rectangle",
+      "length_x": 150,
+      "length_y": 200
+    },
+    {
+      "id":7,
+      "type": "triangle",
+      "point_1": {
+        "x": -100,
+        "y": 45
+      },
+      "point_2": {
+        "x": 0,
+        "y": 30
+      },
+      "point_3": {
+        "x": 200,
+        "y": 300
+      }
+    },
+    {
+      "id":8,
+      "type": "circle",
+      "radius": 150
+    },
+    {
+      "id":9,
+      "type": "rectangle",
+      "length_x": 150,
+      "length_y": 200
+    },
+    {
+      "id":10,
+      "type": "triangle",
+      "point_1": {
+        "x": -100,
+        "y": 45
+      },
+      "point_2": {
+        "x": 0,
+        "y": 30
+      },
+      "point_3": {
+        "x": 200,
+        "y": 300
+      }
+    },
+    {
+      "id":11,
+      "type": "circle",
+      "radius": 150
+    },
+    {
+      "id":12,
       "type": "rectangle",
       "length_x": 150,
       "length_y": 200
     }
+
   ]
 }
