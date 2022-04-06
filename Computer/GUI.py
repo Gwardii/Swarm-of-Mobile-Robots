@@ -185,7 +185,6 @@ class GUI:
         #funkcja do przechwytywania obrazu z kamery i rzutowania go na label, cv2.VideoCapture(0) - oznacza, że rzutuje obraz z kamery w laptopie
         #Jak ktos ma podpieta dodatkowa kamera to podaje kolejny numer. docelowo bedziemy podawac IP websocket-a z RPI
         
-        
         # while self.is_map_drawed:# przesyłanie zaczyna sie dopiero jak zostalo stworzone pole mapy
         _, frame = self.cap.read()
         cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)

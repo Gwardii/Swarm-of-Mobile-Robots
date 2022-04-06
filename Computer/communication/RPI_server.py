@@ -1,6 +1,7 @@
 import socket
 import string
 import threading
+import json
 
 #Narazie komunikacja działa w jedna strone, tylko client wysyla. W tym momencie
 #wiecej nie jest potrzebne
@@ -44,7 +45,7 @@ class RPI_Communication_Server:
                 self._buffer = conn.recv(self.buffer_size)
                 
             print("full msg recvd")
-            self.full_msg = full_msg
+            self.full_msg = full_msg[self.HEADER_SIZE:]
             full_msg = ''
             self._buffer = ''
             self.message_received=True
