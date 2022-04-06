@@ -50,9 +50,9 @@ class RPI_Communication_Server:
         socket.sendall(encoded_command)
 
 
-# server = RPI_Communication_Server(host="192.168.0.20")
-# while True:
-#     if server.get_buffer()!="":
-#         print(server.get_buffer())
-#         server.set_command("wysyłam")
-#         server.clear_buffer()
+server = RPI_Communication_Server(host='192.168.235.95')
+while True:
+    if server.get_buffer()!="":
+        print(server.get_buffer())
+        server.set_command("wysyłam")
+        server.clear_buffer()

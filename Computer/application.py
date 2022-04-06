@@ -1,7 +1,5 @@
-from re import S
 from states import *
 from state_machine import *
-import time 
 class Application(object):
     def __init__(self,cell_size:int=50,number_of_robots:int=10,rpi_ip:string="localhost",rpi_port:int=9999) -> None:
         self.state_machine=StateMachine(self)
@@ -48,7 +46,7 @@ class Application(object):
         self.state_machine.Set_state(state)
         self.state_machine.Execute()
 
-if __name__ == "__main__":
+def main():
     app=Application()
     
     app.set_state(app.states.rpi_communication)
@@ -71,3 +69,6 @@ if __name__ == "__main__":
         app.gui.window.update_idletasks()
         app.gui.window.update()
 
+
+if __name__ == "__main__":
+    main()
