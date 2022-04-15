@@ -1,6 +1,38 @@
 {
   "figures": [
     {
+      "id":0,
+      "type": "triangle",
+      "point_1": {
+        "x": -100,
+        "y": 45
+      },
+      "point_2": {
+        "x": 0,
+        "y": 30
+      },
+      "point_3": {
+        "x": 200,
+        "y": 300
+      }
+    },
+    {
+      "id":1,
+      "type": "circle",
+      "radius": 150
+    },
+    {
+      "id":2,
+      "type": "rectangle",
+      "length_x": 150,
+      "length_y": 200
+    },
+    {
+      "id":3,
+      "type": "circle",
+      "radius": 150
+    },
+    {
       "id":4,
       "type": "triangle",
       "point_1": {

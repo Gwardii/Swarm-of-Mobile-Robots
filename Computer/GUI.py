@@ -44,7 +44,7 @@ class GUI:
         self.robot_target=[150,800]
         self.robot.set_target(self.robot_target)
         self.new_robot_target=False
-
+        
         #robot control - entry
         self.robot_position=np.array([800.,200.,90.]) #potem się to rozszerzy na N robotow
         self.coord_entry=tk.Entry(fg='black',bg='white',width=20)
@@ -71,6 +71,7 @@ class GUI:
         self.is_backward_pressed=False
         self.is_rotate_right_pressed=False
         self.is_rotate_left_pressed=False
+        
         #robot selection
         self.controlled_robot_id=1
         self.robots_id = tk.StringVar()
@@ -88,7 +89,8 @@ class GUI:
         self.console_button=tk.Button(text="Execute line",width=10,font=12,command=self._get_command)
         self.command=""
         self.line=1
- 
+        
+
     def _close_app(self):# narazie watki sa niezalezne od siebie wiec ich nie lacze
         os._exit(1)
     
@@ -100,7 +102,7 @@ class GUI:
         self.window.title("Robotic swarm control application")
         self._place_widgets()
         self.is_map_drawed=True 
-
+        
     def _robot_selected(self,*args):
         self.controlled_robot_id=self.robots_id.get().split("_")[1]
 
@@ -134,18 +136,18 @@ class GUI:
             last=self.command
 
     def draw_figure(self): #tworzenie pola do wykresów, skalowanie osi itp
-        dict_of_obstales,wa=self._read_data()
-        axis_step=self.cell_size
-        extremes=wa.get_extremes()
-        self.ax.set_xlim([0,extremes[1]])
-        self.ax.set_ylim([0,extremes[3]])
-        loc = plticker.MultipleLocator(base=axis_step) # this locator puts ticks at regular intervals
+        dict_of_obstales, wa=self._read_data()
+        axis_step = self.cell_size
+        extremes = wa.get_extremes()
+        self.ax.set_xlim([0, extremes[1]])
+        self.ax.set_ylim([0, extremes[3]])
+        loc = plticker.MultipleLocator(base = axis_step) # this locator puts ticks at regular intervals
         self.ax.xaxis.set_major_locator(loc)
-        loc2 = plticker.MultipleLocator(base=axis_step) # this locator puts ticks at regular intervals
+        loc2 = plticker.MultipleLocator(base = axis_step) # this locator puts ticks at regular intervals
         self.ax.yaxis.set_major_locator(loc2)
-        x=np.arange(-axis_step,int(extremes[1]+axis_step),axis_step)
-        y=np.arange(-axis_step,int(extremes[3]+axis_step),axis_step)
-        self.ax.set_xticklabels(x,rotation=45)
+        x=np.arange(-axis_step,int(extremes[1] + axis_step), axis_step)
+        y=np.arange(-axis_step,int(extremes[3] + axis_step), axis_step)
+        self.ax.set_xticklabels(x, rotation=45)
         self.ax.set_yticklabels(y)
         for index, label in enumerate(self.ax.xaxis.get_ticklabels()):
             if index % 2 != 0:
@@ -155,10 +157,10 @@ class GUI:
                 label.set_visible(False)
         self.ax.set_xlabel("X axis [mm]")
         self.ax.set_ylabel("Y axis [mm]")
-        self.ax.grid(color='k',linestyle="-.",linewidth=0.5,axis='both')
+        self.ax.grid(color='k', linestyle="-.", linewidth=0.5,axis='both')
         
     def _place_widgets(self):
-        ax=FigureCanvasTkAgg(self.map,self.window)
+        ax=FigureCanvasTkAgg(self.map, self.window)
         ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
         #communication diodes
         self.robot_communicaton_label_text.place(x=650,y=15)
@@ -253,12 +255,12 @@ class GUI:
         return robot
 
     def _draw_circle(self,center,radius,color='black'):#rysuje kolo
-        circle =matplotlib.patches.Circle((center),radius,fill=False,ec=color)#,animated=True)
+        circle =matplotlib.patches.Circle((center), radius, fill=False, ec=color)#,animated=True)
         self.ax.add_patch(circle)
         return circle
 
     def _draw_polygon(self,vertices,color="black"):
-        rectangle=Polygon(vertices.transpose(),fill = False,ec=color)
+        rectangle=Polygon(vertices.transpose(), fill = False, ec=color)
         self.ax.add_patch(rectangle)
 
     def draw_obstacles(self):

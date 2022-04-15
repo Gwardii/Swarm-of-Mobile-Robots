@@ -28,38 +28,55 @@ class RPI_Communication_Client():
         self.message_sended=True
         
     def _client_listen(self):
+
+        self.rpi_client_socket.connect((self.host, self.port))
+
         print("Client listening")
-        self.buffer = self.rpi_client_socket.recv(1024)
-        print("Received: ",repr(self.buffer))
+        full_msg=""
+        self._buffer = self.rpi_client_socket.recv(self.buffer_size)
+        
+        print(f"new message lenght: {self._buffer[:self.HEADER_SIZE].decode('utf-8')}")
+        msglen = int(self._buffer[:self.HEADER_SIZE])
+    
+        while (len(full_msg) - self.HEADER_SIZE) < msglen:
+            full_msg += self._buffer.decode("utf-8") 
+            self._buffer = conn.recv(self.buffer_size)
+            
+        print("full msg recvd")
+        self.full_msg = full_msg[self.HEADER_SIZE:]
+        full_msg = ''
+        self._buffer = ''
+        self.message_received=True
+        self.rpi_client_socket.close()
 
 
-client=RPI_Communication_Client(socket.gethostname())
+# client=RPI_Communication_Client(socket.gethostname())
 
-data={"obstacles": [
-{
-    "id": 0,
-    "center": {
-    "x": 250,
-    "y": 150
-    },
-    "rotation": 0
-},
-{
-    "id": 1,
-    "center": {
-    "x": 1000,
-    "y": 100
-    },
-    "rotation": 0
-},
-{
-    "id": 2,
-    "center": {
-    "x": 1328,
-    "y": 976
-    },
-    "rotation": 45
-}
-]
-}
-client.send_json(data)
+# data={"obstacles": [
+# {
+#     "id": 0,
+#     "center": {
+#     "x": 250,
+#     "y": 150
+#     },
+#     "rotation": 0
+# },
+# {
+#     "id": 1,
+#     "center": {
+#     "x": 1000,
+#     "y": 100
+#     },
+#     "rotation": 0
+# },
+# {
+#     "id": 2,
+#     "center": {
+#     "x": 1328,
+#     "y": 976
+#     },
+#     "rotation": 45
+# }
+# ]
+# }
+# client.send_json(data)

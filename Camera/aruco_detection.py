@@ -1,14 +1,20 @@
-from ctypes import sizeof
-from charset_normalizer import detect
+
 import cv2
 from cv2 import aruco
-from matplotlib.transforms import Bbox
 import numpy as np
 import os
 import json
 import math
-import threading
+from threading import Thread
+import argparse
+from pynput import keyboard
 
+
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-d", "--display", type=int, default=1,
+help="Whether or not frames should be displayed")
+args = vars(ap.parse_args())
 
 class Aruco_markers():
     def __init__(self,marker_Size = 3, total_Markers = 20):
@@ -17,8 +23,10 @@ class Aruco_markers():
         self.total_Markers = total_Markers
         self.ids: int = None
         self.rejected = None
-        self.coordinates = []
-        self.orientations = []
+        self.coordinates = {}
+        self.orientations = {}
+        self.coordinates_estimated = {}
+        self.orientations_estimated = {}
         self.augment_images_dict: dict = None
         self.aruco_Cam_param = None
         self.obstacles_list_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -31,7 +39,7 @@ class Aruco_markers():
         self.Y_shift = 0
 
         # size of a side of aruco marker [mm]
-        self.marker_real_size = 835
+        self.marker_real_size = 335
 
     def load_Aug_Images(self, path):
         '''
@@ -39,8 +47,6 @@ class Aruco_markers():
         :return: dictionary with key as the id and values as the augment image
         '''
         myList = os.listdir(path)
-        total_images = len(myList)
-        print(f'total number of imges: {total_images}')
         aug_Dics = {}
         for imgPath in myList:
             key = int(os.path.splitext(imgPath)[0])
@@ -70,41 +76,38 @@ class Aruco_markers():
 
         if self.ids is not None:
 
-            self.coordinates = np.zeros_like(tvec)
-            self.orientations = np.zeros_like(rvec)
+            # self.coordinates = np.zeros_like(tvec)
+            # self.orientations = np.zeros_like(rvec)
 
             aruco.drawDetectedMarkers(img, self.bbox)
 
             for marker in range(len(self.ids)): 
                 rotation_matrix, _ = cv2.Rodrigues(-1*rvec[marker][0])
-                self.coordinates[marker][0] = tvec[marker][0] #np.dot(rotation_matrix, -1*tvec[marker][0])
-                self.orientations[marker][0] = rotationMatrixToEulerAngles(rotation_matrix)
+                self.coordinates[marker] = tvec[marker][0] #np.dot(rotation_matrix, -1*tvec[marker][0])
+                self.orientations[marker] = rotationMatrixToEulerAngles(rotation_matrix)
 
                 top_left= int(self.bbox[marker][0][0][0]) + 50, int(self.bbox[marker][0][0][1])
                 aruco.drawAxis(img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[marker], tvec[marker], 60)    
-                cv2.putText(img, str(f'x:{int(self.coordinates[marker][0][0])} y: {int(self.coordinates[marker][0][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255,0,255), 2)
+                cv2.putText(img, str(f'x:{int(self.coordinates[marker][0])} y: {int(self.coordinates[marker][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255,0,255), 2)
                 
+
+                self.coordinates_estimated[int(self.ids[marker])] = self.coordinates[marker]
+
                 if self.ids[marker] in self.area_list_ids:
-                    if int(self.ids[marker]) in self.detected_corners.keys():
-                        self.detected_corners[int(self.ids[marker])] = self.coordinates[marker][0]
-                    else:
-                        self.detected_corners[int(self.ids[marker])] = self.coordinates[marker][0]
+                    
+                    self.detected_corners[int(self.ids[marker])] = self.coordinates[marker]
 
                     self.X_shift = min(self.detected_corners[id][0] for id in self.detected_corners.keys())
                     self.Y_shift = min(self.detected_corners[id][1] for id in self.detected_corners.keys())
                     
 
                 elif self.ids[marker] in self.robots_list_ids:
-                    if int(self.ids[marker]) in self.detected_robots.keys():
-                        self.detected_robots[int(self.ids[marker])] = np.append(self.coordinates[marker][0],self.orientations[marker][0])
-                    else:
-                        self.detected_robots[int(self.ids[marker])] = np.append(self.coordinates[marker][0],self.orientations[marker][0])
-                
+                    
+                    self.detected_robots[int(self.ids[marker])] = np.append(self.coordinates[marker],self.orientations[marker])
+
                 elif self.ids[marker] in self.obstacles_list_ids:
-                    if int(self.ids[marker]) in self.detected_obstacles.keys():
-                        self.detected_obstacles[int(self.ids[marker])] = np.append(self.coordinates[marker][0], self.orientations[marker][0])
-                    else:
-                        self.detected_obstacles[int(self.ids[marker])] = np.append(self.coordinates[marker][0], self.orientations[marker][0])
+                   
+                     self.detected_obstacles[int(self.ids[marker])] = np.append(self.coordinates[marker], self.orientations[marker])
 
             return True
 
@@ -152,6 +155,11 @@ class Aruco_markers():
                     "position": {
                         "x": self.detected_corners[id][0] - self.X_shift,
                         "y": self.detected_corners[id][1] - self.Y_shift
+                    },
+                    "estimated_position": {
+                        "x": self.coordinates_estimated[id][0] - self.X_shift,
+                        "y": self.coordinates_estimated[id][1] - self.Y_shift,
+                     #   "orientation": self.orientations_estimated[id]
                     }
                     }
                     )
@@ -164,6 +172,12 @@ class Aruco_markers():
                         "y": self.detected_obstacles[id][1] - self.Y_shift
                     },
                      "rotation": self.detected_obstacles[id][5]
+                    ,
+                    "estimated_position": {
+                        "x": self.coordinates_estimated[id][0] - self.X_shift,
+                        "y": self.coordinates_estimated[id][1] - self.Y_shift,
+                      #  "orientation": self.orientations_estimated[id]
+                    }
                     }
                     )
 
@@ -174,7 +188,13 @@ class Aruco_markers():
                         "x": self.detected_robots[id][0] - self.X_shift,
                         "y": self.detected_robots[id][1] - self.Y_shift
                     },
-                     "orientation": self.detected_robots[id][5]
+                    "orientation": self.detected_robots[id][5]
+                    ,
+                    "estimated_position": {
+                        "x": self.coordinates_estimated[id][0] - self.X_shift,
+                        "y": self.coordinates_estimated[id][1] - self.Y_shift,
+                      #  "orientation": self.orientations_estimated[id]
+                    }
                     }
                     )
 
@@ -194,25 +214,61 @@ class Aruco_markers():
 
 
 class Camera():
-    def __init__(self,camera_source = 0):
-        self.cap = cv2.VideoCapture(camera_source)
+    def __init__(self, camera_source = 0, width = 640, height = 480, fps = 40):
+        ''' 
+        :param camera_source: if 0 is not working try 1, 2, 3...
+        :param width: choose for desired resolution 1920, 1280, 640
+        :param height: choose for desired resolution 1080, 720, 480
+        :param fps: choose desired FPS
+        '''
+        # initialize the video camera stream and read the first frame
+        # from the stream
+        self.stream =  cv2.VideoCapture(camera_source)
+        
+        # setup camera (important for raspberry pi)
+        # for raspberry pifor max FPS set 640x480
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)       
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)      
+        self.stream.set(cv2.CAP_PROP_FPS, fps)
+        
+        # get calibration params from calibration file
+        self.camera_calibration_params=self._get_calibration_params_()
 
-    def camera_setup(self, width = 1280, height = 720, fps = 40):
+        (self.grabbed, self.frame) = self.stream.read()
+        # initialize the variable used to indicate if the thread should
+        # be stopped
+        self.stopped = False
+
+    def start(self):
+        # start the thread to read frames from the video stream
+        Thread(target=self.update, args=()).start()
+        return self
+        
+    def update(self):
+        # keep looping infinitely until the thread is stopped
+        while True:
+            # if the thread indicator variable is set, stop the thread
+            if self.stopped:
+                return
+            # otherwise, read the next frame from the stream
+            (self.grabbed, self.frame) = self.stream.read()
+    
+    
+    def stop(self):
+        # indicate that the thread should be stopped
+        self.stopped = True
+
+    def _get_calibration_params_(self):
         
         # load calibration values:
         with open('./Camera/camera_calibration.npy', 'rb') as f:
             camera_matrix = np.load(f)
             camera_distortion = np.load(f)
 
-        # setup camera (important for raspberry pi)
-        # for raspberry pifor max FPS set 640x480
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)       
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)      
-        self.cap.set(cv2.CAP_PROP_FPS, fps)
-        
         return  camera_matrix, camera_distortion
+    
     def take_frame(self):
-        return self.cap.read()
+        return self.frame
 
 
 # Checks if a matrix is a valid rotation matrix.
@@ -249,18 +305,29 @@ def rotationMatrixToEulerAngles(R) :
 def main():
     aruco_markers = Aruco_markers()
 
-    # video capture source camera 
-    camera = Camera(0)
-    aruco_markers.aruco_Cam_param = camera.camera_setup(1280, 720, 40)
+    # start camera
+    camera = Camera(0,1280,720,40)
+    aruco_markers.aruco_Cam_param = camera.camera_calibration_params
+    camera.start()
 
     # load images to augment  
     aruco_markers.load_Aug_Images("./Camera/images")
 
-    print("press:\n\r- q to quit")
+    print("\npress:\n- q to quit")
+
+    def on_press(key):
+        if key.char == 'q': 
+            return False
+        print(key.char) 
+        return True
+
+    #start listening for keyboard
+    k=keyboard.Listener(on_press=on_press)
+    k.start()
 
     while True:
-
-        sccuess, img = camera.take_frame()
+   
+        img = camera.take_frame()
 
         # find Aruco amrkers 
         Is_aruco_Found = aruco_markers.find_Aruco_Markers(img)
@@ -272,16 +339,18 @@ def main():
         if Is_aruco_Found:
             img = aruco_markers.augment_Aruco(img)
 
-        cv2.imshow("ARUCO DETECTION",img)
-          
-        key = cv2.waitKey(1) & 0xFF
-        # quit on 'q':
-        if key == ord('q'):
+        if args["display"] > 0:
+            cv2.imshow("ARUCO DETECTION",img)
+            cv2.waitKey(1)
+        
+        # quit on pressed 'q':
+        if not(k.is_alive()):
+            print('\nquitting...\n')
+            # stop video stream
+            camera.stop()
+            # end main loop
             break
 
-        # ignore if any other key 
-        else:
-            pass
 
 if __name__== '__main__':
     main()
