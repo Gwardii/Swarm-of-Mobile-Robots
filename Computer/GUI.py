@@ -20,24 +20,34 @@ import robot_handler
 import math
 
 class GUI:
-    def __init__(self,cell_size:int=50,number_of_robots:int=10):
-        self.window = tk.Tk()
-        self.window.protocol("WM_DELETE_WINDOW",self._close_app)
-        self.map=plt.Figure(figsize=(6,4),dpi=100)
-        self.ax=self.map.add_subplot(111)
-        self.camera_label= tk.Label(fg="white",bg="black",width=600,height=400)
-        self.cell_size=cell_size
-        self.is_map_drawed=False
-        self.cap = cv2.VideoCapture(0)
-        self.is_robot_connected=False
-        self.robot_communicaton_label_text=tk.Label(text="Robot communication status: ",bg="white",fg="black",font=16)
-        self.rpi_communicaton_label_text=tk.Label(text="Raspberry PI communication status: ",bg="white",fg="black",font=16)
-        self.diode={"green":ImageTk.PhotoImage(Image.open(".\Computer\img\green_diode.png").resize((28,28),
-        Image.ANTIALIAS)),"red":ImageTk.PhotoImage(Image.open(".\Computer\img\\red_diode.png").resize((28,28),Image.ANTIALIAS))}
-        self.robot_diode=tk.Label(image=self.diode["red"],)
-        self.rpi_diode=tk.Label(image=self.diode["red"])
+    def __init__(self, cell_size:int = 50, number_of_robots:int = 10):
+        '''
+        :param: cell_size: step in [mm] for map plotting. Should be chosen accordingly to area size.
+        :number_of_robots: how many robots will be handled
+        '''
+        self.cell_size = cell_size
+        self.cap = cv2.VideoCapture('http://192.168.1.112:1234/video_feed')
         
-        ##object for map generaation
+        # create window for aplication:
+        self.window = tk.Tk()
+        self.window.protocol("WM_DELETE_WINDOW", self._close_app)
+        
+        # some flags:
+        self.is_map_drawed = False
+        self.is_robot_connected = False
+
+        # elements in aplication's window:
+        self.map=plt.Figure(figsize = (6,4), dpi = 100)
+        self.ax=self.map.add_subplot(111)
+        self.camera_label = tk.Label(fg = "white",bg = "black", width = 600, height = 400)
+        self.robot_communicaton_label_text = tk.Label(text = "Robot communication status: ", bg = "white", fg = "black", font = 16)
+        self.rpi_communicaton_label_text = tk.Label(text = "Raspberry PI communication status: ", bg = "white", fg = "black", font = 16)
+        self.diode={"green":ImageTk.PhotoImage(Image.open(".\Computer\img\green_diode.png").resize((28,28),
+        Image.ANTIALIAS)),"red":ImageTk.PhotoImage(Image.open(".\Computer\img\\red_diode.png").resize((28,28), Image.ANTIALIAS))}
+        self.robot_diode = tk.Label(image = self.diode["red"],)
+        self.rpi_diode = tk.Label(image = self.diode["red"])
+        
+        # object for map generaation
         self.raster_map:map_generator.MapGenerator=None
         self.pather = path_planner.PathPlanner(self.raster_map)
         self.robot = robot_handler.Robot(0,[800, 200],0)
@@ -45,11 +55,12 @@ class GUI:
         self.robot.set_target(self.robot_target)
         self.new_robot_target=False
         
-        #robot control - entry
+        # robot control - entry
         self.robot_position=np.array([800.,200.,90.]) #potem się to rozszerzy na N robotow
         self.coord_entry=tk.Entry(fg='black',bg='white',width=20)
         self.coord_label=tk.Label(text="Enter target coordinates (x,y,rot):",bg="white",fg="black",font=12)
         self.coord_confirm_button=tk.Button(text="Confirm coordinates",width=20,command=self._get_target_coord)
+        
         #robot control - BUTTONS
         self.forward=tk.Button(text="FORWARD",width=10,height=2,font=12)
         self.forward.bind('<ButtonPress-1>',self._forward_button_true)
@@ -78,12 +89,13 @@ class GUI:
         robots_name=["Robot_"+str(i+1) for i in range(number_of_robots)]
         self.robots_id.set(robots_name[0])
         self.robot_selection=tk.OptionMenu(self.window,self.robots_id,*robots_name)
-        self.robot_selection.place(x=950,y=133)
+        self.robot_selection.place(x=950, y=133)
         self.robots_id.trace("w",self._robot_selected)
 
         self.robot_artist=None
         self.background=None
         self.background_without_path=None
+        
         #console - prealpha
         self.console=tk.Text(height=20,width=110,bg='white',fg='black')
         self.console_button=tk.Button(text="Execute line",width=10,font=12,command=self._get_command)
@@ -116,14 +128,14 @@ class GUI:
             self.robot_target=[float(x) for x in temp]
             self.coord_entry.delete(0,tk.END)
 
-    def debug(self,message):
+    def debug(self, message):
         self.console.insert(tk.END,str(message)+'\n')
 
     def _get_command(self):
         temp=str(self.line)+".0"
         self.command=self.console.get(temp,tk.END)
         self.line+=1
-        self.console.insert(tk.END,'\n')
+        self.console.insert(tk.END, '\n')
 
     def _console_function(self): #tutaj jest bląd i srednio dziala
         # self.console.place(x=620,y=400)
@@ -131,7 +143,7 @@ class GUI:
         last=self.command
         while(True):
             time.sleep(1)
-            if(self.command!="" and self.command!=last):
+            if(self.command!="" and self.command != last):
                 print(self.command)
             last=self.command
 
@@ -160,26 +172,33 @@ class GUI:
         self.ax.grid(color='k', linestyle="-.", linewidth=0.5,axis='both')
         
     def _place_widgets(self):
+        # place  all elements in app's window:
+    
         ax=FigureCanvasTkAgg(self.map, self.window)
-        ax.get_tk_widget().pack(side=tk.TOP,anchor='nw')
+        ax.get_tk_widget().pack(side=tk.TOP, anchor ='nw')
+        
         #communication diodes
-        self.robot_communicaton_label_text.place(x=650,y=15)
-        self.rpi_communicaton_label_text.place(x=650,y=45)
-        self.robot_diode.place(x=1000,y=15)
-        self.rpi_diode.place(x=1000,y=45)
-        self.rpi_diode.configure(image=self.diode["red"])
+        self.robot_communicaton_label_text.place(x=650, y = 15)
+        self.rpi_communicaton_label_text.place(x=650, y = 45)
+        self.robot_diode.place(x=1000, y = 15)
+        self.rpi_diode.place(x=1000, y = 45)
+        self.rpi_diode.configure(image = self.diode["red"])
+        
         #console 
-        self.console.place(x=620,y=400)
-        self.console_button.place(x=620,y=725)
+        self.console.place(x = 620, y = 400)
+        self.console_button.place(x = 620, y = 725)
+        
         #coord label
-        self.coord_label.place(x=650,y=100)
-        self.coord_entry.place(x=650,y=140)
-        self.coord_confirm_button.place(x=790,y=136)
+        self.coord_label.place(x=650, y=100)
+        self.coord_entry.place(x=650, y=140)
+        self.coord_confirm_button.place(x=790, y=136)
+        
         #controll button
-        self.forward.place(x=1200,y=200)
-        self.backward.place(x=1200,y=280)
-        self.rotate_left.place(x=1090,y=240)
-        self.rotate_right.place(x=1330,y=240)
+        self.forward.place(x=1200, y=200)
+        self.backward.place(x=1200, y=280)
+        self.rotate_left.place(x=1090, y=240)
+        self.rotate_right.place(x=1330, y=240)
+        
         #camera
         self.camera_label.pack(anchor='w')
 
@@ -357,7 +376,7 @@ class GUI:
         self.is_rotate_left_pressed=False
 
 def main():
-    App=GUI(cell_size=35)
+    App = GUI(cell_size = 35)
     App.window_configuration()
     App.window.mainloop()
     

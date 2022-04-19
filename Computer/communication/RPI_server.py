@@ -8,23 +8,30 @@ import json
 
 class RPI_Communication_Server:
     def __init__(self,host = "localhost", port=9999):
-        self._host=host
-        self._port=port
-        self._rpi_server_socket=socket.socket(socket.AF_INET,socket.SOCK_STREAM) #socket - IPv4 ,TCP protocol
+        # for seting up conection:
+        self._host = host
+        self._port = port
+        self._rpi_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #socket - IPv4 ,TCP protocol
         self._rpi_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._rpi_server_socket.bind((self._host,self._port))
-        self._buffer = ""
+        
+        # start separated thread for server:
+        self._rpi_communication_thread = threading.Thread(target = self._server_listen)
+        self._rpi_communication_thread.start()
+        
+        # constants for comunnication:
+        self.HEADER_SIZE = 10
         self.buffer_size = 30
+
+        # real data:
+        self._buffer = ""
+        self._command = ""
         self.is_rpi_connected=False
         self.message_received=False
-        self._rpi_communication_thread=threading.Thread(target=self._server_listen)
-        self._rpi_communication_thread.start()
-        self._command = ""
-        self.HEADER_SIZE = 10
         self.full_msg = ''
         
-
     def _server_listen(self):
+        # start listening for new connection
         self._rpi_server_socket.listen()
         self.is_rpi_connected = True
         while True:
@@ -61,14 +68,14 @@ class RPI_Communication_Server:
     def clear_buffer(self):
         self._buffer = ""
     
-    def set_command(self,command):
+    def set_command(self, command):
         self._command=command
     
     def clear_command(self):
         self._command = ""
 
-    def _send_command(self,command,socket):
-        encoded_command=bytes(command,'utf-8')
+    def _send_command(self, command, socket):
+        encoded_command=bytes(command, 'utf-8')
         socket.sendall(encoded_command)
 
 

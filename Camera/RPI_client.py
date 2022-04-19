@@ -2,12 +2,13 @@ import socket
 import json
 
 class RPI_Communication_Client():
-    def __init__(self,host = "localhost", port = 9999):
-        self.host=host
+    def __init__(self, host = "localhost", port = 9999):
+        self.host = host
         self.port = port
-        self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.buffer=""
+        self.rpi_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.buffer = ""
         self.message_sended=False
+        self.buffer_size = 30
         self.HEADER_SIZE = 10
 
     def send_json(self,json_message):
@@ -19,20 +20,21 @@ class RPI_Communication_Client():
         self._send_message(json_data)
         return json_data    
 
-    def _send_message(self,data):
-        self.message_sended=False
+    def _send_message(self, data):
+
+        self.message_sended = False
         self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.rpi_client_socket.connect((self.host, self.port))
         self.rpi_client_socket.sendall(data.encode())
         self.rpi_client_socket.close()
-        self.message_sended=True
+        self.message_sended = True
         
     def _client_listen(self):
 
         self.rpi_client_socket.connect((self.host, self.port))
 
         print("Client listening")
-        full_msg=""
+        full_msg = ""
         self._buffer = self.rpi_client_socket.recv(self.buffer_size)
         
         print(f"new message lenght: {self._buffer[:self.HEADER_SIZE].decode('utf-8')}")
@@ -40,13 +42,13 @@ class RPI_Communication_Client():
     
         while (len(full_msg) - self.HEADER_SIZE) < msglen:
             full_msg += self._buffer.decode("utf-8") 
-            self._buffer = conn.recv(self.buffer_size)
+            self._buffer = self.rpi_client_socket.recv(self.buffer_size)
             
         print("full msg recvd")
         self.full_msg = full_msg[self.HEADER_SIZE:]
         full_msg = ''
         self._buffer = ''
-        self.message_received=True
+        self.message_received = True
         self.rpi_client_socket.close()
 
 

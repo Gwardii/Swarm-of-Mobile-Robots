@@ -15,13 +15,15 @@ class State(object):
 
 #classes for all gui states
 class RPI_Communication(State):
+
     def __init__(self,rpi_ip:string="localhost",port:int=9999) -> None:
         super().__init__()
         self.rpi_ip = rpi_ip
         self.rpi_port=port
-        self.rpi_server=RPI_Communication_Server(self.rpi_ip,self.rpi_port)
+        self.rpi_server = RPI_Communication_Server(self.rpi_ip,self.rpi_port)
+        
     def Execute(self):
-        while self.rpi_server.is_rpi_connected==False:
+        while self.rpi_server.is_rpi_connected == False:
             print("Waiting for established communication", end="\r")
         is_area_received=False
         area_json=None
@@ -34,21 +36,21 @@ class RPI_Communication(State):
                 print("Application did not receive Area JSON")
                 err_num+=1
                 break
-            if self.rpi_server.message_received==True:
-                area_json=self.rpi_server.get_buffer()
+            if self.rpi_server.message_received == True:
+                area_json = self.rpi_server.get_msg()
                 is_area_received=True
                 break
-        tik=time.time()
+        tik = time.time()
         while not is_obstacle_received:
             if time.time()-tik >=2:
                 print("Application did not receive obstacles JSON")
                 err_num+=1
                 break
-            if self.rpi_server.message_received==True:
-                obstacles_json=self.rpi_server.get_buffer()
+            if self.rpi_server.message_received == True:
+                obstacles_json=self.rpi_server.get_msg()
                 is_obstacle_received=True
                 break
-        if(err_num==0):
+        if(err_num == 0):
             with open(".\Computer\\resources\\obstacles.json","w") as af:
                 json.dump(area_json,af)
             with open(".\Computer\\resources\\area.json","w") as af:
@@ -60,9 +62,10 @@ class Initialization(State):
     map_initialization="map_initialization"
     camera_initialization="camera_initialization"
     ##transitions
-    start_gui_initialization="start_"+gui_initialization
-    start_map_initialization="start_"+gui_initialization
-    start_camera_initialization="start_"+camera_initialization
+    start_gui_initialization="start_" + gui_initialization
+    start_map_initialization="start_" + gui_initialization
+    start_camera_initialization="start_" + camera_initialization
+    
     def __init__(self,gui:GUI) -> None:
         super().__init__()
         self.state_machine=StateMachine(self)
@@ -71,7 +74,7 @@ class Initialization(State):
         self._transition_initalization()
 
     class GUIInitialization(State):
-        def __init__(self,gui:GUI) -> None:
+        def __init__(self, gui:GUI) -> None:
             self.gui=gui
 
         def Execute(self)->None:
@@ -94,11 +97,11 @@ class Initialization(State):
             print("camera initialization")
 
     class Transition(object):
-        def __init__(self,to_state) -> None:
-            self.to_state=to_state
+        def __init__(self, to_state) -> None:
+            self.to_state = to_state
         def Execute(self):
             print("Application is switching to the next state")
-
+    
     def _states_initialization(self)->None:
         self.state_machine.states[self.gui_initialization]=self.GUIInitialization(gui=self.gui)
         self.state_machine.states[self.map_initialization]=self.MapInitialization(gui=self.gui)
@@ -162,6 +165,7 @@ class SendDataToRobot(State):
 #===========================================
 # Add a new state to this struct for easier usage in application's main function
 class AllStates():
+    # names of all states:
     rpi_communication="rpi_communication"
     initialization="init"
     set_target="target"
@@ -173,6 +177,7 @@ class AllStates():
 #===========================================
 # Add a new transition to this struct for easier usage in application's main function
 class AllTransition():
+    # names of all transitions:
     start_rpi_communication="start_rpi_communication"
     start_init="start_init"
     set_target="set_target"
@@ -182,10 +187,10 @@ class AllTransition():
     draw_path="draw_path"
     robot_control="robot_control"
 
-#==========================================
 class Transition(object):
-    def __init__(self,to_state) -> None:
-        self.to_state=to_state
-    def Execute(self):
-        print("Application is switching to the next state")
+        def __init__(self, to_state) -> None:
+            self.to_state = to_state
+        def Execute(self):
+            print("Application is switching to the next state")
+
 
