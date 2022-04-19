@@ -1,4 +1,3 @@
-import GUI
-import map
+import application
 
-GUI.main()
+application.main()

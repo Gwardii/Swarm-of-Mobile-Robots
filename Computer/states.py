@@ -1,6 +1,7 @@
 from concurrent.futures import thread
 import string
 from turtle import update
+from xbee.xbee import Xbee
 from GUI import GUI
 from communication.RPI_server import RPI_Communication_Server
 import json
@@ -155,9 +156,11 @@ class SetTarget(State):
         self.gui.draw_path()
 
 class SendDataToRobot(State):
+    def __init__(self,xbee:Xbee,msg:str="") -> None:
+        self.xbee=xbee
+        self.msg=msg
     def Execute(self):
-        pass
-        # print("Wysylam dane do robota")
+        self.xbee.send_msg_broadcast(self.msg)
 
 #===========================================
 # Add a new state to this struct for easier usage in application's main function

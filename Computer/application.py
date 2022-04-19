@@ -1,7 +1,8 @@
 from states import *
 from state_machine import *
+from xbee.xbee import Xbee
 class Application(object):
-    def __init__(self,cell_size:int=50,number_of_robots:int=10,rpi_ip:string="localhost",rpi_port:int=9999) -> None:
+    def __init__(self,cell_size:int=50,number_of_robots:int=10,rpi_ip:string="localhost",rpi_port:int=9999,xbeeport:str="COM3",xbBoudrate:str="9600") -> None:
         self.state_machine=StateMachine(self)
         self.states=AllStates
         self.transitions=AllTransition
@@ -18,12 +19,13 @@ class Application(object):
         self.initialization=False
         self.set_target=False
         self.send_data_to_robot=False
+        # self.xbee=Xbee(xbeeport,xbBoudrate)
 
     def _states_initialization(self, states:AllStates)->None:
         self.state_machine.states[states.rpi_communication]=RPI_Communication(rpi_ip=self.rpi_ip,port=self.rpi_port)
         self.state_machine.states[states.initialization]=Initialization(self.gui)
         self.state_machine.states[states.set_target]=SetTarget(self.gui)
-        self.state_machine.states[states.robot_communication]=SendDataToRobot()
+        # self.state_machine.states[states.robot_communication]=SendDataToRobot(self.xbee)
         self.state_machine.states[states.update_camera]=CameraUpdate(self.gui)
         self.state_machine.states[states.draw_obstacles]=DrawObstacles(self.gui)
         self.state_machine.states[states.draw_path]=DrawPath(self.gui)
@@ -33,7 +35,7 @@ class Application(object):
         self.state_machine.transitions[transitions.start_rpi_communication]=Transition(states.rpi_communication)
         self.state_machine.transitions[transitions.start_init]=Transition(states.initialization)
         self.state_machine.transitions[transitions.set_target]=Transition(states.set_target)
-        self.state_machine.transitions[transitions.start_robot_communication]=Transition(states.robot_communication)
+        # self.state_machine.transitions[transitions.start_robot_communication]=Transition(states.robot_communication)
         self.state_machine.transitions[transitions.update_camera]=Transition(states.update_camera)
         self.state_machine.transitions[transitions.draw_obstacles]=Transition(states.draw_obstacles)
         self.state_machine.transitions[transitions.draw_path]=Transition(states.draw_path)
@@ -45,6 +47,10 @@ class Application(object):
     def set_state(self,state:str)->None:
         self.state_machine.Set_state(state)
         self.state_machine.Execute()
+
+    def send_data_to_robot(self,msg:str)->None:
+        self.xbee.send_msg_broadcast(msg)
+
 
 def main():
     app=Application()
