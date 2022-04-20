@@ -11,11 +11,10 @@ class RPI_Communication_Client():
         self.buffer_size = 30
         self.HEADER_SIZE = 10
 
-    def send_json(self,json_message):
+    def send_json(self, json_message):
 
         # local_ip=socket.gethostbyname(socket.gethostname())
-        json_data = json.dumps(json_message, sort_keys=False, indent=2)
-        print(len(json_data))
+        json_data = json.dumps(json_message, sort_keys = False, indent = 2)
         json_data = f'{len(json_data):<{self.HEADER_SIZE}}' + json_data
         self._send_message(json_data)
         return json_data    
@@ -23,7 +22,7 @@ class RPI_Communication_Client():
     def _send_message(self, data):
 
         self.message_sended = False
-        self.rpi_client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.rpi_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.rpi_client_socket.connect((self.host, self.port))
         self.rpi_client_socket.sendall(data.encode())
         self.rpi_client_socket.close()
@@ -73,7 +72,7 @@ class RPI_Communication_Client():
 # },
 # {
 #     "id": 2,
-#     "center": {
+#     "center": {qq
 #     "x": 1328,
 #     "y": 976
 #     },

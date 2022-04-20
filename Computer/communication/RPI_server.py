@@ -7,7 +7,7 @@ import json
 #wiecej nie jest potrzebne
 
 class RPI_Communication_Server:
-    def __init__(self,host = "localhost", port=9999):
+    def __init__(self, host = "localhost", port = 9999):
         # for seting up conection:
         self._host = host
         self._port = port
@@ -16,7 +16,7 @@ class RPI_Communication_Server:
         self._rpi_server_socket.bind((self._host,self._port))
         
         # start separated thread for server:
-        self._rpi_communication_thread = threading.Thread(target = self._server_listen)
+        self._rpi_communication_thread = threading.Thread(target = self._server_listen_)
         self._rpi_communication_thread.start()
         
         # constants for comunnication:
@@ -26,36 +26,38 @@ class RPI_Communication_Server:
         # real data:
         self._buffer = ""
         self._command = ""
-        self.is_rpi_connected=False
-        self.message_received=False
+        self.is_rpi_connected = False
+        self.message_received = False
         self.full_msg = ''
         
-    def _server_listen(self):
+    def _server_listen_(self):
+
         # start listening for new connection
         self._rpi_server_socket.listen()
-        self.is_rpi_connected = True
+        self.is_rpi_connected = True 
+        print("\nListening for client..")
         while True:
             
             full_msg=""
-            print("\nListening for client..")
+           
             conn, addr = self._rpi_server_socket.accept()
             self.message_received = False
-            print("Connection address: ", addr)
+           # print("Connection address: ", addr)
             
             self._buffer = conn.recv(self.buffer_size)
             
-            print(f"new message lenght: {self._buffer[:self.HEADER_SIZE].decode('utf-8')}")
+            #print(f"new message lenght: {self._buffer[:self.HEADER_SIZE].decode('utf-8')}")
             msglen = int(self._buffer[:self.HEADER_SIZE])
            
             while (len(full_msg) - self.HEADER_SIZE) < msglen:
                 full_msg += self._buffer.decode("utf-8") 
                 self._buffer = conn.recv(self.buffer_size)
                 
-            print("full msg recvd")
+           # print("full msg recvd")
             self.full_msg = full_msg[self.HEADER_SIZE:]
             full_msg = ''
             self._buffer = ''
-            self.message_received=True
+            self.message_received = True
             conn.close()
             
 

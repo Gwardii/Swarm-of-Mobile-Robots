@@ -75,14 +75,14 @@ class Application(object):
 
 
 def main():
-    
-    app = Application()
+
+    app = Application(rpi_ip = "192.168.0.31", rpi_port = 9999)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
-    app.rpi_communicatiom=True
+    app.rpi_communicatiom = True
     # start initializations:
     gui = app.change_state(app.transitions.start_init)
-    app.initialization=True
+    app.initialization = True
     # draw obstacles:
     app.change_state(app.transitions.draw_obstacles)
     # draw first iteration of path
@@ -103,7 +103,6 @@ def main():
         # update aplication's window:
         app.gui.window.update_idletasks()
         app.gui.window.update()
-
 
 if __name__ == "__main__":
     main()

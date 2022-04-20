@@ -21,7 +21,7 @@ class RPI_Communication(State):
         super().__init__()
         self.rpi_ip = rpi_ip
         self.rpi_port=port
-        self.rpi_server = RPI_Communication_Server(self.rpi_ip,self.rpi_port)
+        self.rpi_server = RPI_Communication_Server(self.rpi_ip, self.rpi_port)
         
     def Execute(self):
         while self.rpi_server.is_rpi_connected == False:
@@ -31,31 +31,39 @@ class RPI_Communication(State):
         obstacles_json=None
         is_obstacle_received=False
         tik=time.time()
-        err_num=0
+        err_num = 0
+
         while not is_area_received:
-            if time.time()-tik >=2:
-                print("Application did not receive Area JSON")
-                err_num+=1
-                break
+            # if time.time()-tik >=2:
+            #     print("Application did not receive Area JSON")
+            #     err_num+=1
+            #     break
             if self.rpi_server.message_received == True:
-                area_json = self.rpi_server.get_msg()
-                is_area_received=True
-                break
+                area_json = json.loads(self.rpi_server.get_msg())
+                is_area_received = True
+                self.rpi_server.message_received = False
+                
         tik = time.time()
+
         while not is_obstacle_received:
-            if time.time()-tik >=2:
-                print("Application did not receive obstacles JSON")
-                err_num+=1
-                break
+            # if time.time()-tik >=2:
+            #     print("Application did not receive obstacles JSON")
+            #     err_num+=1
+            #     break
             if self.rpi_server.message_received == True:
-                obstacles_json=self.rpi_server.get_msg()
-                is_obstacle_received=True
-                break
-        if(err_num == 0):
-            with open(".\Computer\\resources\\obstacles.json","w") as af:
-                json.dump(area_json,af)
+                obstacles_json = json.loads(self.rpi_server.get_msg())
+                is_obstacle_received = True
+                self.rpi_server.message_received = False
+                
+        if err_num == 0:   
+
             with open(".\Computer\\resources\\area.json","w") as af:
-                json.dump(obstacles_json,af)
+                json.dump(area_json, af, indent = 2)
+            
+            with open(".\Computer\\resources\\obstacles.json","w") as of:
+                json.dump(obstacles_json, of, indent = 2)
+            
+            print("JSON files received")
 
 class Initialization(State):
     ## States

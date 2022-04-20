@@ -7,6 +7,7 @@ import math
 from threading import Thread
 import argparse
 from pynput import keyboard
+from RPI_client import RPI_Communication_Client
 
 
 # construct the argument parse and parse the arguments
@@ -14,8 +15,6 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--display", type = int, default = 1,
 help = "Whether or not frames should be displayed")
 args = vars(ap.parse_args())
-
-  
 
 # table real sizes; 
 # assumption that table is rectangle and longer side is on x axis (width on photo)
@@ -348,14 +347,18 @@ def main():
     aruco_markers = Aruco_markers()
   
     # start video capturing
-    camera = Camera(0, 1280, 720, 40)
+    camera = Camera(0, 640, 480, 40)
     aruco_markers.aruco_Cam_param = camera.camera_calibration_params
     # start separate thread:
     camera.start()
         
-    # load images to augment  
+    # load images for augment  
     aruco_markers.load_Aug_Images("./Camera/images")
 
+    # start client for json sending:
+    client = RPI_Communication_Client(host = "192.168.0.31", port = 9999)
+
+    # stop script conditions:
     print("\npress:\n- q to quit")
 
     def on_press(key):
@@ -385,9 +388,14 @@ def main():
             cv2.imshow("ARUCO DETECTION", img)
             cv2.waitKey(1)
         
-        # stream video:
+        # save stream video:
         cv2.imwrite('./Camera/test_scripts/stream/stream.jpg', img)
-       
+
+        # send json files:
+        client.send_json(json.load(open("./Computer/resources/area.json", 'r')))
+        client.send_json(json.load(open("./Computer/resources/obstacles.json", 'r')))
+        client.send_json(json.load(open("./Computer/resources/robots.json", 'r')))
+
         # quit on pressed 'q':
         if not(k.is_alive()):
             print('\nquitting...\n')

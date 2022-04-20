@@ -1,11 +1,23 @@
-<html>
-  <head>
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <meta name = "viewport" content = "width = device - width, initial - scale = 1.0">
     <title>The Great Swarn</title>
+    <meta name="keywords" content="robots swarn">
+    <meta name="description" content="TGS (&quot;The great Swarn&quot;) so far not the greatest but its dreams are big...">
   </head>
   <body>
-    <h1>The Great Swarn stream </h1>
-    <img id="bg" src="{{ url_for('video_feed') }}">
+    <h1>The Great Swarn</h1>
+    <h2>Live Stream</h2>
+    <a href = "{{ url_for('video_feed') }}">
+      <img id = "bg" src = "{{ url_for('video_feed') }}" alt = "live stream of our swarn">
+    </a>
+    <p> 
+      Academic project of the swarm of mobile robots - system for controlling and monitoring mobile robots with differential drive. The system consists of a graphical user interface, mobile robot software and software for detecting obstacles.    </p> 
     <br>
-    <input type="button" value = "random button">
+    <a href="#"><input type="button" value = "back to TOP"></a>
+    <h2>Links</h2>
+    <a href="https://github.com/Gwardii/Swarm-of-Mobile-Robots" target = "_blank">our github</a>
   </body>
 </html>
