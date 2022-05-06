@@ -1,6 +1,7 @@
 from states import *
 from state_machine import *
 from xbee.xbee import Xbee
+import socket
 
 
 class Application(object):
@@ -89,8 +90,13 @@ class Application(object):
 
 
 def main():
+    con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    con.connect(("8.8.8.8", 80))
 
-    app = Application(rpi_ip="192.168.12.120", rpi_port=9999)
+    app = Application(rpi_ip=con.getsockname()[0], rpi_port=9999)
+    print(con.getsockname()[0])
+    con.close()
+
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True

@@ -27,7 +27,7 @@ class GUI:
         :number_of_robots: how many robots will be handled
         '''
         self.cell_size = cell_size
-        self.cap = cv2.VideoCapture('http://192.168.12.76:9999/video_feed')
+        self.cap = cv2.VideoCapture('http://192.168.0.52:9999/video_feed')
 
         # create window for aplication:
         self.window = tk.Tk()
