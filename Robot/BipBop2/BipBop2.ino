@@ -1,9 +1,9 @@
-float kd = 2;
+const float kd = 2;
 double dt;
 double last_t = 0;
 
-float kp = 6;
-float ki = 0;
+const float kp = 6;
+const float ki = 0;
 
 //Parametry Ruchu
 double t_Start;
@@ -61,12 +61,13 @@ float szybk_bledow_2;
 double temp;
 
 //Kola
-int d_kola = 42;
+const float d_kola = 42;
 int dp1, dp2;
 int dp1_last, dp2_last;
 double Dl, Dp;
 double D, D_last;
-float rot = 0, rot_d = 0, rozstaw = 94;
+float rot = 0, rot_d = 0;
+const float rozstaw = 94;
 double x_n, y_n;
 
 //Czas w petli
@@ -81,11 +82,11 @@ double L1, L2;
 int a;
 
 //Odbior
-const int tabN = 9*2*4;
-double tablica[tabN][5]; //tablica do odbioru danych o zadaniu. {Nr zadania, dlugosc (prosta/luk) [mm], czas wykonania [ms], promien luku [mm], kat rotacji w miejscu [deg]}
-double bufor[5] = {0, 0, 0, 0, 0};
-double T1, beta, delta, L_obr;
-double *T0, *L, *Mi;
+const int tabN = 20;
+float tablica[tabN][5]; //tablica do odbioru danych o zadaniu. {Nr zadania, dlugosc (prosta/luk) [mm], czas wykonania [ms], promien luku [mm], kat rotacji w miejscu [deg]}
+float bufor[5] = {0, 0, 0, 0, 0};
+float T1, beta, delta, L_obr;
+float *T0, *L, *Mi;
 
 void setup() {
   // put your setup code here, to run once:
@@ -141,8 +142,8 @@ void setup() {
     tablica[7][2] = 10 * 1000; //w 10 sekund
   */
 
-  //Kwadrat
-
+  //Kwadrat, const int tabN = 9*2*4;
+/*
   for (int i = 1; i <= 9*4; i++) {
     tablica[2*i-2][0] = 2; //prosto
     tablica[2*i-2][1] = 500; //500mm
@@ -151,7 +152,8 @@ void setup() {
     tablica[2*i-1][0] = 3; //obrot
     tablica[2*i-1][4] = 90; //360deg
     tablica[2*i-1][2] = 3 * 1000; //w 6 sekund
-  }
+  
+  }*/
 }
 
 void loop() {
