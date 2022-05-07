@@ -189,7 +189,7 @@ void loop() {
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
+          T1 = *T0 / 2. - sqrt(delta) / 2. / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -204,10 +204,10 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           if (*Mi > 0) a = 1; else a = -1;
-          L_obr = a**Mi / 180 * 3.1416 * rozstaw / 2;
+          L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2.;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
+          T1 = *T0 / 2. - sqrt(delta) / 2. / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -223,7 +223,7 @@ void loop() {
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
+          T1 = *T0 / 2 - sqrt(delta) / 2. / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -254,14 +254,14 @@ void luk() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(1);
-    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2.;
   }
   else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
   {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -269,15 +269,15 @@ void luk() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
   //Serial.println(kat_obrot);
-  float aa = rozstaw / 2 / tablica[0][3];
+  float aa = rozstaw / 2. / tablica[0][3];
 
   if (tablica[0][0] == 4) {
     kat_obrot_1 = kat_obrot * (1 - aa) + katL0;
@@ -309,7 +309,7 @@ void obrot() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -317,10 +317,10 @@ void obrot() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
@@ -341,14 +341,14 @@ void prosto() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(1);
-    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2.;
   }
   else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
   {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -356,10 +356,10 @@ void prosto() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
@@ -461,7 +461,7 @@ void odczyt_1()
   dp1 = silnik_1 - dp1_last;
   dp1_last = silnik_1;
 
-  kat_1 = silnik_1 * 360 / 230;
+  kat_1 = silnik_1 * 360 / 230.;
 }
 
 void odczyt_2()
@@ -480,13 +480,13 @@ void odczyt_2()
   dp2 = silnik_2 - dp2_last;
   dp2_last = silnik_2;
 
-  kat_2 = silnik_2 * 360 / 230;
+  kat_2 = silnik_2 * 360 / 230.;
 }
 
 void odometria()
 {
-  Dl = Dl + (3.1415 * dp1) * d_kola / 230;
-  Dp = Dp + (3.1415 * dp2) * d_kola / 230;
+  Dl = Dl + (3.1415 * dp1) * d_kola / 230.;
+  Dp = Dp + (3.1415 * dp2) * d_kola / 230.;
 
   D = (Dl + Dp) / 2;
   rot = (Dp - Dl) / rozstaw;
