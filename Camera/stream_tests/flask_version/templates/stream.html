@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename = 'style.css')}}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width = device-width, initial-scale = 1.0" />
+    <meta name="keywords" content="robots swarm" />
+    <meta
+      name="description"
+      content='TGS ("The great Swarm") so far not the greatest but its dreams are big...'
+    />
+    <title>TGS</title>
+  </head>
+  <body>
+    <header>
+      <div class="container-nav">
+        <div>
+          <h1>
+            The <span>Great</span> Swarm
+            <img
+              src="{{url_for('static', filename='logo.png')}}"
+              alt="TGS logo"
+              style="width: 1em"
+            />
+          </h1>
+        </div>
+        <div class="menu-btn">
+          <div class="menu-btn__burger"></div>
+        </div>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#" class="current-page">Home</a></li>
+          <li><a href="#stream">Stream</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="columns">
+          <div class="col col-1" id="robots">
+            <h2>Robots</h2>
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Consequatur veniam quas odio corrupti doloribus ullam mollitia
+              natus, voluptate autem, explicabo nulla molestias cupiditate
+              commodi illo maxime nisi dolorum error. Sapiente!
+            </p>
+          </div>
+
+          <div class="col col-2" id="raspberry">
+            <h2>Raspberry pi</h2>
+            <p>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam
+              maxime at molestias? Quia, debitis numquam. Veritatis maxime
+              quisquam labore repudiandae. Praesentium quae mollitia ducimus
+              cumque recusandae quidem doloribus, facilis tempora?
+            </p>
+          </div>
+          <div class="col col-1 col-bg">
+            <p>
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Recusandae quia molestias illo possimus fugit ipsam deserunt
+              minima quaerat porro voluptatum perspiciatis optio, molestiae iure
+              quidem magnam sint velit labore quam.
+            </p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="col col-3" id="aplication">
+            <h2>Aplication</h2>
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore,
+              suscipit, nam sit fugit ratione, libero consectetur possimus et
+              corporis odio provident impedit asperiores numquam saepe dolorem
+              quisquam ullam inventore molestiae.
+            </p>
+          </div>
+          <div class="col col-1 col-bg">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae sed
+              labore laborum ratione tenetur explicabo eligendi laboriosam.
+              Autem, nam! Optio ipsa repudiandae neque omnis expedita facilis
+              animi. Quidem, vero ipsum!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section id="stream" class="container">
+        <h2>Live Stream</h2>
+
+        <!-- define stream -->
+        <div
+          style="
+            text-align: center;
+            background-image: '../static/logo.png';
+            background-size: 50%;
+            background-position: center;
+            padding: 10%;
+          "
+          ;
+        >
+          <a style="align-self: center" href="{{ url_for('video_feed') }}">
+            <img
+              id="bg"
+              src="{{ url_for('video_feed') }}"
+              alt="live stream of swarm"
+              style="width: 90%"
+            />
+          </a>
+        </div>
+      </section>
+
+      <section id="about" class="container">
+        <h2>About</h2>
+        <p>
+          Academic project of the swarm of mobile robots - system for
+          controlling and monitoring mobile robots with differential drive. The
+          system consists of a graphical user interface, mobile robot software
+          and software for detecting obstacles.
+        </p>
+      </section>
+
+      <div class="container" style="text-align: center">
+        <a href="#"
+          ><input
+            type="button"
+            value="up"
+            style="
+              color: var(--colors-font_main);
+              font-size: 1rem;
+              font-weight: bold;
+              background-color: var(--colors-yellow);
+              padding: 1% 5% 1% 5%;
+              border-style: solid;
+              border-color: black;
+              border-radius: 0.5rem;
+              margin: 0% 0% 0% 0%;
+              font-family: Raleway, sans-serif;
+            "
+        /></a>
+      </div>
+    </main>
+    <footer>
+      <div class="container-foot">
+        <h2 style="margin: 0.5em 0 0.5em">Links</h2>
+        <a
+          href="https://github.com/Gwardii/Swarm-of-Mobile-Robots"
+          target="_blank"
+          style="font-weight: bold"
+          >Our github</a
+        >
+      </div>
+    </footer>
+    <script src="{{url_for('static', filename='animation.js')}}"></script>
+  </body>
+</html>
