@@ -20,13 +20,13 @@ import robot_handler
 import math
 
 class GUI:
-    def __init__(self, cell_size:int = 50, number_of_robots:int = 10):
+    def __init__(self, cell_size:int = 50, number_of_robots:int = 10, video_feed=0):
         '''
         :param: cell_size: step in [mm] for map plotting. Should be chosen accordingly to area size.
         :number_of_robots: how many robots will be handled
         '''
         self.cell_size = cell_size
-        self.cap = cv2.VideoCapture('http://192.168.0.52:1234/video_feed')
+        self.cap = cv2.VideoCapture(video_feed)
         
         # create window for aplication:
         self.window = tk.Tk()

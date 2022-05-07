@@ -41,3 +41,10 @@ class Xbee:
         print(f"Robot {id}: {decoded_msg}")
 
     
+xbee = Xbee()
+# while True:
+xbee.send_msg_unicast("0013A200415E861B","<500>")
+xbee.send_msg_unicast("0013A200415E861B","<1000>")
+
+print("wyslane")
+    # print("odbieram dane")

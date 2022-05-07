@@ -15,7 +15,7 @@ class Application(object):
         self.rpi_port=rpi_port
 
 class Application(object):
-    def __init__(self, cell_size: int = 35, number_of_robots:int = 10, rpi_ip:string = "localhost", rpi_port:int = 9999) -> None:
+    def __init__(self, cell_size: int = 35, number_of_robots:int = 10, rpi_ip:string = "localhost", rpi_port:int = 9999, video_feed=0) -> None:
         
         self.state_machine = StateMachine(self)
         self.states=AllStates
@@ -24,7 +24,7 @@ class Application(object):
         #application parameters
         self.cell_size = cell_size
         self.number_of_robots = number_of_robots
-        self.gui = GUI(cell_size = cell_size, number_of_robots = number_of_robots)
+        self.gui = GUI(cell_size = cell_size, number_of_robots = number_of_robots,video_feed=video_feed)
         self.rpi_ip = rpi_ip
         self.rpi_port = rpi_port
 
@@ -76,7 +76,7 @@ class Application(object):
 
 def main():
 
-    app = Application(rpi_ip = "192.168.0.31", rpi_port = 9999)
+    app = Application()#rpi_ip = "192.168.0.31", rpi_port = 9999)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
