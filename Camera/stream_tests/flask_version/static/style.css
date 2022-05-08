@@ -14,6 +14,7 @@ header {
 }
 /* ------NAVIGATION-------- */
 nav {
+  max-width: 900px;
   background-color: var(--colors-yellow);
   padding: 0.1em 0 0.1em 0;
   margin: 0% 0% 0% 0%;
@@ -36,6 +37,7 @@ nav.active {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: auto;
   padding: 0;
 
   /* border: 2px solid magenta; */
