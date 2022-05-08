@@ -5,6 +5,14 @@ double last_t = 0;
 const float kp = 6;
 const float ki = 0;
 
+//Xbee
+bool started = false; //True: Message is strated
+bool ended   = false;//True: Message is finished
+char incomingByte ; //Variable to store the incoming byte
+char msg[3];    //Message - array from 0 to 2 (3 values - PWM - e.g. 240)
+byte index;     //Index of array
+int value = 0;
+
 //Parametry Ruchu
 double t_Start;
 double t_End;
@@ -140,20 +148,20 @@ void setup() {
     tablica[7][0] = 2; //prosto
     tablica[7][1] = 500; //500mm
     tablica[7][2] = 10 * 1000; //w 10 sekund
+
   */
-
   //Kwadrat, const int tabN = 9*2*4;
-/*
-  for (int i = 1; i <= 9*4; i++) {
-    tablica[2*i-2][0] = 2; //prosto
-    tablica[2*i-2][1] = 500; //500mm
-    tablica[2*i-2][2] = 5 * 1000; //w 10 sekund
+  /*
+    for (int i = 1; i <= 9*4; i++) {
+      tablica[2*i-2][0] = 2; //prosto
+      tablica[2*i-2][1] = 500; //500mm
+      tablica[2*i-2][2] = 5 * 1000; //w 10 sekund
 
-    tablica[2*i-1][0] = 3; //obrot
-    tablica[2*i-1][4] = 90; //360deg
-    tablica[2*i-1][2] = 3 * 1000; //w 6 sekund
-  
-  }*/
+      tablica[2*i-1][0] = 3; //obrot
+      tablica[2*i-1][4] = 90; //360deg
+      tablica[2*i-1][2] = 3 * 1000; //w 6 sekund
+
+    }*/
 }
 
 void loop() {
@@ -165,7 +173,7 @@ void loop() {
   //kat_obrot_1 = map(potencjometr, 0, 1021, -180, 180);
   //kat_obrot_2 = map(potencjometr, 0, 1021, -180, 180);
 
-
+  odbior();
 
   //Petla co X ms, obsługa zadania
   if ((millis() - petla_t1) >= Xt) {
@@ -189,7 +197,7 @@ void loop() {
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2. - sqrt(delta) / 2. / epsilon;
+          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -204,10 +212,10 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           if (*Mi > 0) a = 1; else a = -1;
-          L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2.;
+          L_obr = a**Mi / 180 * 3.1416 * rozstaw / 2;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2. - sqrt(delta) / 2. / epsilon;
+          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -223,7 +231,7 @@ void loop() {
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
           if (delta < 0) Serial.println("Zle zadany ruch");
-          T1 = *T0 / 2 - sqrt(delta) / 2. / epsilon;
+          T1 = *T0 / 2 - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
           katL0 = kat_1;
@@ -242,6 +250,52 @@ void loop() {
   delay(1);
 }
 
+void odbior() {
+  while (Serial.available() > 0) {
+    //Read the incoming byte
+    incomingByte = Serial.read();
+    //Start the message when the '<' symbol is received
+    if (incomingByte == '<')
+    {
+      started = true;
+      index = 0;
+      msg[index] = '\0'; // Throw away any incomplete packet
+    }
+    //End the message when the '>' symbol is received
+    else if (incomingByte == '>')
+    {
+      ended = true;
+      break; // Done reading - exit from while loop!
+    }
+    //Read the message!
+    else
+    {
+      if (index < 4) // Make sure there is room
+      {
+        msg[index] = incomingByte; // Add char to array
+        index++;
+        msg[index] = '\0'; // Add NULL to end
+      }
+    }
+  }
+  if (started && ended)
+  {
+    value = atoi(msg);
+    index = 0;
+    msg[index] = '\0';
+    started = false;
+    ended = false;
+
+    int ff = 0;
+    while (tablica[ff][0] == 0 && ff < tabN) ff++;
+    tablica[0][0] = 2; //prosto
+    tablica[0][1] = value; //500mm
+    tablica[0][2] = 10 * 1000; //w 10 sekund
+  }
+
+
+}
+
 void luk() {
 
   double pr_t = millis();
@@ -254,14 +308,14 @@ void luk() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(1);
-    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2.;
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
   }
   else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
   {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -269,15 +323,15 @@ void luk() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
   //Serial.println(kat_obrot);
-  float aa = rozstaw / 2. / tablica[0][3];
+  float aa = rozstaw / 2 / tablica[0][3];
 
   if (tablica[0][0] == 4) {
     kat_obrot_1 = kat_obrot * (1 - aa) + katL0;
@@ -309,7 +363,7 @@ void obrot() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -317,10 +371,10 @@ void obrot() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
@@ -341,14 +395,14 @@ void prosto() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(1);
-    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2.;
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
   }
   else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
   {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(2);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (pr_t - zad_t - T1);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
   }
 
   else if (pr_t <= T0_now)//Czy zwalnia?
@@ -356,10 +410,10 @@ void prosto() {
     //    Serial.print(millis() - zad_t);
     //    Serial.print("ms - petla)");
     //Serial.print(3);
-    kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2.;
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
   }
 
-  else kat_obrot = epsilon * T1 * T1 / 2. + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2.;
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
 
   kat_obrot = kat_obrot / 3.1416 * 180;
   //Serial.print("   Kat:");
@@ -424,23 +478,6 @@ void PWM() {
 
 }
 
-void odbior() {
-  int i = 0;
-  //dodac jezeli tablica pelna wywal blad
-  //while (tablica[i][0] != 0 && i < tabN) {
-  //  i++; //przy implementacji komunikacji usunac przy tabN
-  //}
-
-  tablica[i][0] = 2; //prosto
-  tablica[i][1] = 50; //100mm
-  tablica[i][2] = 3 * 1000; //w ... sekund
-
-  tablica[i + 1][0] = 1; //stoj
-  tablica[i + 1][1] = 0;
-  tablica[i + 1][2] = 3 * 1000; //przez ... sekund
-
-}
-
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
@@ -461,7 +498,7 @@ void odczyt_1()
   dp1 = silnik_1 - dp1_last;
   dp1_last = silnik_1;
 
-  kat_1 = silnik_1 * 360 / 230.;
+  kat_1 = silnik_1 * 360 / 230;
 }
 
 void odczyt_2()
@@ -480,13 +517,13 @@ void odczyt_2()
   dp2 = silnik_2 - dp2_last;
   dp2_last = silnik_2;
 
-  kat_2 = silnik_2 * 360 / 230.;
+  kat_2 = silnik_2 * 360 / 230;
 }
 
 void odometria()
 {
-  Dl = Dl + (3.1415 * dp1) * d_kola / 230.;
-  Dp = Dp + (3.1415 * dp2) * d_kola / 230.;
+  Dl = Dl + (3.1415 * dp1) * d_kola / 230;
+  Dp = Dp + (3.1415 * dp2) * d_kola / 230;
 
   D = (Dl + Dp) / 2;
   rot = (Dp - Dl) / rozstaw;

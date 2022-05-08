@@ -110,3 +110,11 @@ if __name__ == '__main__':
     frame = xbee_frame()
     frame.send_msg(task_id=10, distance=256, task_time=45,
                    arc_radius=10, rotation_angle=40)
+    
+xbee = Xbee()
+# while True:
+xbee.send_msg_unicast("0013A200415E861B","<500>")
+xbee.send_msg_unicast("0013A200415E861B","<1000>")
+
+print("wyslane")
+    # print("odbieram dane")
