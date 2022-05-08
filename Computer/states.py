@@ -39,10 +39,10 @@ class RPI_Communication(State):
         err_num = 0
 
         while not is_area_received:
-            # if time.time()-tik >=2:
-            #     print("Application did not receive Area JSON")
-            #     err_num+=1
-            #     break
+            if time.time()-tik >=2:
+                print("Application did not receive Area JSON")
+                err_num+=1
+                break
             if self.rpi_server.message_received == True:
                 area_json = json.loads(self.rpi_server.get_msg())
                 is_area_received = True
@@ -51,10 +51,10 @@ class RPI_Communication(State):
         tik = time.time()
 
         while not is_obstacle_received:
-            # if time.time()-tik >=2:
-            #     print("Application did not receive obstacles JSON")
-            #     err_num+=1
-            #     break
+            if time.time()-tik >=2:
+                print("Application did not receive obstacles JSON")
+                err_num+=1
+                break
             if self.rpi_server.message_received == True:
                 obstacles_json = json.loads(self.rpi_server.get_msg())
                 is_obstacle_received = True

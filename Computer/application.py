@@ -1,21 +1,6 @@
 from states import *
 from state_machine import *
-from xbee.xbee import Xbee
 import socket
-
-
-class Application(object):
-    def __init__(self, cell_size: int = 50, number_of_robots: int = 10, rpi_ip: string = "localhost", rpi_port: int = 9999, xbeeport: str = "COM3", xbBoudrate: str = "9600") -> None:
-        self.state_machine = StateMachine(self)
-        self.states = AllStates
-        self.transitions = AllTransition
-        # application parameters
-        self.cell_size = cell_size
-        self.number_of_robots = number_of_robots
-        self.gui = GUI(cell_size=cell_size, number_of_robots=number_of_robots)
-        self.rpi_ip = rpi_ip
-        self.rpi_port = rpi_port
-
 
 class Application(object):
     def __init__(self, cell_size: int = 35, number_of_robots:int = 10, rpi_ip:string = "localhost", rpi_port:int = 9999, video_feed=0) -> None:
@@ -41,7 +26,6 @@ class Application(object):
         self.initialization = False
         self.set_target = False
         self.send_data_to_robot = False
-        # self.xbee=Xbee(xbeeport,xbBoudrate)
 
     def _states_initialization(self, states: AllStates) -> None:
         # add all states to state_machine (add to states_dictionary):
@@ -50,7 +34,6 @@ class Application(object):
         self.state_machine.states[states.initialization] = Initialization(
             self.gui)
         self.state_machine.states[states.set_target] = SetTarget(self.gui)
-        # self.state_machine.states[states.robot_communication] = SendDataToRobot(self.xbee)
         self.state_machine.states[states.update_camera] = CameraUpdate(
             self.gui)
         self.state_machine.states[states.draw_obstacles] = DrawObstacles(
@@ -67,7 +50,6 @@ class Application(object):
             states.initialization)
         self.state_machine.transitions[transitions.set_target] = Transition(
             states.set_target)
-        # self.state_machine.transitions[transitions.start_robot_communication]=Transition(states.robot_communication)
         self.state_machine.transitions[transitions.update_camera] = Transition(
             states.update_camera)
         self.state_machine.transitions[transitions.draw_obstacles] = Transition(
@@ -85,19 +67,11 @@ class Application(object):
         self.state_machine.Set_state(state)
         self.state_machine.Execute()
 
-    def send_data_to_robot(self, msg: str) -> None:
-        self.xbee.send_msg_broadcast(msg)
-
-
 def main():
-    con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    con.connect(("8.8.8.8", 80))
-
-    app = Application(rpi_ip=con.getsockname()[0], rpi_port=9999)
-    print(con.getsockname()[0])
-    con.close()
-
-    app = Application()#rpi_ip = "192.168.0.31", rpi_port = 9999)
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    print(local_ip)
+    app = Application(video_feed="http://192.168.0.13:9999/video_feed",rpi_ip = str(local_ip), rpi_port = 9999)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -108,7 +82,7 @@ def main():
     app.change_state(app.transitions.draw_obstacles)
     # draw first iteration of path
     app.change_state(app.transitions.draw_path)
-
+    tic = time.time()*1000
     while True:
         # ====================
         # some if statement to update widgets
@@ -118,7 +92,10 @@ def main():
             app.change_state(app.transitions.set_target)
         # app.change_state(app.transitions.start_robot_communication)
         # app.send_data_to_robot=True
-        app.change_state(app.transitions.robot_control)
+        
+        if (time.time()*1000-tic>30):
+            app.change_state(app.transitions.robot_control)
+            tic=time.time()*1000
         app.change_state(app.transitions.update_camera)
 
         # update aplication's window:

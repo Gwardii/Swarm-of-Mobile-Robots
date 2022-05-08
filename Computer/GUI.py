@@ -19,6 +19,8 @@ from robot_handler import Robot
 import robot_handler
 import math
 
+from xbee.xbee import Xbee
+
 
 class GUI:
     def __init__(self, cell_size:int = 50, number_of_robots:int = 10, video_feed=0):
@@ -114,6 +116,14 @@ class GUI:
             text="Execute line", width=10, font=12, command=self._get_command)
         self.command = ""
         self.line = 1
+
+        #robot communication
+        self.xbee = Xbee()
+
+        #robots MAC
+        self.robots_MAC={
+            "1":"0013A200415E861B"
+        }
 
     def _close_app(self):  # narazie watki sa niezalezne od siebie wiec ich nie lacze
         os._exit(1)
@@ -386,32 +396,41 @@ class GUI:
 
     def _forward_button_true(self, event):
         self.is_forward_pressed = True
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<69>")
 
     def _forward_button_false(self, event):
         self.is_forward_pressed = False
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<169>")
 
     def _backward_button_true(self, event):
         self.is_backward_pressed = True
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<70>")
 
     def _backward_button_false(self, event):
         self.is_backward_pressed = False
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<170>")
 
     def _turn_right_button_true(self, event):
         self.is_rotate_right_pressed = True
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<71>")
 
     def _turn_right_button_false(self, event):
         self.is_rotate_right_pressed = False
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<171>")
 
     def _turn_left_button_true(self, event):
         self.is_rotate_left_pressed = True
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<72>")
 
     def _turn_left_button_false(self, event):
         self.is_rotate_left_pressed = False
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<172>")
 
 
 def main():
     App = GUI(cell_size=35)
     App.window_configuration()
+    App.video_stream()
     App.window.mainloop()
 
 
