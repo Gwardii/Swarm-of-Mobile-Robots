@@ -23,14 +23,14 @@ from xbee.xbee import Xbee
 
 
 class GUI:
-    def __init__(self, cell_size:int = 50, number_of_robots:int = 10, video_feed=0):
+    def __init__(self, cell_size: int = 50, number_of_robots: int = 10, video_feed=0):
         '''
         :param: cell_size: step in [mm] for map plotting. Should be chosen accordingly to area size.
         :number_of_robots: how many robots will be handled
         '''
         self.cell_size = cell_size
         self.cap = cv2.VideoCapture(video_feed)
-        
+
         # create window for aplication:
         self.window = tk.Tk()
         self.window.protocol("WM_DELETE_WINDOW", self._close_app)
