@@ -3,12 +3,14 @@ import cv2
 from threading import Thread
 import numpy as np
 
-# So this is script to transfer video with socket:
+# This is script to transfer video with socket. It uses
+# Not used but maybe in the future.
 
 
 class Video_Stream_server():
     # create a server for video streaming
-    def __init__(self, IP=socket.gethostname(), port=1234) -> None:
+    # define server IP and port:
+    def __init__(self, IP=socket.gethostname(), port=9999) -> None:
 
         # setup server
         self.ADDRESS = (IP, port)
@@ -56,8 +58,9 @@ class Video_Stream_server():
 
 
 class Video_Stream_client():
-    # create client for video streaming
-    def __init__(self, IP=socket.gethostname(), port=1234) -> None:
+    # create client for video streaming:
+    # define IP and port of server:
+    def __init__(self, IP=socket.gethostname(), port=9999) -> None:
 
         # setup Adress of server
         self.ADDRESS = (IP, port)
@@ -76,16 +79,18 @@ class Video_Stream_client():
         self.client.close()
 
 
-# # test everthing:
-# vserver = Video_Stream_server()
-# vserver.start()
-# vclient = Video_Stream_client()
-# cap = cv2.VideoCapture(0)
+if __name__ == "__main__":
 
-# while True:
-#     _, frame = cap.read()
-#     vclient.stream_frame(frame)
+    # test server and client functions on one device:
 
+    vserver = Video_Stream_server()
+    vserver.start()
+    vclient = Video_Stream_client()
+    cap = cv2.VideoCapture(0)
 
-#     if not vserver.Is_alive():
-#         break
+    while True:
+        _, frame = cap.read()
+        vclient.stream_frame(frame)
+
+        if not vserver.Is_alive():
+            break

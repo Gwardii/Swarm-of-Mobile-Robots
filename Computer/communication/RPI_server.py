@@ -85,34 +85,36 @@ class RPI_Communication_Server:
         socket.sendall(encoded_command)
 
 
-# server = RPI_Communication_Server(socket.gethostname())
-# while True:
-#     if server.get_msg()!="":
+# testing:
+if __name__ == "__main__":
+    server = RPI_Communication_Server(socket.gethostname())
+    while True:
+        if server.get_msg() != "":
 
-#         data = json.loads(str(server.get_msg()))
+            data = json.loads(str(server.get_msg()))
 
-#         if ('obstacles' in data.keys()):
+            if ('obstacles' in data.keys()):
 
-#             with open("./Computer/resources/obstacles.json",'w') as f:
-#                 json.dump(data, f, indent = 2)
-#                 f.close()
+                with open("./Computer/resources/obstacles.json", 'w') as f:
+                    json.dump(data, f, indent=2)
+                    f.close()
 
-#         elif ('robots' in data.keys()):
+            elif ('robots' in data.keys()):
 
-#             with open("./Computer/resources/robots.json",'w') as f:
-#                 json.dump(data, f, indent = 2)
-#                 f.close()
+                with open("./Computer/resources/robots.json", 'w') as f:
+                    json.dump(data, f, indent=2)
+                    f.close()
 
-#         elif ('area' in data.keys()):
+            elif ('area' in data.keys()):
 
-#             with open("./Computer/resources/area.json",'w') as f:
-#                 json.dump(data, f, indent = 2)
-#                 f.close()
+                with open("./Computer/resources/area.json", 'w') as f:
+                    json.dump(data, f, indent=2)
+                    f.close()
 
-#         else:
-#              with open("./Computer/resources/dump_data.txt",'w') as f:
-#                 json.dump(data, f, indent = 2)
-#                 f.close()
+            else:
+                with open("./Computer/resources/dump_data.txt", 'w') as f:
+                    json.dump(data, f, indent=2)
+                    f.close()
 
-#         server.clear_buffer()
-#         server.clear_last_msg()
+            server.clear_buffer()
+            server.clear_last_msg()

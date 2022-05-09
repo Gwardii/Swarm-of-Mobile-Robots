@@ -10,19 +10,45 @@ from pynput import keyboard
 from RPI_client import RPI_Communication_Client
 import socket
 
+# This is main function for aruco markers detection.
+# It contains detection, saving into jsons files and
+# sending jsons to server with sockets.
+
+
+# --------------USER SETTINGS---------------
+
+server_IP = "192.168.12.120"
+server_PORT = 9999
+
+# camera setting:
+resolution = [640, 480]
+FPS = 40
+
+# table real sizes;
+# assumption that table is rectangle and longer side is on x axis (width on photo)
+# enter real-world values [mm] for side where 3rd, 2nd markers and 3rd, 0th markers are:
+TABLE_SIZE = {'long side': 1800, 'short side': 1400}
+
+# define which markers you use as robots, obstacles, and corners:
+robots_markers_ids = [13, 14, 15]
+obstacles_markers_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
+area_markers_ids = [0, 1, 2, 3]
+
+# define real size of a side of markers (in [mm]):
+marker_real_size = 335
+
+
+# -----------END OF USER SETTING-----------
+
 
 # construct the argument parse and parse the arguments
+# (these will be argument that you can use while calling aruco_detection.py):
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--display", type=int, default=1,
                 help="Whether or not frames should be displayed")
 ap.add_argument("-js", "--json_sending", type=int, default=1,
                 help="Whether or not you want to stream json files")
 args = vars(ap.parse_args())
-
-# table real sizes;
-# assumption that table is rectangle and longer side is on x axis (width on photo)
-# enter real-world values [mm] for side where 3, 2 markers and 3, 0 markers are:
-TABLE_SIZE = {'long side': 1800, 'short side': 1400}
 
 
 class Aruco_markers():
@@ -39,9 +65,9 @@ class Aruco_markers():
         self.orientations_estimated = {}
         self.augment_images_dict: dict = None
         self.aruco_Cam_param = None
-        self.obstacles_list_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
-        self.area_list_ids = [0, 1, 2, 3]
-        self.robots_list_ids = [13, 14, 15]
+        self.obstacles_list_ids = obstacles_markers_ids
+        self.area_list_ids = area_markers_ids
+        self.robots_list_ids = robots_markers_ids
         self.detected_corners = {}
         self.detected_robots = {}
         self.detected_obstacles = {}
@@ -63,8 +89,9 @@ class Aruco_markers():
         self.coordinates_px_resize_y = 1
 
         # size of a side of aruco marker [mm]
-        self.marker_real_size = 335
+        self.marker_real_size = marker_real_size
 
+    # ----- adding images on aruco markers ----
     def load_Aug_Images(self, path):
         '''
         :param path: folder in which markers images are stored
@@ -78,6 +105,39 @@ class Aruco_markers():
             aug_Dics[key] = imgAug
         self.augment_images_dict = aug_Dics
 
+    def augment_Aruco(self, img, drawId=True):
+
+        for id in self.ids:
+            id = int(id)
+            if id in self.augment_images_dict.keys():
+
+                top_left = int(self.bbox[id][0, 0]), int(self.bbox[id][0, 1])
+                top_right = int(self.bbox[id][1, 0]), int(self.bbox[id][1, 1])
+                bottom_right = int(self.bbox[id][2, 0]), int(
+                    self.bbox[id][2, 1])
+                bottom_left = int(self.bbox[id][3, 0]), int(
+                    self.bbox[id][3, 1])
+
+                h, w, c = self.augment_images_dict[int(id)].shape
+
+                pts1 = np.array(
+                    [top_left, top_right, bottom_right, bottom_left])
+                pts2 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+                matrix, _ = cv2.findHomography(pts2, pts1)
+                imgOut = cv2.warpPerspective(
+                    self.augment_images_dict[int(id)], matrix, (img.shape[1], img.shape[0]))
+                cv2.fillConvexPoly(img, pts1.astype(int), (0, 0, 0))
+                imgOut = img + imgOut
+
+                if drawId:
+                    cv2.putText(imgOut, str(id), top_left,
+                                cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 255), 2)
+
+                img = imgOut
+
+        return img
+
+    # ----- finding aruco markers ----
     def find_Aruco_Markers(self, img, draw=True):
         '''
         :param img: img in which to find the aruco markers
@@ -172,38 +232,7 @@ class Aruco_markers():
 
         return False
 
-    def augment_Aruco(self, img, drawId=True):
-
-        for id in self.ids:
-            id = int(id)
-            if id in self.augment_images_dict.keys():
-
-                top_left = int(self.bbox[id][0, 0]), int(self.bbox[id][0, 1])
-                top_right = int(self.bbox[id][1, 0]), int(self.bbox[id][1, 1])
-                bottom_right = int(self.bbox[id][2, 0]), int(
-                    self.bbox[id][2, 1])
-                bottom_left = int(self.bbox[id][3, 0]), int(
-                    self.bbox[id][3, 1])
-
-                h, w, c = self.augment_images_dict[int(id)].shape
-
-                pts1 = np.array(
-                    [top_left, top_right, bottom_right, bottom_left])
-                pts2 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
-                matrix, _ = cv2.findHomography(pts2, pts1)
-                imgOut = cv2.warpPerspective(
-                    self.augment_images_dict[int(id)], matrix, (img.shape[1], img.shape[0]))
-                cv2.fillConvexPoly(img, pts1.astype(int), (0, 0, 0))
-                imgOut = img + imgOut
-
-                if drawId:
-                    cv2.putText(imgOut, str(id), top_left,
-                                cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 255), 2)
-
-                img = imgOut
-
-        return img
-
+    # ------- save detected aruco as jsons files -------
     def save_Aruco_json(self):
 
         if self.ids is None:
@@ -213,6 +242,7 @@ class Aruco_markers():
         robots_data = {"robots": []}
         area_data = {"area": []}
 
+        # creating area json:
         for id in self.detected_corners.keys():
 
             area_data["area"].append(
@@ -230,6 +260,7 @@ class Aruco_markers():
                 }
             )
 
+        # creating obstacles json:
         for id in self.detected_obstacles.keys():
 
             obstacles_data["obstacles"].append(
@@ -248,6 +279,7 @@ class Aruco_markers():
                 }
             )
 
+        # creating robots json:
         for id in self.detected_robots.keys():
 
             robots_data["robots"].append(
@@ -266,7 +298,7 @@ class Aruco_markers():
                 }
             )
 
-        # save data into files
+        # save data into as json files
         with open('./Computer/resources/obstacles.json', 'w') as f:
             json.dump(obstacles_data, f, indent=2)
             f.close()
@@ -278,6 +310,8 @@ class Aruco_markers():
             f.close()
 
 
+# Camera class contain all setting of camera.
+# Also allow to run as separate thread which hugly increase FPS.
 class Camera():
     def __init__(self, camera_source=0, width=640, height=480, fps=40):
         ''' 
@@ -334,9 +368,9 @@ class Camera():
     def take_frame(self):
         return self.frame
 
+
+# functions for matematical operations:
 # Checks if a matrix is a valid rotation matrix.
-
-
 def isRotationMatrix(R):
     Rt = np.transpose(R)
     shouldBeIdentity = np.dot(Rt, R)
@@ -344,11 +378,10 @@ def isRotationMatrix(R):
     n = np.linalg.norm(I - shouldBeIdentity)
     return n < 1e-6
 
+
 # Calculates rotation matrix to euler angles
 # The result is the same as MATLAB except the order
 # of the euler angles (x and z are swapped).
-
-
 def rotationMatrixToEulerAngles(R):
 
     assert(isRotationMatrix(R))
@@ -374,7 +407,7 @@ def main():
     aruco_markers = Aruco_markers()
 
     # start video capturing
-    camera = Camera(0, 640, 480, 40)
+    camera = Camera(0, resolution[0], resolution[1], FPS)
     aruco_markers.aruco_Cam_param = camera.camera_calibration_params
     # start separate thread:
     camera.start()
@@ -385,7 +418,7 @@ def main():
     # start client for json sending:
     # enter IP of server:
     if args["json_sending"] > 0:
-        client = RPI_Communication_Client(host="192.168.12.120", port=9999)
+        client = RPI_Communication_Client(host=server_IP, port=server_PORT)
 
     # stop script conditions:
     print("\npress:\n- q to quit")
@@ -423,15 +456,12 @@ def main():
 
         # send json files:
         if args["json_sending"] > 0:
-            try:
-                client.send_json(
-                    json.load(open("./Computer/resources/area.json", 'r')))
-                client.send_json(
-                    json.load(open("./Computer/resources/obstacles.json", 'r')))
-                client.send_json(
-                    json.load(open("./Computer/resources/robots.json", 'r')))
-            except OSError:
-                pass
+            client.send_json(
+                json.load(open("./Computer/resources/area.json", 'r')))
+            client.send_json(
+                json.load(open("./Computer/resources/obstacles.json", 'r')))
+            client.send_json(
+                json.load(open("./Computer/resources/robots.json", 'r')))
 
         # quit on pressed 'q':
         if not(k.is_alive()):
