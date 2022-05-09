@@ -16,7 +16,7 @@ In our case RPI is 3 B+ but probably most of the advise will be valid on differe
 
 ### How to get IP of your RPI?
 To use your RPI only with your computer you need to get IP of your RPI. You can connect monitor, mouse and keyboard, login and get IP with comand "ifconfig",
-also if you enabled VNC IP will be shown if you click on VNC icon in right up corner. But these methods are not really usefull if you want to connect to new wifi
+also if you enabled VNC IP will be shown if you click on VNC icon in right up corner. But these methods are not really usefull, if you want to connect to new wifi
 or you just don't have monitor and mouse and keyboard with you.\
 <br/>
 So instead, you want to connect with your raspberrypi with ethernet cable and next connect with SSH to your RPI.\
@@ -29,13 +29,13 @@ or Windows terminal:
 > ssh pi@raspberrypi
 ```
 <br/>
-or VNC Viewer (preferred method - you can now use remote desktop!):
+or VNC Viewer (preferred method - now, you can use remote desktop!):
 <br/>
-<img src="/Readme_img/VNC.png" style = "width: 40%" /> 
+<img src="/Readme_img/VNC.png" style = "width: 55%" /> 
 
 \* if "raspberrypi" doesn't work you can try "raspberrypi.local"
 
-Next you can check for IP of your RPI:
+Next, you can check for IP of your RPI:
 
 ```
 pi@raspberrypi:~ $ ifconfig
@@ -65,7 +65,7 @@ With some changes this was the right one. Follow steps and:
 - after compilation install OpenCV (check if there are no errors!)
 - reduce swap space (back to 100 MB): [link](https://pimylifeup.com/raspberry-pi-swap-file/)
 - Last step (different as in tutorial)
-  - go into ../python3.[X](https://your_python_version)/site-packages
+  - find and go into ../python3.[X](https://your_python_version)/site-packages
   - find path for ../python-3.[X](https://your_python_version)/cv2.cpython-3[X](https://your_python_version)m-arm-linux-gnueabihf.so (in our case: "/usr/local/lib/python3.9/site-packages/cv2/python-3.9/cv2.cpython-39-arm-linux-gnueabihf.so"
   - create symbolic link ( ```ln -s ../path_to_XXX.so cv2.so ```)
  - test if OpenCV is working:
@@ -78,7 +78,7 @@ With some changes this was the right one. Follow steps and:
   
   ## Aruco detection
   
-  The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But before you want use any camera with opencv you should calibrate it.
+  The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But before you want use any camera with opencv you should calibrate  it.
   It is necessary step to reduce fish-eye effect and to achive good results next steps.  
   
   ### Calibration
@@ -87,7 +87,7 @@ With some changes this was the right one. Follow steps and:
   ```
   $ python ./Camera/capture_frame.py
   ```
-  You can use any grid you want but you need to set your parameters in ``` camera_calibration.py```:
+  You can use any grid you want ([link](https://markhedleyjones.com/projects/calibration-checkerboard-collection)) but you need to set your parameters in ```       camera_calibration.py```:
   ```
   # Define the dimensions of checkerboard
   # how much corners can be found:
@@ -95,8 +95,12 @@ With some changes this was the right one. Follow steps and:
   # also size of the side of a square in [mm])
   CHECKERBOARD = (8, 5, 251/9)
   ```
-  next you can run:```$ python ./Camera/camera_calibration.py``` and
-  calibration file will be saved as "./Camera/camera_calibration.npy"
+  Next, you can run:```$ python ./Camera/camera_calibration.py``` and
+  calibration file will be saved as "./Camera/camera_calibration.npy".
+  Example with correctly detected grid:
+  <br/>
+  <img src="/Readme_img/calibration.png" style = "width: 40%" align=right/> 
+  
   
   ### aruco_detection.py
   
@@ -108,10 +112,20 @@ With some changes this was the right one. Follow steps and:
   ```
   $ python ./Camera/aruco_detection.py -d 1 -js 0
   ```
+  Also, if you want to connect with main server (send jsons), it is needed to set correct IP and port of server in aruco_detection.py:
+  ```
+  def main():
+    ...
+    # start client for json sending:
+    # enter IP of server:
+    if args["json_sending"] > 0:
+        client = RPI_Communication_Client(host="192.168.12.120", port=9999)
+    ...
+  ```
   
   ### stream.py
   
-  For visualization and learning HTML website was created. Pictures are streamed into this website from where main aplication can feed its display.
+  For visualization and HTML learning simple website was created. Pictures are streamed into this website from where main aplication can feed its display.
   To turn on stream type:
   ```
   $ python ./Camera/stream_tests/flask_version/stream.py
