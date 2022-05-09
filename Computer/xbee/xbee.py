@@ -9,7 +9,6 @@ import string
 from time import sleep
 import numpy as np
 
-from pyrsistent import b
 try:
     import digi.xbee.devices as xb
 except ModuleNotFoundError:
@@ -46,6 +45,7 @@ class Xbee:
         id = msg.remote_device.get_16bit_addr().get_lsb()
         decoded_msg = msg.data.decode('utf-8')
         print(f"Robot {id}: {decoded_msg}")
+
 
 class xbee_frame():
     def __init__(self):
@@ -110,4 +110,3 @@ if __name__ == '__main__':
     frame = xbee_frame()
     frame.send_msg(task_id=10, distance=256, task_time=45,
                    arc_radius=10, rotation_angle=40)
-    

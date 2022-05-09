@@ -2,9 +2,10 @@ from states import *
 from state_machine import *
 import socket
 
+
 class Application(object):
-    def __init__(self, cell_size: int = 35, number_of_robots:int = 10, rpi_ip:string = "localhost", rpi_port:int = 9999, video_feed=0) -> None:
-        
+    def __init__(self, cell_size: int = 35, number_of_robots: int = 10, rpi_ip: string = "localhost", rpi_port: int = 9999, video_feed=0) -> None:
+
         self.state_machine = StateMachine(self)
         self.states = AllStates
         self.transitions = AllTransition
@@ -12,7 +13,8 @@ class Application(object):
         # application parameters
         self.cell_size = cell_size
         self.number_of_robots = number_of_robots
-        self.gui = GUI(cell_size = cell_size, number_of_robots = number_of_robots,video_feed=video_feed)
+        self.gui = GUI(cell_size=cell_size,
+                       number_of_robots=number_of_robots, video_feed=video_feed)
         self.rpi_ip = rpi_ip
         self.rpi_port = rpi_port
 
@@ -67,11 +69,13 @@ class Application(object):
         self.state_machine.Set_state(state)
         self.state_machine.Execute()
 
+
 def main():
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     print(local_ip)
-    app = Application(video_feed="http://192.168.0.13:9999/video_feed",rpi_ip = str(local_ip), rpi_port = 9999)
+    app = Application(video_feed="http://192.168.1.108:9999/video_feed",
+                      rpi_ip=str(local_ip), rpi_port=9999)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -91,11 +95,12 @@ def main():
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
         # app.change_state(app.transitions.start_robot_communication)
+
         # app.send_data_to_robot=True
-        
-        if (time.time()*1000-tic>30):
+
+        if (time.time()*1000-tic > 30):
             app.change_state(app.transitions.robot_control)
-            tic=time.time()*1000
+            tic = time.time()*1000
         app.change_state(app.transitions.update_camera)
 
         # update aplication's window:

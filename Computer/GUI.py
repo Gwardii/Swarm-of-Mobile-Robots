@@ -117,12 +117,12 @@ class GUI:
         self.command = ""
         self.line = 1
 
-        #robot communication
-        self.xbee = Xbee()
+        # robot communication
+        #self.xbee = Xbee()
 
-        #robots MAC
-        self.robots_MAC={
-            "1":"0013A200415E861B"
+        # robots MAC
+        self.robots_MAC = {
+            "1": "0013A200415E861B"
         }
 
     def _close_app(self):  # narazie watki sa niezalezne od siebie wiec ich nie lacze
@@ -396,35 +396,43 @@ class GUI:
 
     def _forward_button_true(self, event):
         self.is_forward_pressed = True
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<69>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<69>")
 
     def _forward_button_false(self, event):
         self.is_forward_pressed = False
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<169>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<169>")
 
     def _backward_button_true(self, event):
         self.is_backward_pressed = True
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<70>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<70>")
 
     def _backward_button_false(self, event):
         self.is_backward_pressed = False
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<170>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<170>")
 
     def _turn_right_button_true(self, event):
         self.is_rotate_right_pressed = True
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<71>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<71>")
 
     def _turn_right_button_false(self, event):
         self.is_rotate_right_pressed = False
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<171>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<171>")
 
     def _turn_left_button_true(self, event):
         self.is_rotate_left_pressed = True
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<72>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<72>")
 
     def _turn_left_button_false(self, event):
         self.is_rotate_left_pressed = False
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)],"<172>")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], "<172>")
 
 
 def main():

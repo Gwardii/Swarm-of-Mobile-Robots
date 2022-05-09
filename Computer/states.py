@@ -38,32 +38,31 @@ class RPI_Communication(State):
         tik = time.time()
         err_num = 0
 
-        while not is_area_received:
-            if time.time()-tik >=2:
+        while not (is_area_received and is_obstacle_received):
+
+            if time.time() - tik >= 10:
                 print("Application did not receive Area JSON")
-                err_num+=1
+                err_num += 1
                 break
-            if self.rpi_server.message_received == True:
-                area_json = json.loads(self.rpi_server.get_msg())
-                is_area_received = True
-                self.rpi_server.message_received = False
 
-        tik = time.time()
-
-        while not is_obstacle_received:
-            if time.time()-tik >=2:
-                print("Application did not receive obstacles JSON")
-                err_num+=1
-                break
             if self.rpi_server.message_received == True:
-                obstacles_json = json.loads(self.rpi_server.get_msg())
-                is_obstacle_received = True
-                self.rpi_server.message_received = False
+                temp = json.loads(self.rpi_server.get_msg())
+                if ("area" in temp):
+                    area_json = json.loads(self.rpi_server.get_msg())
+                    is_area_received = True
+                    self.rpi_server.message_received = False
+                elif("obstacles" in temp):
+                    obstacles_json = json.loads(self.rpi_server.get_msg())
+                    is_obstacle_received = True
+                    self.rpi_server.message_received = False
+                else:
+                    self.rpi_server.message_received = False
 
         if err_num == 0:
 
             with open(".\Computer\\resources\\area.json", "w") as af:
 
+                # set corners in order:
                 area_json = sorted(area_json["area"], key=lambda x: x['id'])
 
                 json.dump(area_json, af, indent=2)

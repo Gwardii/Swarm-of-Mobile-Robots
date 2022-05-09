@@ -15,7 +15,7 @@ import socket
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--display", type=int, default=1,
                 help="Whether or not frames should be displayed")
-ap.add_argument("-js", "--jsonstream", type=int, default=1,
+ap.add_argument("-js", "--json_sending", type=int, default=1,
                 help="Whether or not you want to stream json files")
 args = vars(ap.parse_args())
 
@@ -384,7 +384,7 @@ def main():
 
     # start client for json sending:
     # enter IP of server:
-    if args["jsonstream"] > 0:
+    if args["json_sending"] > 0:
         client = RPI_Communication_Client(host="192.168.12.120", port=9999)
 
     # stop script conditions:
@@ -422,7 +422,7 @@ def main():
             './Camera/stream_tests/flask_version/stream/stream.jpg', img)
 
         # send json files:
-        if args["jsonstream"] > 0:
+        if args["json_sending"] > 0:
             try:
                 client.send_json(
                     json.load(open("./Computer/resources/area.json", 'r')))
