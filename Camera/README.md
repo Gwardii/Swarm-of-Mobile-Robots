@@ -79,7 +79,7 @@ With some changes this was the right one. Follow steps and:
   ## Aruco detection
   
   The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But before you want use any camera with opencv you should calibrate  it.
-  It is necessary step to reduce fish-eye effect and to achive good results next steps.  
+  It is necessary step to reduce fish-eye effect and to achive good results in next steps.  
   
   ### Calibration
   
