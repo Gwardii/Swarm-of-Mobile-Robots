@@ -9,7 +9,7 @@ This page is all about how to configure and set up Raspberry PI, OpenCV. Also th
 
 ## Set up Raspberry Pi
 
-In our case RPI is 3 B+ but probably most of the advise will be valid on different models.
+In our case RPI is 3B+ but probably most of the advise will be valid on different models.
 
 - install Rasbian (OS for your RPI) follow original page: https://www.raspberrypi.com/software/
 - enable: SSH, VNC
@@ -112,15 +112,16 @@ With some changes this was the right one. Follow steps and:
   ```
   $ python ./Camera/aruco_detection.py -d 1 -js 0
   ```
-  Also, if you want to connect with main server (send jsons), it is needed to set correct IP and port of server in aruco_detection.py:
+  Also, if you want to connect with main server (send jsons), it is needed to set correct IP and port of server at beginning of aruco_detection.py:
   ```
-  def main():
-    ...
-    # start client for json sending:
-    # enter IP of server:
-    if args["json_sending"] > 0:
-        client = RPI_Communication_Client(host="192.168.12.120", port=9999)
-    ...
+  # --------------USER SETTINGS---------------
+
+  server_IP = "192.168.12.120"
+  server_PORT = 9999
+
+  # camera setting:
+  resolution = [640, 480]
+  FPS = 40
   ```
   
   ### stream.py
