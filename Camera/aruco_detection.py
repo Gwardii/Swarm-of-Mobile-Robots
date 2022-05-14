@@ -1,3 +1,4 @@
+
 import cv2
 from cv2 import aruco
 import numpy as np
@@ -73,6 +74,7 @@ class Aruco_markers():
         self.detected_obstacles = {}
         self.X_shift = 0
         self.Y_shift = 0
+        self.main_IMG = None
 
         # for simple estimation real coordinates:
         # X = (pixels_x - px_shift_x) * px_resize_x
@@ -134,7 +136,7 @@ class Aruco_markers():
                                 cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 255), 2)
 
                 img = imgOut
-
+                self.main_IMG = img
         return img
 
     # ----- finding aruco markers ----
@@ -160,79 +162,82 @@ class Aruco_markers():
         rvec, tvec, _ = aruco.estimatePoseSingleMarkers(
             bbox, self.marker_real_size, self.aruco_Cam_param[0], self.aruco_Cam_param[1])
 
-        if self.ids is not None:
+        if self.ids is None:
+            self.main_IMG = img
+            return False
 
-            self.ids = self.ids.flatten()
-            aruco.drawDetectedMarkers(img, bbox)
+        self.ids = self.ids.flatten()
+        aruco.drawDetectedMarkers(img, bbox)
 
-            for i, id in enumerate(self.ids):
+        for i, id in enumerate(self.ids):
 
-                # iterate all ids and save all dictionares
-                self.bbox[id] = bbox[i][0]
+            # iterate all ids and save all dictionares
+            self.bbox[id] = bbox[i][0]
 
-                rotation_matrix, _ = cv2.Rodrigues(-1*rvec[i][0])
-                # np.dot(rotation_matrix, -1*tvec[i][0])
-                self.coordinates_estimated[id] = tvec[i][0]
+            rotation_matrix, _ = cv2.Rodrigues(-1*rvec[i][0])
+            # np.dot(rotation_matrix, -1*tvec[i][0])
+            self.coordinates_estimated[id] = tvec[i][0]
 
-                self.orientations[id] = rotationMatrixToEulerAngles(
-                    rotation_matrix)
-                self.coordinates[id] = [np.sum(self.bbox[id][:, 0])/4,
-                                        np.sum(self.bbox[id][:, 1])/4]
+            self.orientations[id] = rotationMatrixToEulerAngles(
+                rotation_matrix)
+            self.coordinates[id] = [np.sum(self.bbox[id][:, 0])/4,
+                                    np.sum(self.bbox[id][:, 1])/4]
 
-                if id in self.area_list_ids:
-                    # save for detected corners coordinates x,y
-                    self.detected_corners[id] = self.coordinates[id][0:2]
+            if id in self.area_list_ids:
+                # save for detected corners coordinates x,y
+                self.detected_corners[id] = self.coordinates[id][0:2]
 
-                if len(self.detected_corners) >= 3:
-                    self.X_shift = min(
-                        self.coordinates_estimated[id][0] for id in self.detected_corners.keys())
-                    self.Y_shift = min(
-                        self.coordinates_estimated[id][1] for id in self.detected_corners.keys())
-                    self.coordinates_px_shift_x = min(
-                        self.detected_corners[id][0] for id in self.detected_corners.keys())
-                    self.coordinates_px_shift_y = min(
-                        self.detected_corners[id][1] for id in self.detected_corners.keys())
-                    self.coordinates_px_resize_x = TABLE_SIZE["long side"]/(max(
-                        self.detected_corners[id][0] for id in self.detected_corners.keys()) - self.coordinates_px_shift_x)
-                    self.coordinates_px_resize_y = TABLE_SIZE["short side"]/(max(
-                        self.detected_corners[id][1] for id in self.detected_corners.keys()) - self.coordinates_px_shift_y)
+            if len(self.detected_corners) >= 3:
+                self.X_shift = min(
+                    self.coordinates_estimated[id][0] for id in self.detected_corners.keys())
+                self.Y_shift = min(
+                    self.coordinates_estimated[id][1] for id in self.detected_corners.keys())
+                self.coordinates_px_shift_x = min(
+                    self.detected_corners[id][0] for id in self.detected_corners.keys())
+                self.coordinates_px_shift_y = min(
+                    self.detected_corners[id][1] for id in self.detected_corners.keys())
+                self.coordinates_px_resize_x = TABLE_SIZE["long side"]/(max(
+                    self.detected_corners[id][0] for id in self.detected_corners.keys()) - self.coordinates_px_shift_x)
+                self.coordinates_px_resize_y = TABLE_SIZE["short side"]/(max(
+                    self.detected_corners[id][1] for id in self.detected_corners.keys()) - self.coordinates_px_shift_y)
 
-            for id in self.ids:
-                # update coordinates after calculating corrections
-                self.coordinates[id] = [(self.coordinates[id][0] - self.coordinates_px_shift_x) * self.coordinates_px_resize_x,
-                                        (self.coordinates[id][1] - self.coordinates_px_shift_y) * self.coordinates_px_resize_y]
-                self.coordinates_estimated[id] = [
-                    self.coordinates_estimated[id][0] - self.X_shift, self.coordinates_estimated[id][1] - self.Y_shift]
+        for id in self.ids:
+            # update coordinates after calculating corrections
+            self.coordinates[id] = [(self.coordinates[id][0] - self.coordinates_px_shift_x) * self.coordinates_px_resize_x,
+                                    (self.coordinates[id][1] - self.coordinates_px_shift_y) * self.coordinates_px_resize_y]
+            self.coordinates_estimated[id] = [
+                self.coordinates_estimated[id][0] - self.X_shift, self.coordinates_estimated[id][1] - self.Y_shift]
 
-                if id in self.area_list_ids:
-                    # save for detected corners coordinates x,y
-                    self.detected_corners[id] = self.coordinates[id][0:2]
+            if id in self.area_list_ids:
+                # save for detected corners coordinates x,y
+                self.detected_corners[id] = self.coordinates[id][0:2]
 
-                elif id in self.robots_list_ids:
-                    # save for detected robots coordinates x,y and rotation in z
-                    self.detected_robots[id] = np.append(
-                        self.coordinates[id][0:2], self.orientations[id][2])
+            elif id in self.robots_list_ids:
+                # save for detected robots coordinates x,y and rotation in z
+                self.detected_robots[id] = np.append(
+                    self.coordinates[id][0:2], self.orientations[id][2])
 
-                elif id in self.obstacles_list_ids:
-                    # save for detected obstacles coordinates x,y and rotation in z
-                    self.detected_obstacles[id] = np.append(
-                        self.coordinates[id][0:2], self.orientations[id][2])
+            elif id in self.obstacles_list_ids:
+                # save for detected obstacles coordinates x,y and rotation in z
+                self.detected_obstacles[id] = np.append(
+                    self.coordinates[id][0:2], self.orientations[id][2])
 
-                # Drawing aruco boxes and texts:
-                top_left = [int(self.bbox[id][0, 0]) + 75,
-                            int(self.bbox[id][0, 1])]
-                aruco.drawAxis(
-                    img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
-                cv2.putText(img, str(
-                    f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
-                cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
-                            top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+            # Drawing aruco boxes and texts:
+            top_left = [int(self.bbox[id][0, 0]) + 75,
+                        int(self.bbox[id][0, 1])]
+            aruco.drawAxis(
+                img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
+            cv2.putText(img, str(
+                f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+            cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
+                        top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
 
-            return True
+            self.main_IMG = img
 
-        return False
+        return True
 
     # ------- save detected aruco as jsons files -------
+
     def save_Aruco_json(self):
 
         if self.ids is None:
@@ -434,25 +439,25 @@ def main():
 
     while True:
 
-        img = camera.take_frame()
+        image = camera.take_frame()
 
-        # find Aruco amrkers
-        Is_aruco_Found = aruco_markers.find_Aruco_Markers(img)
+        # find Aruco markers
+        Is_aruco_Found = aruco_markers.find_Aruco_Markers(image)
 
         # save Aruco markers into json
         aruco_markers.save_Aruco_json()
 
         # loop through all the markers and augment each one
         if Is_aruco_Found:
-            img = aruco_markers.augment_Aruco(img)
+            image = aruco_markers.augment_Aruco(image)
 
         if args["display"] > 0:
-            cv2.imshow("ARUCO DETECTION", img)
+            cv2.imshow("ARUCO DETECTION", image)
             cv2.waitKey(1)
 
         # save stream video:
         cv2.imwrite(
-            './Camera/stream_tests/flask_version/stream/stream.jpg', img)
+            './Camera/stream_tests/flask_version/stream/stream.jpg', image)
 
         # send json files:
         if args["json_sending"] > 0:

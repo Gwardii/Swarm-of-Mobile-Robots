@@ -56,8 +56,15 @@ def stream_main_fun():
 
 def stream_start():
     # start stream (you can change port):
-    app.run(debug=True, host=socket.gethostbyname(
-        socket.gethostname()), port='9999', threaded=True)
+
+    # For RPI it is necessary to do this in this way :(
+    # create socket connection and next read IP and close conection:
+
+    con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    con.connect(("8.8.8.8", 80))
+    print(con.getsockname()[0])
+    app.run(debug=True, host=con.getsockname()[0], port='9999', threaded=True)
+    con.close()
 
 
 if __name__ == "__main__":

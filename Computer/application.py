@@ -74,7 +74,7 @@ def main():
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     print(local_ip)
-    app = Application(video_feed="http://192.168.1.108:9999/video_feed",
+    app = Application(video_feed="http://192.168.0.52:9999/video_feed",
                       rpi_ip=str(local_ip), rpi_port=9999)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
