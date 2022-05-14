@@ -78,7 +78,7 @@ With some changes this was the right one. Follow steps and:
   
   ## Aruco detection
   
-  The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But before you want use any camera with opencv you should calibrate  it.
+  The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But     before you want use any camera with opencv you should calibrate  it.
   It is necessary step to reduce fish-eye effect and to achive good results in next steps.  
   
   ### Calibration
@@ -112,7 +112,7 @@ With some changes this was the right one. Follow steps and:
   ```
   $ python ./Camera/aruco_detection.py -d 1 -js 0
   ```
-  Also, if you want to connect with main server (send jsons), it is needed to set correct IP and port of server at beginning of aruco_detection.py:
+  Also, if you want to connect with main server (send jsons), it is needed to set correct IP and port of   server at beginning of aruco_detection.py:
   ```
   # --------------USER SETTINGS---------------
 
@@ -124,9 +124,21 @@ With some changes this was the right one. Follow steps and:
   FPS = 40
   ```
   
+  ### state_machine_RPI.py
+  
+aruco_detection.py bases on if statements which was good enought but with development of this project new functionality will be added. Also remembering all flags is not so easy after some time. So, we decided to create Finite State Machine (FSM). This concept is really usefull to organize all functionality and allows to add in easy way new ones. In a nutshell, FSM bases on states (which all are defined at the beginning) and transitions which allow for changes between states. Each state has arbitrarily defined all possible transitions. FSM usually doesn't provide less code but its purpose is to give more orderly and clear code. For more info about FSM see [link](https://brilliant.org/wiki/finite-state-machines/), [link](https://www.youtube.com/watch?v=2OiWs-h_M3A). 
+ <img src="/Readme_img/Aruco state machine.svg" style = "width: 55% "  align=right />
+ <br/>
+ 
+All states and transitions are shown on this diagram. Each of the states consist of the main function and at the end possible transitions. Main while loop runs only one command and on each iteration you can check on which state you are. It is probably not the best solution but for sure it is useful to know FSM concept and own impelementation is the best way to learn this. 
+
+In use there is no difference with aruco_detection.py still all options works:
+```
+ $ python .\Camera\state_machine_RPI.py -d 0 -js 1   
+```
   ### stream.py
   
-  For visualization and HTML learning simple website was created. Pictures are streamed into this website from where main aplication can feed its display.
+  For visualization and HTML learning simple website was created. Pictures are streamed into this website   from where main aplication can feed its display.
   To turn on stream type:
   ```
   $ python ./Camera/stream_tests/flask_version/stream.py
