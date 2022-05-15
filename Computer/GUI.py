@@ -19,7 +19,7 @@ from robot_handler import Robot
 import robot_handler
 import math
 
-from xbee.xbee import Xbee
+from xbee.xbee import Xbee, xbee_frame
 
 
 class GUI:
@@ -118,11 +118,13 @@ class GUI:
         self.line = 1
 
         # robot communication
-        #self.xbee = Xbee()
-
+        # self.xbee = Xbee()
+        # if(self.xbee != None):
+        #     self.xbee_ready=True
         # robots MAC
         self.robots_MAC = {
-            "1": "0013A200415E861B"
+            "1": "0013A200415E861B",
+            "2": "0013A200415BA7CD"
         }
 
     def _close_app(self):  # narazie watki sa niezalezne od siebie wiec ich nie lacze
@@ -247,12 +249,17 @@ class GUI:
             obstacles = json.load(o)['obstacles']
         dict_of_obstacles = obs.load_obstacles(obstacles, figures)
         with open(".\Computer\\resources\\area.json") as a:
-            area = json.load(a)
+            area = json.load(a) 
+        with open(".\Computer\\resources\\robots.json") as r:
+            robots_position=json.load(r)["robots"]
+        self.robot_position[0:2]=[robots_position[0]["position"]["x"],robots_position[0]["position"]["y"]]
+        self.robot_position[2]=robots_position[0]["orientation"]
         wa = working_area.WorkingArea(area)
         return dict_of_obstacles, wa
 
     def robot_control(self):
         if self.is_forward_pressed:
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<69>")
             R = self._rotation_matrix(self.robot_position[2]-90)
             local_vector = [0, 2]
             local_vector = R.dot(local_vector)
@@ -260,13 +267,16 @@ class GUI:
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_backward_pressed:
             R = self._rotation_matrix(self.robot_position[2]-90)
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<70>")
             local_vector = [0, -2]
             local_vector = R.dot(local_vector)
             self.robot_position[0:2] = [
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_rotate_right_pressed:
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<71>")
             self.robot_position[2] = float(self.robot_position[2]-0.5)
         if self.is_rotate_left_pressed:
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<72>")
             self.robot_position[2] = float(self.robot_position[2]+0.5)
         self.map.canvas.restore_region(self.background)
         self.robot_artist = self._draw_robot(
@@ -365,6 +375,45 @@ class GUI:
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.background_without_path = self.map.canvas.copy_from_bbox(
             self.ax.bbox)
+    def robots_command(self,path:list):
+        last_orientation=self.robot_position[2]
+        task_time=3
+        task_id=0
+        frame = xbee_frame()
+        for i in range(1,len(path)):
+            cell_size = self.cell_size
+            center_i = tuple(i * cell_size for i in path[i])
+            center_i_1 = tuple(i*cell_size for i in path[i-1])
+            x_data = center_i[0]- center_i_1[0]
+            y_data = center_i[1]- center_i_1[1]
+            target_orientation=math.degrees(math.atan2(y_data,x_data))
+            new_orientation=target_orientation-last_orientation #
+            last_orientation=target_orientation
+            distance = math.dist(center_i,center_i_1)
+            if(new_orientation==0):
+                task_id=2
+                frame.send_msg(task_id=task_id,distance=distance, task_time=task_time,arc_radius=0,rotation_angle=0)
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+            else:
+                task_id=3
+                frame.send_msg(task_id=task_id,distance=0, task_time=task_time,arc_radius=0,rotation_angle=new_orientation)
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+                task_id=2
+                frame.send_msg(task_id=task_id,distance=distance, task_time=task_time,arc_radius=0,rotation_angle=0)
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+        #set required orientation
+        task_id=3
+        distance=0
+        new_orientation=new_orientation-self.robot_target
+        frame.send_msg(task_id=1,distance=distance, task_time=task_time,arc_radius=10,rotation_angle=new_orientation)
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+
+        task_id=1
+        distance=0
+        new_orientation=0
+        frame.send_msg(task_id=1,distance=distance, task_time=task_time,arc_radius=10,rotation_angle=new_orientation)
+        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+
 
     def draw_path(self):
         self.robot.set_target(self.robot_target)
@@ -372,6 +421,7 @@ class GUI:
         self.pather.add_robot(0, self.robot)
         self.pather._determine_paths()
         path = self.pather.get_paths()
+        self.robots_command(path)
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.background = self.background_without_path
         for i in range(1, len(path)):
@@ -396,43 +446,43 @@ class GUI:
 
     def _forward_button_true(self, event):
         self.is_forward_pressed = True
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<69>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<69>")
 
     def _forward_button_false(self, event):
         self.is_forward_pressed = False
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<169>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<169>")
 
     def _backward_button_true(self, event):
         self.is_backward_pressed = True
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<70>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<70>")
 
     def _backward_button_false(self, event):
         self.is_backward_pressed = False
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<170>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<170>")
 
     def _turn_right_button_true(self, event):
         self.is_rotate_right_pressed = True
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<71>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<71>")
 
     def _turn_right_button_false(self, event):
         self.is_rotate_right_pressed = False
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<171>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<171>")
 
     def _turn_left_button_true(self, event):
         self.is_rotate_left_pressed = True
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<72>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<72>")
 
     def _turn_left_button_false(self, event):
         self.is_rotate_left_pressed = False
-        self.xbee.send_msg_unicast(
-            self.robots_MAC[str(self.controlled_robot_id)], "<172>")
+        # self.xbee.send_msg_unicast(
+        #     self.robots_MAC[str(self.controlled_robot_id)], "<172>")
 
 
 def main():

@@ -4,18 +4,22 @@ import socket
 
 
 class Application(object):
-    def __init__(self, cell_size: int = 35, number_of_robots: int = 10, rpi_ip: string = "localhost", rpi_port: int = 9999, video_feed=0) -> None:
+    def __init__(self, cell_size: int = 35, number_of_robots: int = 10,rpi_port: int = 9999, video_feed_ip=0) -> None:
 
         self.state_machine = StateMachine(self)
         self.states = AllStates
         self.transitions = AllTransition
-
+        if video_feed_ip !=0:
+            video_feed_ip="http://"+video_feed_ip+":"+str(rpi_port)+"/video_feed"
         # application parameters
         self.cell_size = cell_size
         self.number_of_robots = number_of_robots
         self.gui = GUI(cell_size=cell_size,
-                       number_of_robots=number_of_robots, video_feed=video_feed)
-        self.rpi_ip = rpi_ip
+                       number_of_robots=number_of_robots, video_feed=video_feed_ip)
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        print(local_ip)
+        self.rpi_ip = local_ip
         self.rpi_port = rpi_port
 
         # initializate all states:
@@ -30,6 +34,7 @@ class Application(object):
         self.send_data_to_robot = False
 
     def _states_initialization(self, states: AllStates) -> None:
+        
         # add all states to state_machine (add to states_dictionary):
         self.state_machine.states[states.rpi_communication] = RPI_Communication(
             rpi_ip=self.rpi_ip, port=self.rpi_port)
@@ -71,18 +76,15 @@ class Application(object):
 
 
 def main():
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
-    print(local_ip)
-    app = Application(video_feed="http://192.168.1.108:9999/video_feed",
-                      rpi_ip=str(local_ip), rpi_port=9999)
+
+    app = Application(video_feed_ip=0,rpi_port=9999,number_of_robots=2)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
     # start initializations:
     gui = app.change_state(app.transitions.start_init)
     app.initialization = True
-    # draw obstacles:
+    # draw obstacles:,
     app.change_state(app.transitions.draw_obstacles)
     # draw first iteration of path
     app.change_state(app.transitions.draw_path)
@@ -92,6 +94,8 @@ def main():
         # some if statement to update widgets
         if app.rpi_communicatiom == True:
             app.gui.rpi_diode.configure(image=app.gui.diode["green"])
+        # if app.gui.xbee_ready == True:
+        #     app.gui.robot_diode.configure(image=app.gui.diode["green"])
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
         # app.change_state(app.transitions.start_robot_communication)
