@@ -77,22 +77,22 @@ class xbee_frame():
 
         # put values into full.msg:
         self.full_msg[2] = task_id & 0xff
-        self.full_msg[3] = distance & 0xff
-        self.full_msg[4] = (distance >> 8) & 0xff
-        self.full_msg[5] = task_time & 0xff
+        self.full_msg[3] = (distance >> 8) & 0xff
+        self.full_msg[4] = distance & 0xff
+        self.full_msg[5] = (task_time >> 16) & 0xff
         self.full_msg[6] = (task_time >> 8) & 0xff
-        self.full_msg[7] = (task_time >> 16) & 0xff
-        self.full_msg[8] = arc_radius & 0xff
-        self.full_msg[9] = (arc_radius >> 8) & 0xff
-        self.full_msg[10] = rotation_angle & 0xff
-        self.full_msg[11] = (rotation_angle >> 8) & 0xff
+        self.full_msg[7] = task_time & 0xff
+        self.full_msg[8] = (arc_radius >> 8) & 0xff
+        self.full_msg[9] = arc_radius & 0xff
+        self.full_msg[10] = (rotation_angle >> 8) & 0xff
+        self.full_msg[11] = rotation_angle & 0xff
 
         # calculate checksum
         self.checksum = sum(self.full_msg[0:self.LENGTH-4])
 
         # put checksum into full.msg
-        self.full_msg[12] = self.checksum & 0xff
-        self.full_msg[13] = (self.checksum >> 8) & 0xff
+        self.full_msg[12] = (self.checksum >> 8) & 0xff
+        self.full_msg[13] = self.checksum & 0xff
 
         # create bitarray (xbee requirements):
         self.full_msg = bytearray(self.full_msg)
