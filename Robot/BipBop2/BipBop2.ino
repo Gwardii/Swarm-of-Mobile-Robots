@@ -213,6 +213,7 @@ void serialEvent() {
     if (XbeeGetTab[0] == 0x20 && XbeeGetTab[1] == 0x40)
     {
       started = true;
+      hardCodedProsto();
     }
     //Zakoncz wiadomosc
     else if (XbeeGetTab[14] == 0x50 && XbeeGetTab[15] == 0x60)
@@ -261,6 +262,22 @@ void serialEvent() {
   XIndex = 0;
 
 }
+
+void hardCodedProsto(){
+  delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
+  if (delta < 0) Serial.println("Zle zadany ruch");
+  T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+  T1_now = zad_t + T1;
+  T0_now = zad_t + *T0;
+  katL0 = kat_1;
+  katP0 = kat_2;
+  tablica[0].id = 2; //prosto
+  tablica[0].distance = 500; //500mm
+  tablica[0]._time = 10 * 1000; //w 10 sekund
+  tablica_empty_id = 1;
+  prosto();
+}
+
 
 void luk() {
 
