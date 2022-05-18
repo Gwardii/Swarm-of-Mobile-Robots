@@ -6,15 +6,15 @@ const float kp = 6;
 const float ki = 0;
 
 //Xbee
-bool started = false; //True: Message is started
-bool ended   = false;//True: Message is finished
+static bool started = false; //True: Message is started
+static bool ended   = false;//True: Message is finished
 char incomingByte ; //Variable to store the incoming byte
 char msg[3];    //Message - array from 0 to 2 (3 values - PWM - e.g. 240)
 byte index;     //Index of array
 int value = 0;
 double Tjazda;
 uint8_t XbeeGetTab[16];
-int XIndex = 0;
+static int XIndex = 0;
 
 //Parametry Ruchu
 double t_Start;
@@ -198,69 +198,25 @@ void loop() {
 }
 
 void serialEvent() {
-  while (Serial.available() > 0) {
-    //Odbierz bite
-    if (!started) {
-      XbeeGetTab[0] = XbeeGetTab[1];
-      XbeeGetTab[1] = Serial.read();
-    }
-    else
-    {
-      XbeeGetTab[XIndex + 2] = Serial.read();
-      XIndex++;
-    }
-    //Zacznij wiadomosc
-    if (XbeeGetTab[0] == 0x20 && XbeeGetTab[1] == 0x40)
-    {
-      started = true;
-      hardCodedProsto();
-    }
-    //Zakoncz wiadomosc
-    else if (XbeeGetTab[14] == 0x50 && XbeeGetTab[15] == 0x60)
-    {
-      ended = true;
-      for (int g = 0; g < 16; g++)
-        XbeeGetTab[g] = 0;
-      XIndex = 0;
-
-      break; // Done reading - exit from while loop!
-    }
-    if (XIndex >= 13) { //Jezeli wiadomosc za dluga odrzuc
-      ended = false;
-      started = false;
-      for (int g = 0; g < 16; g++)
-        XbeeGetTab[g] = 0;
-      XIndex = 0;
-      break;
-    }
-
-  }
-
+  hardCodedProsto();
   uint16_t ChSum = 0;
-  for (int elo = 0; elo < 14; elo++) {
+  delay(1000);
+  if(Serial.readBytes(XbeeGetTab, 16) != 16)
+    return;
+  if(XbeeGetTab[0] != 0x20 || XbeeGetTab[1] != 0x40 || XbeeGetTab[14] != 0x50 || XbeeGetTab[15] != 0x60)
+    return;
+  for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
   }
-
-  if (((uint16_t)XbeeGetTab[13] << 8) | XbeeGetTab[12] == ChSum) {
-
-    if (started && ended)
+  if (((uint16_t)XbeeGetTab[13] << 8) | XbeeGetTab[12] == ChSum)
     {
       tablica[tablica_empty_id].id = XbeeGetTab[2];
       tablica[tablica_empty_id].distance = ((uint16_t)XbeeGetTab[4] << 8) | XbeeGetTab[3];
       tablica[tablica_empty_id]._time = (((uint32_t)XbeeGetTab[7] << 16) | ((uint32_t)XbeeGetTab[6] << 8)) | XbeeGetTab[5];
       tablica[tablica_empty_id].radius = ((uint16_t)XbeeGetTab[9] << 8) | XbeeGetTab[8];
       tablica[tablica_empty_id].orientation = ((uint16_t)XbeeGetTab[11] << 8) | XbeeGetTab[10];
+      tablica_empty_id += 1;
     }
-
-  }
-  tablica_empty_id += 1;
-  ChSum = 0;
-  ended = false;
-  started = false;
-  for (int g = 0; g < 16; g++)
-    XbeeGetTab[g] = 0;
-  XIndex = 0;
-
 }
 
 void hardCodedProsto(){

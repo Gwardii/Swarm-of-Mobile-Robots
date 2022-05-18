@@ -106,10 +106,10 @@ class xbee_frame():
         # print(self.full_msg)
 
 
-# if __name__ == '__main__':
-#     frame = xbee_frame()
-#     frame.send_msg(task_id=10, distance=256, task_time=45,
-#                    arc_radius=10, rotation_angle=40)
-#     xbee=Xbee()
-#     xbee.send_msg_unicast("0013A200415E861B",frame.full_msg)
-
+if __name__ == '__main__':
+    frame = xbee_frame()
+    frame.send_msg(task_id=2, distance=256, task_time=45,
+                   arc_radius=10, rotation_angle=40)
+    xbee=Xbee()
+    xbee.send_msg_unicast("0013A200415E861B",frame.full_msg)
+    print('Wyslane')
