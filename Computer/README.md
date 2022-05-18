@@ -32,3 +32,10 @@ GUI was created to provide some feedback, visualization and also interaction wit
 
 <img src="/Readme_img/GUI.png" align="center" style = "width: 80%"  />
 
+
+### PATH COMPUTING
+Main idea behind creating paths for robots is......
+
+
+
+
