@@ -198,25 +198,28 @@ void loop() {
 }
 
 void serialEvent() {
-  hardCodedProsto();
   uint16_t ChSum = 0;
   delay(1000);
   if(Serial.readBytes(XbeeGetTab, 16) != 16)
-    return;
-  if(XbeeGetTab[0] != 0x20 || XbeeGetTab[1] != 0x40 || XbeeGetTab[14] != 0x50 || XbeeGetTab[15] != 0x60)
-    return;
+    return;    
+//  if(XbeeGetTab[0] != 0x20 || XbeeGetTab[1] != 0x40 || XbeeGetTab[14] != 0x50 || XbeeGetTab[15] != 0x60)
+//    return;
+//    
+
   for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
   }
-  if (((uint16_t)XbeeGetTab[13] << 8) | XbeeGetTab[12] == ChSum)
+  if (true)//((((uint16_t)XbeeGetTab[12]) << 8) | XbeeGetTab[13]) == ChSum)
     {
       tablica[tablica_empty_id].id = XbeeGetTab[2];
-      tablica[tablica_empty_id].distance = ((uint16_t)XbeeGetTab[4] << 8) | XbeeGetTab[3];
-      tablica[tablica_empty_id]._time = (((uint32_t)XbeeGetTab[7] << 16) | ((uint32_t)XbeeGetTab[6] << 8)) | XbeeGetTab[5];
-      tablica[tablica_empty_id].radius = ((uint16_t)XbeeGetTab[9] << 8) | XbeeGetTab[8];
-      tablica[tablica_empty_id].orientation = ((uint16_t)XbeeGetTab[11] << 8) | XbeeGetTab[10];
+      tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[4]) << 8) | XbeeGetTab[3];
+      tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[7]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[5];
+      tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[9]) << 8) | XbeeGetTab[8];
+      tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[11]) << 8) | XbeeGetTab[10];
       tablica_empty_id += 1;
     }
+  if(XbeeGegTab[0] == 0x20)
+    hardCodedProsto();
 }
 
 void hardCodedProsto(){
