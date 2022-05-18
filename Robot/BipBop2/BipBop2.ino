@@ -13,7 +13,7 @@ char msg[3];    //Message - array from 0 to 2 (3 values - PWM - e.g. 240)
 byte index;     //Index of array
 int value = 0;
 double Tjazda;
-uint8_t XbeeGetTab[16];
+uint8_t XbeeGetTab[25];
 static int XIndex = 0;
 
 //Parametry Ruchu
@@ -198,13 +198,45 @@ void loop() {
 }
 
 void serialEvent() {
+  Serial.println("Wchodze w event");
   uint16_t ChSum = 0;
+  static int y = 0;
   delay(1000);
-  if(Serial.readBytes(XbeeGetTab, 16) != 16)
+  int rxlen = Serial.available();
+//  Serial.print("Odebrano: ");
+//  Serial.println(rxlen);
+  if(rxlen == 2){
+    Serial.read();
+    Serial.read();
+    Serial.print(y);
+    Serial.print('\n');
+    for(int i= 0;i<25; i++){
+      Serial.print((XbeeGetTab[i]), HEX);
+      Serial.print(' ');
+    }
+    Serial.println();
+    y = 0;
+    return;
+  }
+  int rlen = min(rxlen, 25);
+  y += Serial.readBytes((char*)XbeeGetTab, rlen);
+  return;
+//  for(int i=0; i<17; i++)
+//    if(XbeeGetTab[i+1] == 0x40){
+//      y = i+'0';
+//      hardCodedProsto();
+//    }
+  if(XbeeGetTab[0] == 0x20 && XbeeGetTab[1] == 0x40)
+    hardCodedProsto();
+  return; 
+  if(Serial.readBytes(XbeeGetTab, 17) < 17)
     return;    
-//  if(XbeeGetTab[0] != 0x20 || XbeeGetTab[1] != 0x40 || XbeeGetTab[14] != 0x50 || XbeeGetTab[15] != 0x60)
+  
+  if(XbeeGetTab[2] != 0x02)
+    return;
+//  if((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
 //    return;
-//    
+    
 
   for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
@@ -218,8 +250,6 @@ void serialEvent() {
       tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[11]) << 8) | XbeeGetTab[10];
       tablica_empty_id += 1;
     }
-  if(XbeeGegTab[0] == 0x20)
-    hardCodedProsto();
 }
 
 void hardCodedProsto(){

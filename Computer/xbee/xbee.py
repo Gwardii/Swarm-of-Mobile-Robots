@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 class Xbee:
-    xbeePort = "COM4"
+    xbeePort = "COM8"
     xbBoudrate = "9600"
 
     def __init__(self, port=xbeePort, boudrate=xbBoudrate) -> None:
@@ -95,6 +95,7 @@ class xbee_frame():
         self.full_msg[13] = self.checksum & 0xff
 
         # create bitarray (xbee requirements):
+        print(self.full_msg)
         self.full_msg = bytearray(self.full_msg)
 
     def send_msg(self, task_id=0, distance=0, task_time=0, arc_radius=0, rotation_angle=0):
