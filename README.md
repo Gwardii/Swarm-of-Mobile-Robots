@@ -23,7 +23,7 @@ Robots were built around the Arduino Uno boards. Each of them has two wheels equ
 
 <img src=/Readme_img/robot_swarm.jpg width=40%></img>
 
-A robot can get the command to wait, move forward, rotate, and move around the given arc. 
+A robot can get the command to wait, move forward, rotate, and move around the given arc. Each command is built so the robot will drive a given distance or angle in a given amount of time.
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
