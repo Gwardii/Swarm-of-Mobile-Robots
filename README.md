@@ -19,10 +19,11 @@ Raspberry Pi with a mounted camera detects ArUco markers and procces captured im
 <img src=/Readme_img/web_screenshot1.png width=40% ></img> <img src=https://github.com/Gwardii/Swarm-of-Mobile-Robots/blob/master/Readme_img/web_screenshot2.png width=40% align=right></img>
 
 ## Mobile robot software
-Robots were built around the Arduino Uno boards. Each of them have two wheels equiped with encoders. The communication with the main computer is realized using the XBeeS1 boards. 
+Robots were built around the Arduino Uno boards. Each of them has two wheels equipped with encoders. The communication with the central computer is realized using the XBeeS1 boards.
 
 <img src=/Readme_img/robot_swarm.jpg width=40%></img>
 
+A robot can get the command to wait, move forward, rotate, and move around the given arc. 
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
