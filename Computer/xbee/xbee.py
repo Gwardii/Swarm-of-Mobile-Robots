@@ -8,6 +8,7 @@ import os
 import string
 from time import sleep
 import numpy as np
+from sympy import ring
 
 try:
     import digi.xbee.devices as xb
@@ -108,8 +109,12 @@ class xbee_frame():
 
 # if __name__ == '__main__':
 #     frame = xbee_frame()
-#     frame.send_msg(task_id=10, distance=256, task_time=45,
-#                    arc_radius=10, rotation_angle=40)
+#     frame.send_msg(task_id=3, distance=45, task_time=45,
+#                    arc_radius=0, rotation_angle=90)
+#     for i in frame.full_msg:
+#         print(hex(i),i)
+
 #     xbee=Xbee()
 #     xbee.send_msg_unicast("0013A200415E861B",frame.full_msg)
+#     print("koniec")
 

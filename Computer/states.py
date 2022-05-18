@@ -34,11 +34,13 @@ class RPI_Communication(State):
         is_area_received = False
         area_json = None
         obstacles_json = None
+        robots_json = None
         is_obstacle_received = False
+        is_robots_received=False
         tik = time.time()
         err_num = 0
 
-        while not (is_area_received and is_obstacle_received):
+        while not (is_area_received and is_obstacle_received and is_robots_received): 
 
             if time.time() - tik >= 10:
                 print("Application did not receive Area JSON")
@@ -55,6 +57,10 @@ class RPI_Communication(State):
                     obstacles_json = json.loads(self.rpi_server.get_msg())
                     is_obstacle_received = True
                     self.rpi_server.message_received = False
+                elif("robots" in temp):
+                    robots_json=json.loads(self.rpi_server.get_msg())
+                    is_robots_received=True
+                    self.rpi_server.message_received = False
                 else:
                     self.rpi_server.message_received = False
 
@@ -69,6 +75,9 @@ class RPI_Communication(State):
 
             with open(".\Computer\\resources\\obstacles.json", "w") as of:
                 json.dump(obstacles_json, of, indent=2)
+
+            with open(".\Computer\\resources\\robots.json", "w") as of:
+                json.dump(robots_json, of, indent=2)
 
             print("JSON files received")
 
@@ -191,6 +200,10 @@ class SetTarget(State):
     def Execute(self):
         self.gui.background = self.gui.background_without_path
         self.gui.draw_path()
+        print("wysylam komende")
+        self.gui.robots_command()
+        print("komenty wyslane")
+
 
 
 class SendDataToRobot(State):
