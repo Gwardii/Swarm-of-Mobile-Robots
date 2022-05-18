@@ -198,56 +198,41 @@ void loop() {
 }
 
 void serialEvent() {
-  Serial.println("Wchodze w event");
   uint16_t ChSum = 0;
-  static int y = 0;
-  delay(1000);
-  int rxlen = Serial.available();
-//  Serial.print("Odebrano: ");
-//  Serial.println(rxlen);
-  if(rxlen == 2){
-    Serial.read();
-    Serial.read();
-    Serial.print(y);
-    Serial.print('\n');
-    for(int i= 0;i<25; i++){
-      Serial.print((XbeeGetTab[i]), HEX);
-      Serial.print(' ');
-    }
-    Serial.println();
-    y = 0;
-    return;
-  }
-  int rlen = min(rxlen, 25);
-  y += Serial.readBytes((char*)XbeeGetTab, rlen);
-  return;
-//  for(int i=0; i<17; i++)
-//    if(XbeeGetTab[i+1] == 0x40){
-//      y = i+'0';
-//      hardCodedProsto();
-//    }
-  if(XbeeGetTab[0] == 0x20 && XbeeGetTab[1] == 0x40)
-    hardCodedProsto();
-  return; 
-  if(Serial.readBytes(XbeeGetTab, 17) < 17)
-    return;    
-  
-  if(XbeeGetTab[2] != 0x02)
-    return;
-//  if((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
+  while(Serial.available() < 25);
+//  delay(1000);
+//  int rxlen = Serial.available();
+//  if(rxlen == 2){
+//    Serial.print("Odebrano: ");
+//    Serial.read();
+//    Serial.read();
+//    Serial.print(tablica[0].id);
+//    Serial.print(' ');
+//    Serial.print(tablica[0].distance);
+//    Serial.print(' ');
+//    Serial.print(tablica[0]._time);
+//    Serial.print(' ');
+//    Serial.print(tablica[0].radius);
+//    Serial.print(' ');
+//    Serial.print(tablica[0].orientation);    
+//    Serial.println();
 //    return;
-    
-
+//    }
+  Serial.readBytes((char*)XbeeGetTab, 8);
+  Serial.readBytes((char*)XbeeGetTab, 16);
+  Serial.read();
+  if((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
+    return;
   for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
   }
-  if (true)//((((uint16_t)XbeeGetTab[12]) << 8) | XbeeGetTab[13]) == ChSum)
+  if (((((uint16_t)XbeeGetTab[12]) << 8) | XbeeGetTab[13]) == ChSum)
     {
       tablica[tablica_empty_id].id = XbeeGetTab[2];
-      tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[4]) << 8) | XbeeGetTab[3];
-      tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[7]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[5];
-      tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[9]) << 8) | XbeeGetTab[8];
-      tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[11]) << 8) | XbeeGetTab[10];
+      tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[3]) << 8) | XbeeGetTab[4];
+      tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[5]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[7];
+      tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[8]) << 8) | XbeeGetTab[9];
+      tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[10]) << 8) | XbeeGetTab[11];
       tablica_empty_id += 1;
     }
 }
@@ -395,10 +380,15 @@ void prosto() {
 }
 
 void koniec_CMD() {
-  for (int i = 0; i < tablica_empty_id; i++)
+  for (int i = 0; i < tablica_empty_id - 1; i++)
     tablica[i] = tablica[i+1];
   zad_t = 0;
   tablica_empty_id -=1;
+  tablica[tablica_empty_id].id = 0;
+  tablica[tablica_empty_id].distance = 0;
+  tablica[tablica_empty_id]._time = 0;
+  tablica[tablica_empty_id].radius = 0;
+  tablica[tablica_empty_id].orientation = 0;
 }
 
 void PWM() {
