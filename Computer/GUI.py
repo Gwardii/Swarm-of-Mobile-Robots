@@ -119,9 +119,9 @@ class GUI:
         self.line = 1
 
         # robot communication
-        # self.xbee = Xbee()
-        # if(self.xbee != None):
-        #     self.xbee_ready=True
+        self.xbee = Xbee()
+        if(self.xbee != None):
+            self.xbee_ready=True
         # robots MAC
         self.robots_MAC = {
             "1": "0013A200415BA7CD",
@@ -262,8 +262,10 @@ class GUI:
         return dict_of_obstacles, wa
 
     def robot_control(self):
+        _msg = xbee_frame()
         if self.is_forward_pressed:
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<69>")
+            _msg.send_msg(task_id = 2, distance = 1000, task_time = 8000)
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             R = self._rotation_matrix(self.robot_position[2]-90)
             local_vector = [0, 2]
             local_vector = R.dot(local_vector)
@@ -271,17 +273,21 @@ class GUI:
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_backward_pressed:
             R = self._rotation_matrix(self.robot_position[2]-90)
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<70>")
+            _msg.send_msg(task_id = 3, distance = 1000, task_time = 8000)
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             local_vector = [0, -2]
             local_vector = R.dot(local_vector)
             self.robot_position[0:2] = [
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_rotate_right_pressed:
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<71>")
+            _msg.send_msg(task_id = 5, rotation_angle = 30, task_time = 1200)
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[2] = float(self.robot_position[2]-0.5)
         if self.is_rotate_left_pressed:
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], "<72>")
+            _msg.send_msg(task_id = 4, rotation_angle = 30, task_time = 1200)
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[2] = float(self.robot_position[2]+0.5)
+        
         self.map.canvas.restore_region(self.background)
         self.robot_artist = self._draw_robot(
             self.robot_position[0:2], self.robot_position[2], self.controlled_robot_id)

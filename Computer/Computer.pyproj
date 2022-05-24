@@ -7,7 +7,7 @@
     <ProjectHome />
     <StartupFile>__main__.py</StartupFile>
     <SearchPath />
-    <WorkingDirectory>.\..</WorkingDirectory>
+    <WorkingDirectory>./..</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
@@ -64,6 +64,7 @@
     <Content Include="resources\obstacles.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="application.py" />
     <Compile Include="GUI.py" />
     <Compile Include="map\map_generator.py" />
     <Compile Include="map\obstacles.py" />
@@ -72,6 +73,8 @@
     <Compile Include="map\__init__.py" />
     <Compile Include="map\__main__.py" />
     <Compile Include="robot_handler.py" />
+    <Compile Include="states.py" />
+    <Compile Include="state_machine.py" />
     <Compile Include="xbee\xbee.py" />
     <Compile Include="__main__.py" />
   </ItemGroup>

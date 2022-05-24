@@ -77,7 +77,7 @@ class Application(object):
 
 def main():
 
-    app = Application(video_feed_ip="192.168.221.76",rpi_port=9999,number_of_robots=2)
+    app = Application(video_feed_ip=0,rpi_port=9999,number_of_robots=1)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True

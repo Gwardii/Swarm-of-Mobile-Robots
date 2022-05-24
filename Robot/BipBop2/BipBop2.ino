@@ -153,8 +153,22 @@ void loop() {
         prosto();
       }
 
+      if (tablica[0].id == 3) {//Jedz prosto
+        if (zad_t == 0) {//Czy to rozpoczecie komendy?
+          zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
+          //Parametry ruchu
+          delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
+          if (delta < 0) Serial.println("Zle zadany ruch");
+          T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+          T1_now = zad_t + T1;
+          T0_now = zad_t + *T0;
+          katL0 = kat_1;
+          katP0 = kat_2;
+        }
+        tyl();
+      }
 
-      if (tablica[0].id == 3) {//Obrot
+      if (tablica[0].id == 4) {//Obrot
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -168,11 +182,28 @@ void loop() {
           katL0 = kat_1;
           katP0 = kat_2;
         }
-        obrot();
+        obrotL();
+      }
+
+       if (tablica[0].id == 5) {//Obrot
+        if (zad_t == 0) {//Czy to rozpoczecie komendy?
+          zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
+          //Parametry ruchu
+          if (*Mi > 0) a = 1; else a = -1;
+          L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
+          delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
+          if (delta < 0) Serial.println("Zle zadany ruch");
+          T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+          T1_now = zad_t + T1;
+          T0_now = zad_t + *T0;
+          katL0 = kat_1;
+          katP0 = kat_2;
+        }
+        obrotP();
       }
 
 
-      if (tablica[0].id == 4 || tablica[0].id == 5) {//Luk
+      if (tablica[0].id == 6 || tablica[0].id == 7) {//Luk
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -290,19 +321,19 @@ void luk() {
   //Serial.println(kat_obrot);
   float aa = rozstaw / 2. / tablica[0].radius;
 
-  if (tablica[0].id == 4) {
+  if (tablica[0].id == 6) {
     kat_obrot_1 = kat_obrot * (1 - aa) + katL0;
     Serial.println(kat_obrot);
     kat_obrot_2 = kat_obrot * (1 + aa) + katP0;
   }
 
-  if (tablica[0].id == 5) {
+  if (tablica[0].id == 7) {
     kat_obrot_1 = kat_obrot * (1 + aa) + katL0;
     kat_obrot_2 = kat_obrot * (1 - aa) + katP0;
   }
 }
 
-void obrot() {
+void obrotL() {
   double pr_t = millis();
 
   //Serial.print("Faza: ");
@@ -338,6 +369,44 @@ void obrot() {
   //Serial.println(kat_obrot);
   kat_obrot_1 = -a * kat_obrot + katL0;
   kat_obrot_2 = a * kat_obrot + katP0;
+}
+
+void obrotP() {
+  double pr_t = millis();
+
+  //Serial.print("Faza: ");
+
+  double kat_obrot = 0;
+  if (pr_t <= T1_now) //Czy przyspiesza?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(1);
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+  }
+  else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(2);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+  }
+
+  else if (pr_t <= T0_now)//Czy zwalnia?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(3);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+  }
+
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+
+  kat_obrot = kat_obrot / 3.1416 * 180;
+  //Serial.print("   Kat:");
+  //Serial.println(kat_obrot);
+  kat_obrot_1 = a * kat_obrot + katL0;
+  kat_obrot_2 = -a * kat_obrot + katP0;
 }
 
 void prosto() {
@@ -377,6 +446,45 @@ void prosto() {
   //Serial.println(kat_obrot);
   kat_obrot_1 = kat_obrot + katL0;
   kat_obrot_2 = kat_obrot + katP0;
+}
+
+void tyl() {
+
+  double pr_t = millis();
+
+  //Serial.print("Faza: ");
+
+  double kat_obrot = 0;
+  if (pr_t <= T1_now) //Czy przyspiesza?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(1);
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+  }
+  else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(2);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+  }
+
+  else if (pr_t <= T0_now)//Czy zwalnia?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(3);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+  }
+
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+
+  kat_obrot = kat_obrot / 3.1416 * 180;
+  //Serial.print("   Kat:");
+  //Serial.println(kat_obrot);
+  kat_obrot_1 = -kat_obrot + katL0;
+  kat_obrot_2 = -kat_obrot + katP0;
 }
 
 void koniec_CMD() {
