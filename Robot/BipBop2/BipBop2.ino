@@ -94,7 +94,7 @@ int a;
 
 //Odbior
 const int tabN = 20;
-struct Task{
+struct Task {
   uint8_t id;
   uint16_t distance;
   uint32_t _time;
@@ -138,7 +138,9 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie już nie trwa, zapisz czas rozpoczecia
 
 
-      if (tablica[0].id == 2) {//Jedz prosto
+      if (tablica[0].id == 2) {//Jedz prosto przod
+        //delta=Eps^2*T0^2-4*Eps*2*L/dk
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -153,7 +155,8 @@ void loop() {
         prosto();
       }
 
-      if (tablica[0].id == 3) {//Jedz prosto
+      if (tablica[0].id == 3) {//Jedz prosto tyl
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -169,6 +172,7 @@ void loop() {
       }
 
       if (tablica[0].id == 4) {//Obrot
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*Mi / 180 * 3.1416 * rozstaw / 2)) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -185,7 +189,9 @@ void loop() {
         obrotL();
       }
 
-       if (tablica[0].id == 5) {//Obrot
+      if (tablica[0].id == 5) {//Obrot
+        //L=(Mi/180*3.1416 * roz/ 2) %obrot
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*Mi / 180 * 3.1416 * rozstaw / 2)) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -204,6 +210,8 @@ void loop() {
 
 
       if (tablica[0].id == 6 || tablica[0].id == 7) {//Luk
+        //%L=(*L/tablica[0].radius*(tablica[0].radius+rozstaw/2)) %luk
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*L / tablica[0].radius * (tablica[0].radius + rozstaw / 2))) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -230,45 +238,45 @@ void loop() {
 
 void serialEvent() {
   uint16_t ChSum = 0;
-  while(Serial.available() < 25);
-//  delay(1000);
-//  int rxlen = Serial.available();
-//  if(rxlen == 2){
-//    Serial.print("Odebrano: ");
-//    Serial.read();
-//    Serial.read();
-//    Serial.print(tablica[0].id);
-//    Serial.print(' ');
-//    Serial.print(tablica[0].distance);
-//    Serial.print(' ');
-//    Serial.print(tablica[0]._time);
-//    Serial.print(' ');
-//    Serial.print(tablica[0].radius);
-//    Serial.print(' ');
-//    Serial.print(tablica[0].orientation);    
-//    Serial.println();
-//    return;
-//    }
+  while (Serial.available() < 25);
+  //  delay(1000);
+  //  int rxlen = Serial.available();
+  //  if(rxlen == 2){
+  //    Serial.print("Odebrano: ");
+  //    Serial.read();
+  //    Serial.read();
+  //    Serial.print(tablica[0].id);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].distance);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0]._time);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].radius);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].orientation);
+  //    Serial.println();
+  //    return;
+  //    }
   Serial.readBytes((char*)XbeeGetTab, 8);
   Serial.readBytes((char*)XbeeGetTab, 16);
   Serial.read();
-  if((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
+  if ((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
     return;
   for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
   }
   if (((((uint16_t)XbeeGetTab[12]) << 8) | XbeeGetTab[13]) == ChSum)
-    {
-      tablica[tablica_empty_id].id = XbeeGetTab[2];
-      tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[3]) << 8) | XbeeGetTab[4];
-      tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[5]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[7];
-      tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[8]) << 8) | XbeeGetTab[9];
-      tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[10]) << 8) | XbeeGetTab[11];
-      tablica_empty_id += 1;
-    }
+  {
+    tablica[tablica_empty_id].id = XbeeGetTab[2];
+    tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[3]) << 8) | XbeeGetTab[4];
+    tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[5]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[7];
+    tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[8]) << 8) | XbeeGetTab[9];
+    tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[10]) << 8) | XbeeGetTab[11];
+    tablica_empty_id += 1;
+  }
 }
 
-void hardCodedProsto(){
+void hardCodedProsto() {
   delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
   if (delta < 0) Serial.println("Zle zadany ruch");
   T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
@@ -489,9 +497,9 @@ void tyl() {
 
 void koniec_CMD() {
   for (int i = 0; i < tablica_empty_id - 1; i++)
-    tablica[i] = tablica[i+1];
+    tablica[i] = tablica[i + 1];
   zad_t = 0;
-  tablica_empty_id -=1;
+  tablica_empty_id -= 1;
   tablica[tablica_empty_id].id = 0;
   tablica[tablica_empty_id].distance = 0;
   tablica[tablica_empty_id]._time = 0;
