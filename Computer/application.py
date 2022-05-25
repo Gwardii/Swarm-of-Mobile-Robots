@@ -2,15 +2,23 @@ from states import *
 from state_machine import *
 import socket
 
+# --------------USER SETTINGS---------------
+
+RPI_IP = "192.168.0.52"
+RPI_PORT = 9999
+
+# -----------END OF USER SETTING-----------
+
 
 class Application(object):
-    def __init__(self, cell_size: int = 35, number_of_robots: int = 10,rpi_port: int = 9999, video_feed_ip=0) -> None:
+    def __init__(self, cell_size: int = 35, number_of_robots: int = 10, rpi_port: int = 9999, video_feed_ip=0) -> None:
 
         self.state_machine = StateMachine(self)
         self.states = AllStates
         self.transitions = AllTransition
-        if video_feed_ip !=0:
-            video_feed_ip="http://"+video_feed_ip+":"+str(rpi_port)+"/video_feed"
+        if video_feed_ip != 0:
+            video_feed_ip = "http://"+video_feed_ip + \
+                ":"+str(rpi_port)+"/video_feed"
         # application parameters
         self.cell_size = cell_size
         self.number_of_robots = number_of_robots
@@ -34,7 +42,7 @@ class Application(object):
         self.send_data_to_robot = False
 
     def _states_initialization(self, states: AllStates) -> None:
-        
+
         # add all states to state_machine (add to states_dictionary):
         self.state_machine.states[states.rpi_communication] = RPI_Communication(
             rpi_ip=self.rpi_ip, port=self.rpi_port)
@@ -77,7 +85,8 @@ class Application(object):
 
 def main():
 
-    app = Application(video_feed_ip=0,rpi_port=9999,number_of_robots=2)
+    app = Application(video_feed_ip=RPI_IP,
+                      rpi_port=RPI_PORT, number_of_robots=2)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True

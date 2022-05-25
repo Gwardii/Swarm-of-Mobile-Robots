@@ -14,7 +14,7 @@ from pynput import keyboard
 
 # --------------USER SETTINGS---------------
 
-server_IP = "192.168.12.120"
+server_IP = "192.168.0.31"
 server_PORT = 9999
 
 # camera setting:

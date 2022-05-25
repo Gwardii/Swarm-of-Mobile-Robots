@@ -36,7 +36,7 @@ obstacles_markers_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
 area_markers_ids = [0, 1, 2, 3]
 
 # define real size of a side of markers (in [mm]):
-marker_real_size = 335
+marker_real_size = 35
 
 
 # -----------END OF USER SETTING-----------
@@ -204,7 +204,7 @@ class Aruco_markers():
         for id in self.ids:
             # update coordinates after calculating corrections
             self.coordinates[id] = [(self.coordinates[id][0] - self.coordinates_px_shift_x) * self.coordinates_px_resize_x,
-                                    (self.coordinates[id][1] - self.coordinates_px_shift_y) * self.coordinates_px_resize_y]
+                                    TABLE_SIZE["short side"] - (self.coordinates[id][1] - self.coordinates_px_shift_y) * self.coordinates_px_resize_y]
             self.coordinates_estimated[id] = [
                 self.coordinates_estimated[id][0] - self.X_shift, self.coordinates_estimated[id][1] - self.Y_shift]
 
@@ -306,13 +306,12 @@ class Aruco_markers():
         # save data into as json files
         with open('./Computer/resources/obstacles.json', 'w') as f:
             json.dump(obstacles_data, f, indent=2)
-            f.close()
+
         with open('./Computer/resources/robots.json', 'w') as f:
             json.dump(robots_data, f, indent=2)
-            f.close()
+
         with open('./Computer/resources/area.json', 'w') as f:
             json.dump(area_data, f, indent=2)
-            f.close()
 
 
 # Camera class contain all setting of camera.
