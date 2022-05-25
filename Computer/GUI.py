@@ -388,7 +388,7 @@ class GUI:
     def robots_command(self):
         path=self.path
         last_orientation=self.robot_position[2]
-        task_time=3
+        task_time=2000
         task_id=0
         frame = xbee_frame()
         new_orientation=0
