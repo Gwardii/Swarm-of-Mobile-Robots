@@ -6,15 +6,15 @@ const float kp = 6;
 const float ki = 0;
 
 //Xbee
-bool started = false; //True: Message is started
-bool ended   = false;//True: Message is finished
+static bool started = false; //True: Message is started
+static bool ended   = false;//True: Message is finished
 char incomingByte ; //Variable to store the incoming byte
 char msg[3];    //Message - array from 0 to 2 (3 values - PWM - e.g. 240)
 byte index;     //Index of array
 int value = 0;
 double Tjazda;
-uint8_t XbeeGetTab[16];
-int XIndex = 0;
+uint8_t XbeeGetTab[25];
+static int XIndex = 0;
 
 //Parametry Ruchu
 double t_Start;
@@ -94,7 +94,7 @@ int a;
 
 //Odbior
 const int tabN = 20;
-struct Task{
+struct Task {
   uint8_t id;
   uint16_t distance;
   uint32_t _time;
@@ -138,7 +138,9 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie już nie trwa, zapisz czas rozpoczecia
 
 
-      if (tablica[0].id == 2) {//Jedz prosto
+      if (tablica[0].id == 2) {//Jedz prosto przod
+        //delta=Eps^2*T0^2-4*Eps*2*L/dk
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -153,8 +155,24 @@ void loop() {
         prosto();
       }
 
+      if (tablica[0].id == 3) {//Jedz prosto tyl
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L) < 0);
+        if (zad_t == 0) {//Czy to rozpoczecie komendy?
+          zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
+          //Parametry ruchu
+          delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
+          if (delta < 0) Serial.println("Zle zadany ruch");
+          T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+          T1_now = zad_t + T1;
+          T0_now = zad_t + *T0;
+          katL0 = kat_1;
+          katP0 = kat_2;
+        }
+        tyl();
+      }
 
-      if (tablica[0].id == 3) {//Obrot
+      if (tablica[0].id == 4) {//Obrot
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*Mi / 180 * 3.1416 * rozstaw / 2)) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -168,11 +186,32 @@ void loop() {
           katL0 = kat_1;
           katP0 = kat_2;
         }
-        obrot();
+        obrotL();
+      }
+
+      if (tablica[0].id == 5) {//Obrot
+        //L=(Mi/180*3.1416 * roz/ 2) %obrot
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*Mi / 180 * 3.1416 * rozstaw / 2)) < 0);
+        if (zad_t == 0) {//Czy to rozpoczecie komendy?
+          zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
+          //Parametry ruchu
+          if (*Mi > 0) a = 1; else a = -1;
+          L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
+          delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
+          if (delta < 0) Serial.println("Zle zadany ruch");
+          T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+          T1_now = zad_t + T1;
+          T0_now = zad_t + *T0;
+          katL0 = kat_1;
+          katP0 = kat_2;
+        }
+        obrotP();
       }
 
 
-      if (tablica[0].id == 4 || tablica[0].id == 5) {//Luk
+      if (tablica[0].id == 6 || tablica[0].id == 7) {//Luk
+        //%L=(*L/tablica[0].radius*(tablica[0].radius+rozstaw/2)) %luk
+        while (((epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * (*L / tablica[0].radius * (tablica[0].radius + rozstaw / 2))) < 0);
         if (zad_t == 0) {//Czy to rozpoczecie komendy?
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
@@ -198,69 +237,60 @@ void loop() {
 }
 
 void serialEvent() {
-  while (Serial.available() > 0) {
-    //Odbierz bite
-    if (!started) {
-      XbeeGetTab[0] = XbeeGetTab[1];
-      XbeeGetTab[1] = Serial.read();
-    }
-    else
-    {
-      XbeeGetTab[XIndex + 2] = Serial.read();
-      XIndex++;
-    }
-    //Zacznij wiadomosc
-    if (XbeeGetTab[0] == 0x20 && XbeeGetTab[1] == 0x40)
-    {
-      started = true;
-    }
-    //Zakoncz wiadomosc
-    else if (XbeeGetTab[14] == 0x50 && XbeeGetTab[15] == 0x60)
-    {
-      ended = true;
-      for (int g = 0; g < 16; g++)
-        XbeeGetTab[g] = 0;
-      XIndex = 0;
-
-      break; // Done reading - exit from while loop!
-    }
-    if (XIndex >= 13) { //Jezeli wiadomosc za dluga odrzuc
-      ended = false;
-      started = false;
-      for (int g = 0; g < 16; g++)
-        XbeeGetTab[g] = 0;
-      XIndex = 0;
-      break;
-    }
-
-  }
-
   uint16_t ChSum = 0;
-  for (int elo = 0; elo < 14; elo++) {
+  while (Serial.available() < 25);
+  //  delay(1000);
+  //  int rxlen = Serial.available();
+  //  if(rxlen == 2){
+  //    Serial.print("Odebrano: ");
+  //    Serial.read();
+  //    Serial.read();
+  //    Serial.print(tablica[0].id);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].distance);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0]._time);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].radius);
+  //    Serial.print(' ');
+  //    Serial.print(tablica[0].orientation);
+  //    Serial.println();
+  //    return;
+  //    }
+  Serial.readBytes((char*)XbeeGetTab, 8);
+  Serial.readBytes((char*)XbeeGetTab, 16);
+  Serial.read();
+  if ((XbeeGetTab[0] != 0x20) || (XbeeGetTab[1] != 0x40) || (XbeeGetTab[14] != 0x50) || (XbeeGetTab[15] != 0x60))
+    return;
+  for (int elo = 0; elo < 12; elo++) {
     ChSum += XbeeGetTab[elo];
   }
-
-  if (((uint16_t)XbeeGetTab[13] << 8) | XbeeGetTab[12] == ChSum) {
-
-    if (started && ended)
-    {
-      tablica[tablica_empty_id].id = XbeeGetTab[2];
-      tablica[tablica_empty_id].distance = ((uint16_t)XbeeGetTab[4] << 8) | XbeeGetTab[3];
-      tablica[tablica_empty_id]._time = (((uint32_t)XbeeGetTab[7] << 16) | ((uint32_t)XbeeGetTab[6] << 8)) | XbeeGetTab[5];
-      tablica[tablica_empty_id].radius = ((uint16_t)XbeeGetTab[9] << 8) | XbeeGetTab[8];
-      tablica[tablica_empty_id].orientation = ((uint16_t)XbeeGetTab[11] << 8) | XbeeGetTab[10];
-    }
-
+  if (((((uint16_t)XbeeGetTab[12]) << 8) | XbeeGetTab[13]) == ChSum)
+  {
+    tablica[tablica_empty_id].id = XbeeGetTab[2];
+    tablica[tablica_empty_id].distance = (((uint16_t)XbeeGetTab[3]) << 8) | XbeeGetTab[4];
+    tablica[tablica_empty_id]._time = ((((uint32_t)XbeeGetTab[5]) << 16) | (((uint32_t)XbeeGetTab[6]) << 8)) | XbeeGetTab[7];
+    tablica[tablica_empty_id].radius = (((uint16_t)XbeeGetTab[8]) << 8) | XbeeGetTab[9];
+    tablica[tablica_empty_id].orientation = (((uint16_t)XbeeGetTab[10]) << 8) | XbeeGetTab[11];
+    tablica_empty_id += 1;
   }
-  tablica_empty_id += 1;
-  ChSum = 0;
-  ended = false;
-  started = false;
-  for (int g = 0; g < 16; g++)
-    XbeeGetTab[g] = 0;
-  XIndex = 0;
-
 }
+
+void hardCodedProsto() {
+  delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
+  if (delta < 0) Serial.println("Zle zadany ruch");
+  T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
+  T1_now = zad_t + T1;
+  T0_now = zad_t + *T0;
+  katL0 = kat_1;
+  katP0 = kat_2;
+  tablica[0].id = 2; //prosto
+  tablica[0].distance = 500; //500mm
+  tablica[0]._time = 10 * 1000; //w 10 sekund
+  tablica_empty_id = 1;
+  prosto();
+}
+
 
 void luk() {
 
@@ -299,19 +329,19 @@ void luk() {
   //Serial.println(kat_obrot);
   float aa = rozstaw / 2. / tablica[0].radius;
 
-  if (tablica[0].id == 4) {
+  if (tablica[0].id == 6) {
     kat_obrot_1 = kat_obrot * (1 - aa) + katL0;
     Serial.println(kat_obrot);
     kat_obrot_2 = kat_obrot * (1 + aa) + katP0;
   }
 
-  if (tablica[0].id == 5) {
+  if (tablica[0].id == 7) {
     kat_obrot_1 = kat_obrot * (1 + aa) + katL0;
     kat_obrot_2 = kat_obrot * (1 - aa) + katP0;
   }
 }
 
-void obrot() {
+void obrotL() {
   double pr_t = millis();
 
   //Serial.print("Faza: ");
@@ -347,6 +377,44 @@ void obrot() {
   //Serial.println(kat_obrot);
   kat_obrot_1 = -a * kat_obrot + katL0;
   kat_obrot_2 = a * kat_obrot + katP0;
+}
+
+void obrotP() {
+  double pr_t = millis();
+
+  //Serial.print("Faza: ");
+
+  double kat_obrot = 0;
+  if (pr_t <= T1_now) //Czy przyspiesza?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(1);
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+  }
+  else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(2);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+  }
+
+  else if (pr_t <= T0_now)//Czy zwalnia?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(3);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+  }
+
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+
+  kat_obrot = kat_obrot / 3.1416 * 180;
+  //Serial.print("   Kat:");
+  //Serial.println(kat_obrot);
+  kat_obrot_1 = a * kat_obrot + katL0;
+  kat_obrot_2 = -a * kat_obrot + katP0;
 }
 
 void prosto() {
@@ -388,11 +456,55 @@ void prosto() {
   kat_obrot_2 = kat_obrot + katP0;
 }
 
+void tyl() {
+
+  double pr_t = millis();
+
+  //Serial.print("Faza: ");
+
+  double kat_obrot = 0;
+  if (pr_t <= T1_now) //Czy przyspiesza?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(1);
+    kat_obrot = epsilon * (pr_t - zad_t) * (pr_t - zad_t) / 2;
+  }
+  else if (pr_t <= (T0_now - T1))  //Czy stala predkosc?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(2);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (pr_t - zad_t - T1);
+  }
+
+  else if (pr_t <= T0_now)//Czy zwalnia?
+  {
+    //    Serial.print(millis() - zad_t);
+    //    Serial.print("ms - petla)");
+    //Serial.print(3);
+    kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * (pr_t - zad_t - *T0 + T1) - epsilon * (pr_t - zad_t - *T0 + T1) * (pr_t - zad_t - *T0 + T1) / 2;
+  }
+
+  else kat_obrot = epsilon * T1 * T1 / 2 + epsilon * T1 * (*T0 - 2 * T1) + epsilon * T1 * T1 - epsilon * T1 * T1 / 2;
+
+  kat_obrot = kat_obrot / 3.1416 * 180;
+  //Serial.print("   Kat:");
+  //Serial.println(kat_obrot);
+  kat_obrot_1 = -kat_obrot + katL0;
+  kat_obrot_2 = -kat_obrot + katP0;
+}
+
 void koniec_CMD() {
-  for (int i = 0; i < tablica_empty_id; i++)
-    tablica[i] = tablica[i+1];
+  for (int i = 0; i < tablica_empty_id - 1; i++)
+    tablica[i] = tablica[i + 1];
   zad_t = 0;
-  tablica_empty_id -=1;
+  tablica_empty_id -= 1;
+  tablica[tablica_empty_id].id = 0;
+  tablica[tablica_empty_id].distance = 0;
+  tablica[tablica_empty_id]._time = 0;
+  tablica[tablica_empty_id].radius = 0;
+  tablica[tablica_empty_id].orientation = 0;
 }
 
 void PWM() {

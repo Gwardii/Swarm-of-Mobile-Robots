@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 class Xbee:
-    xbeePort = "COM4"
+    xbeePort = "COM8"
     xbBoudrate = "9600"
 
     def __init__(self, port=xbeePort, boudrate=xbBoudrate) -> None:
@@ -95,6 +95,7 @@ class xbee_frame():
         self.full_msg[13] = self.checksum & 0xff
 
         # create bitarray (xbee requirements):
+        print(self.full_msg)
         self.full_msg = bytearray(self.full_msg)
 
     def send_msg(self, task_id=0, distance=0, task_time=0, arc_radius=0, rotation_angle=0):
@@ -106,10 +107,18 @@ class xbee_frame():
         # print(self.full_msg)
 
 
-# if __name__ == '__main__':
-#     frame = xbee_frame()
-#     frame.send_msg(task_id=10, distance=256, task_time=45,
-#                    arc_radius=10, rotation_angle=40)
-#     xbee=Xbee()
-#     xbee.send_msg_unicast("0013A200415E861B",frame.full_msg)
-
+if __name__ == '__main__':
+    frame = xbee_frame()
+    frame.send_msg(task_id=2, distance=70, task_time=2000,
+                   arc_radius=10, rotation_angle=30)
+    xbee=Xbee()
+    xbee.send_msg_unicast("0013A200415BA7CD",frame.full_msg)
+    #frame = xbee_frame()
+    #frame.send_msg(task_id=3, distance=500, task_time=2000,
+    #               arc_radius=10, rotation_angle=90)
+    #xbee.send_msg_unicast("0013A200415BA7CD",frame.full_msg)
+    #frame = xbee_frame()
+    #frame.send_msg(task_id=4, distance=500, task_time=8000,
+    #               arc_radius=200, rotation_angle=40)
+    #xbee.send_msg_unicast("0013A200415BA7CD",frame.full_msg)
+    print('Wyslane')
