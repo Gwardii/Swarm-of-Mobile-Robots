@@ -202,7 +202,7 @@ class SetTarget(State):
         self.gui.draw_path()
         print("wysylam komende")
         self.gui.robots_command()
-        print("komenty wyslane")
+        print("komendy wyslane")
 
 
 
