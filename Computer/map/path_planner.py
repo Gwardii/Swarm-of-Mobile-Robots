@@ -167,7 +167,8 @@ class PathPlanner(object):
         target_cell = self._position_to_cell(robot._target[0])
         line = self._rasterize_line_between_cells(starting_cell, target_cell)
         if(all([cell in rated_cells for cell in line])):
-            robot.path = {starting_cell, target_cell}
+            robot.path = [starting_cell, target_cell]
+            self._paths = robot.path
             return
         paths = PathTree(Node(starting_cell, None))
         active_nodes = paths._last_nodes.copy()
@@ -191,6 +192,7 @@ class PathPlanner(object):
             path = self._minimize_path(path)
             set_of_paths.add(path)
         robot.path = list(set_of_paths)[0]
+        self._paths = robot.path
 
     def _minimize_path(self, path):
         size = len(path)
