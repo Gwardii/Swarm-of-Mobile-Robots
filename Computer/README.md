@@ -22,7 +22,7 @@ RPI_PORT = 9999
 
 In order to provide more orderly and readable code state machine was implemented. All states and possible transitions are shown on the diagram below:
 
-<img src="/Readme_img/main_state_machine.svg" align="center" style = "width: 80%"  />
+<img src="/Readme_img/main_state_machine.png" align="center" style = "width: 80%"  />
 
 
 
