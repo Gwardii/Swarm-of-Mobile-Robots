@@ -4,7 +4,7 @@ import socket
 
 # --------------USER SETTINGS---------------
 
-RPI_IP = "192.168.0.52"
+RPI_IP = "192.168.108.76"
 RPI_PORT = 9999
 
 # -----------END OF USER SETTING-----------
@@ -96,7 +96,7 @@ def main():
     # draw obstacles:,
     app.change_state(app.transitions.draw_obstacles)
     # draw first iteration of path
-    app.change_state(app.transitions.draw_path)
+    # app.change_state(app.transitions.draw_path)
     tic = time.time()*1000
     while True:
         # ====================
@@ -119,6 +119,7 @@ def main():
         # update aplication's window:
         app.gui.window.update_idletasks()
         app.gui.window.update()
+        
 
 
 if __name__ == "__main__":
