@@ -61,19 +61,8 @@
     },
     {
       "id":7,
-      "type": "triangle",
-      "point_1": {
-        "x": -100,
-        "y": 45
-      },
-      "point_2": {
-        "x": 0,
-        "y": 30
-      },
-      "point_3": {
-        "x": 200,
-        "y": 300
-      }
+      "type": "circle",
+      "radius":100
     },
     {
       "id":8,
@@ -83,8 +72,8 @@
     {
       "id":9,
       "type": "rectangle",
-      "length_x": 150,
-      "length_y": 200
+      "length_x": 220,
+      "length_y": 150
     },
     {
       "id":10,
@@ -103,15 +92,15 @@
       }
     },
     {
-      "id":11,
-      "type": "circle",
-      "radius": 150
+      "id":14,
+      "type": "rectangle",
+      "length_x": 280,
+      "length_y": 140
     },
     {
-      "id":12,
-      "type": "rectangle",
-      "length_x": 150,
-      "length_y": 200
+      "id":15,
+      "type": "circle",
+      "radius": 120
     }
 
   ]

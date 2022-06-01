@@ -31,6 +31,7 @@ class GUI:
         '''
         self.cell_size = cell_size
         self.cap = cv2.VideoCapture(video_feed)
+        self.number_of_robots=number_of_robots
 
         # create window for aplication:
         self.window = tk.Tk()
@@ -64,7 +65,8 @@ class GUI:
 
         # robot control - entry
         # potem się to rozszerzy na N robotow
-        self.robot_position = np.array([800., 200., 90.])
+        self.robot_position = np.ndarray((number_of_robots,3))
+        print(self.robot_position.shape)
         self.coord_entry = tk.Entry(fg='black', bg='white', width=20)
         self.coord_label = tk.Label(
             text="Enter target coordinates (x,y,rot):", bg="white", fg="black", font=12)
@@ -119,9 +121,9 @@ class GUI:
         self.line = 1
 
         # robot communication
-        self.xbee = Xbee()
-        if(self.xbee != None):
-            self.xbee_ready=True
+        # self.xbee = Xbee()
+        # if(self.xbee != None):
+        #     self.xbee_ready=True
         # robots MAC
         self.robots_MAC = {
             "1": "0013A200415BA7CD",
@@ -256,8 +258,10 @@ class GUI:
             area = json.load(a) 
         with open(".\Computer\\resources\\robots.json") as r:
             robots_position=json.load(r)["robots"]
-        self.robot_position[0:2]=[robots_position[0]["position"]["x"],robots_position[0]["position"]["y"]]
-        self.robot_position[2]=robots_position[0]["orientation"]
+        
+        for i in range(self.number_of_robots):
+            self.robot_position[i,0:2]=[robots_position[i]["position"]["x"],robots_position[i]["position"]["y"]]
+            self.robot_position[i,2]=robots_position[i]["orientation"]
         wa = working_area.WorkingArea(area)
         return dict_of_obstacles, wa
 
@@ -269,38 +273,39 @@ class GUI:
             R = self._rotation_matrix(self.robot_position[2]-90)
             local_vector = [0, 2]
             local_vector = R.dot(local_vector)
-            self.robot_position[0:2] = [
-                self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
+            self.robot_position[self.controlled_robot_id,0:2] = [
+                self.robot_position[int(self.controlled_robot_id)-1,0]+local_vector[0], self.robot_position[int(self.controlled_robot_id)-1,1]+local_vector[1]]
         if self.is_backward_pressed:
             R = self._rotation_matrix(self.robot_position[2]-90)
             _msg.send_msg(task_id = 3, distance = 1000, task_time = 8000)
             self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             local_vector = [0, -2]
             local_vector = R.dot(local_vector)
-            self.robot_position[0:2] = [
-                self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
+            self.robot_position[self.controlled_robot_id-1,0:2] = [
+                self.robot_position[int(self.controlled_robot_id)-1,0]+local_vector[0], self.robot_position[int(self.controlled_robot_id)-1,1]+local_vector[1]]
         if self.is_rotate_right_pressed:
             _msg.send_msg(task_id = 5, rotation_angle = 30, task_time = 1200)
             self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
-            self.robot_position[2] = float(self.robot_position[2]-0.5)
+            self.robot_position[int(self.controlled_robot_id)-1,2] = float(self.robot_position[int(self.controlled_robot_id)-1,2]-0.5)
         if self.is_rotate_left_pressed:
             _msg.send_msg(task_id = 4, rotation_angle = 30, task_time = 1200)
             self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
-            self.robot_position[2] = float(self.robot_position[2]+0.5)
+            self.robot_position[int(self.controlled_robot_id)-1,2] = float(self.robot_position[int(self.controlled_robot_id)-1,2]+0.5)
         
         self.map.canvas.restore_region(self.background)
-        self.robot_artist = self._draw_robot(
-            self.robot_position[0:2], self.robot_position[2], self.controlled_robot_id)
-        self.ax.draw_artist(self.robot_artist[0])
-        self.ax.draw_artist(self.robot_artist[1])
-        self.ax.draw_artist(self.robot_artist[2])
-        self.map.canvas.blit(self.ax.bbox)
-        self.robot_artist[0].remove()
-        self.robot_artist[1].remove()
-        self.robot_artist[2].remove()
+        for i in range(self.number_of_robots):
+            self.robot_artist = self._draw_robot(
+                self.robot_position[i,0:2], self.robot_position[i,2], i+1)
+            self.ax.draw_artist(self.robot_artist[0])
+            self.ax.draw_artist(self.robot_artist[1])
+            self.ax.draw_artist(self.robot_artist[2])
+            self.map.canvas.blit(self.ax.bbox)
+            self.robot_artist[0].remove()
+            self.robot_artist[1].remove()
+            self.robot_artist[2].remove()
 
-        self.robot._position = self.robot_position[0:2]
-        self.robot._orientation = self.robot_position[2]
+        self.robot._position = self.robot_position[int(self.controlled_robot_id)-1,0:2]
+        self.robot._orientation = self.robot_position[int(self.controlled_robot_id)-1,2]
 
     def _draw_robot(self, position, rotation, id):
         # rysoanie kola ktore bedzei podstawa robota
