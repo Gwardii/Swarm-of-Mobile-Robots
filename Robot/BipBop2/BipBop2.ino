@@ -18,12 +18,14 @@ double Tjazda;
 uint8_t XbeeGetTab[25];
 static int XIndex = 0;
 
+
 ///Parametry Ruchu///
 double epsilon = 5 * 0.000001; //przyspieszenie katowe [deg/ms2]
 double t_Start;
 double t_End;
 
-///konfiguracja napedow///
+
+///Konfiguracja napedow///
 const byte silnik_1_A = 2;
 const byte silnik_1_B = 5;
 const byte silnik_2_A = 3;
@@ -162,7 +164,7 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -180,7 +182,7 @@ void loop() {
           if (*Mi > 0) a = 1; else a = -1;
           L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -199,7 +201,7 @@ void loop() {
           if (*Mi > 0) a = 1; else a = -1;
           L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -217,7 +219,7 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
