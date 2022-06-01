@@ -24,7 +24,7 @@ Robots were built around the Arduino Uno boards. Each of them has two wheels equ
 <img src=/Readme_img/robot_swarm.jpg width=40%></img>
 
 A robot can get the command to wait, move forward, rotate, and move around the given arc. Each command is built so the robot will drive a given distance or angle in a given amount of time.
-The main goal while programming robots was to make their path as deterministic as possible. To achieve this, each command consists of the path parametrs such as its length or radius and the time in with the path should be complited. Based on that robot calculates the path of each wheel and follows it using PID.
+The main goal while programming robots was to make their path as deterministic as possible. To achieve this, each command consists of the path parametrs such as its length or radius and the time in with the path should be complited. Based on that robot calculates the path for each wheel and follows it using PID.
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
