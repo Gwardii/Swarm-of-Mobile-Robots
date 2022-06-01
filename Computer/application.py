@@ -4,7 +4,7 @@ import socket
 
 # --------------USER SETTINGS---------------
 
-RPI_IP = "192.168.0.52"
+RPI_IP = 0
 RPI_PORT = 9999
 
 # -----------END OF USER SETTING-----------

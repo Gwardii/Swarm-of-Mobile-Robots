@@ -389,6 +389,7 @@ class GUI:
         path=self.path
         last_orientation=self.robot_position[2]
         task_time=2000
+        velocity = 35/1000
         task_id=0
         frame = xbee_frame()
         new_orientation=0
@@ -402,27 +403,43 @@ class GUI:
             new_orientation=target_orientation-last_orientation #
             last_orientation=target_orientation
             distance = math.dist(center_i,center_i_1)
+            offset_time = 2000
             if(new_orientation==0):
+                task_time = offset_time + distance/velocity
                 task_id=2
                 frame.send_msg(task_id=task_id,distance=int(distance), task_time=int(task_time),arc_radius=0,rotation_angle=0)
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
                 self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
             else:
-                task_id=3
-                frame.send_msg(task_id=task_id,distance=0, task_time=int(task_time),arc_radius=0,rotation_angle=int(new_orientation))
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                task_time = offset_time + abs(new_orientation)/velocity
+                if(new_orientation > 0):
+                    task_id=4
+                    frame.send_msg(task_id=task_id,distance=0, task_time=int(task_time),arc_radius=0,rotation_angle=int(new_orientation))
+                else:
+                    task_id=5
+                    frame.send_msg(task_id=task_id,distance=0, task_time=int(task_time),arc_radius=0,rotation_angle=int(abs(new_orientation)))
+
+                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
                 self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+                
+                task_time = offset_time + distance/velocity
                 task_id=2
                 frame.send_msg(task_id=task_id,distance=int(distance), task_time=int(task_time),arc_radius=0,rotation_angle=0)
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
                 self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
         #set required orientation
-        task_id=3
+
         distance=0
         new_orientation=new_orientation-self.robot_target[2]
-        frame.send_msg(task_id=1,distance=int(distance), task_time=int(task_time),arc_radius=int(10),rotation_angle=int(new_orientation))
-        print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+        task_time = 1000 + abs(new_orientation)/velocity
+        if(new_orientation != 0):
+            if(new_orientation > 0):
+                task_id = 4
+            else:
+                task_id = 5
+            frame.send_msg(task_id,distance=int(distance), task_time=int(task_time),arc_radius=int(10),rotation_angle=int(abs(new_orientation)))
+            print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
+            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
 
         task_id=1
         distance=0
@@ -437,7 +454,7 @@ class GUI:
         _rated_cells, _ = self.pather.get_rated_cells(self.robot)
         self.pather.add_robot(0, self.robot)
         self.pather._determine_paths()
-        path = self.pather.get_paths()
+        path = self.robot.get_path()
         self.path=path
         # self.robots_command(path)
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)

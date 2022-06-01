@@ -186,12 +186,10 @@ class PathPlanner(object):
                         paths._add_nodes(_nodes_to_add)
                         next_active_nodes.extend(_nodes_to_add)
             active_nodes = next_active_nodes
-            set_of_paths = set()
         for node in paths._last_nodes:
             path = paths._to_list(node)
             path = self._minimize_path(path)
-            set_of_paths.add(path)
-        robot.path = list(set_of_paths)[0]
+            robot.path = path
         self._paths = robot.path
 
     def _minimize_path(self, path):
@@ -207,7 +205,7 @@ class PathPlanner(object):
             else:
                 cell_2 = path[int(size/2)]
                 new_path = self._minimize_path([cell_1, cell_2])[0:-1]
-                new_path.append(self._minimize_path([cell_2, cell_3]))
+                new_path.extend(self._minimize_path([cell_2, cell_3]))
         return new_path
 
 
