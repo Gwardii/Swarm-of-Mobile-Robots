@@ -86,7 +86,7 @@ class Application(object):
 def main():
 
     app = Application(video_feed_ip=RPI_IP,
-                      rpi_port=RPI_PORT, number_of_robots=2)
+                      rpi_port=RPI_PORT, number_of_robots=1)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -96,17 +96,19 @@ def main():
     # draw obstacles:,
     app.change_state(app.transitions.draw_obstacles)
     # draw first iteration of path
-    # app.change_state(app.transitions.draw_path)
+    app.change_state(app.transitions.draw_path)
     tic = time.time()*1000
     while True:
         # ====================
         # some if statement to update widgets
         if app.rpi_communicatiom == True:
             app.gui.rpi_diode.configure(image=app.gui.diode["green"])
-        # if app.gui.xbee_ready == True:
-        #     app.gui.robot_diode.configure(image=app.gui.diode["green"])
+        if app.gui.xbee_ready == True:
+            app.gui.robot_diode.configure(image=app.gui.diode["green"])
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
+            app.change_state(app.transitions.draw_path)
+            
         # app.change_state(app.transitions.start_robot_communication)
 
         # app.send_data_to_robot=True
@@ -119,7 +121,7 @@ def main():
         # update aplication's window:
         app.gui.window.update_idletasks()
         app.gui.window.update()
-        
+
 
 
 if __name__ == "__main__":

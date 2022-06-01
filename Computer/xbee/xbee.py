@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 class Xbee:
-    xbeePort = "COM8"
+    xbeePort = "COM4"
     xbBoudrate = "9600"
 
     def __init__(self, port=xbeePort, boudrate=xbBoudrate) -> None:

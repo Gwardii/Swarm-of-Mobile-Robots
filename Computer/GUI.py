@@ -59,7 +59,7 @@ class GUI:
         self.raster_map: map_generator.MapGenerator = None
         self.pather = path_planner.PathPlanner(self.raster_map)
         self.robot = robot_handler.Robot(0, [800, 200], 0)
-        self.robot_target = [150, 800]
+        self.robot_target = [150, 800,0]
         self.robot.set_target(self.robot_target)
         self.new_robot_target = False
 
@@ -121,9 +121,9 @@ class GUI:
         self.line = 1
 
         # robot communication
-        # self.xbee = Xbee()
-        # if(self.xbee != None):
-        #     self.xbee_ready=True
+        self.xbee = Xbee()
+        if(self.xbee != None):
+            self.xbee_ready=True
         # robots MAC
         self.robots_MAC = {
             "1": "0013A200415BA7CD",
@@ -392,9 +392,9 @@ class GUI:
             self.ax.bbox)
     def robots_command(self):
         path=self.path
-        last_orientation=self.robot_position[2]
+        last_orientation=self.robot_position[int(self.controlled_robot_id)-1,2]
         task_time=2000
-        velocity = 35/1000
+        velocity = 35/500
         task_id=0
         frame = xbee_frame()
         new_orientation=0
@@ -435,16 +435,16 @@ class GUI:
         #set required orientation
 
         distance=0
-        new_orientation=new_orientation-self.robot_target[2]
-        task_time = 1000 + abs(new_orientation)/velocity
-        if(new_orientation != 0):
-            if(new_orientation > 0):
-                task_id = 4
-            else:
-                task_id = 5
-            frame.send_msg(task_id,distance=int(distance), task_time=int(task_time),arc_radius=int(10),rotation_angle=int(abs(new_orientation)))
-            print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+        # new_orientation=new_orientation-self.robot_target[2]
+        # task_time = 1000 + abs(new_orientation)/velocity
+        # if(new_orientation != 0):
+        #     if(new_orientation > 0):
+        #         task_id = 4
+        #     else:
+        #         task_id = 5
+        #     frame.send_msg(task_id,distance=int(distance), task_time=int(task_time),arc_radius=int(10),rotation_angle=int(abs(new_orientation)))
+        #     print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}, time {task_time}")
+        #     self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
 
         task_id=1
         distance=0
@@ -476,6 +476,7 @@ class GUI:
             self.ax.draw_artist(temp)
             self.map.canvas.blit(self.ax.bbox)
             self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
+        self.robot_position[int(self.controlled_robot_id)-1,0:3]=self.robot_target
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.new_robot_target = False
 
