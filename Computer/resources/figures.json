@@ -8,8 +8,8 @@
     {
       "id":9,
       "type": "rectangle",
-      "length_x": 150,
-      "length_y": 220
+      "length_x": 220,
+      "length_y": 150
     },
     {
       "id":10,

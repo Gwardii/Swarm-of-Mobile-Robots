@@ -4,8 +4,9 @@ import socket
 
 # --------------USER SETTINGS---------------
 
-RPI_IP = "192.168.152.76"
+RPI_IP = "192.168.0.52"
 RPI_PORT = 9999
+NUMBER_OF_ROBOTS = 4
 
 # -----------END OF USER SETTING-----------
 
@@ -86,7 +87,7 @@ class Application(object):
 def main():
 
     app = Application(video_feed_ip=RPI_IP,
-                      rpi_port=RPI_PORT, number_of_robots=1)
+                      rpi_port=RPI_PORT, number_of_robots=NUMBER_OF_ROBOTS)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -103,12 +104,12 @@ def main():
         # some if statement to update widgets
         if app.rpi_communicatiom == True:
             app.gui.rpi_diode.configure(image=app.gui.diode["green"])
-        if app.gui.xbee_ready == True:
-            app.gui.robot_diode.configure(image=app.gui.diode["green"])
+        # if app.gui.xbee_ready == True:
+        #     app.gui.robot_diode.configure(image=app.gui.diode["green"])
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
             app.change_state(app.transitions.draw_path)
-            
+
         # app.change_state(app.transitions.start_robot_communication)
 
         # app.send_data_to_robot=True
@@ -121,7 +122,6 @@ def main():
         # update aplication's window:
         app.gui.window.update_idletasks()
         app.gui.window.update()
-
 
 
 if __name__ == "__main__":

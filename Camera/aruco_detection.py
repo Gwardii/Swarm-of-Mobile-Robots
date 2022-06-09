@@ -233,14 +233,16 @@ class Aruco_markers():
                     self.coordinates[id][0:2], self.orientations[id][2])
 
             # Drawing aruco boxes and texts:
-            top_left = [int(self.bbox[id][0, 0]) + 75,
-                        int(self.bbox[id][0, 1])]
-            aruco.drawAxis(
-                img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
-            cv2.putText(img, str(
-                f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
-            cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
-                        top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+            if(draw):
+                top_left = [int(self.bbox[id][0, 0]) + 75,
+                            int(self.bbox[id][0, 1])]
+                aruco.drawAxis(
+                    img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
+
+                cv2.putText(img, str(
+                    f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+                cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
+                    top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
 
             self.main_IMG = img
 
