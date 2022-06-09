@@ -75,6 +75,7 @@ class Aruco_markers():
         self.detected_obstacles = {}
         # time [s] for refreshing all lists. if something is not detected will be removed
         self.refresh_time = 2
+        self.time_flag = time.time()
         self.X_shift = 0
         self.Y_shift = 0
         self.main_IMG = None
@@ -205,9 +206,10 @@ class Aruco_markers():
                     self.detected_corners[id][1] for id in self.detected_corners.keys()) - self.coordinates_px_shift_y)
 
         # once for refresh_time clear all list to remove nonexisting object:
-        if (time.time()-time_flag > self.refresh_time):
+        if (time.time() - self.time_flag > self.refresh_time):
             self.detected_robots.clear()
             self.detected_obstacles.clear()
+            self.time_flag = time.time()
 
         for id in self.ids:
             # update coordinates after calculating corrections

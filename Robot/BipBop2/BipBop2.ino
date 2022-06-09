@@ -1,11 +1,13 @@
+///PID///
 const float kd = 2;
-double dt;
-double last_t = 0;
-
 const float kp = 6;
 const float ki = 0;
 
-//Xbee
+double dt;
+double last_t = 0;
+
+
+///Xbee///
 static bool started = false; //True: Message is started
 static bool ended   = false;//True: Message is finished
 char incomingByte ; //Variable to store the incoming byte
@@ -16,11 +18,14 @@ double Tjazda;
 uint8_t XbeeGetTab[25];
 static int XIndex = 0;
 
-//Parametry Ruchu
+
+///Parametry Ruchu///
+double epsilon = 5 * 0.000001; //przyspieszenie katowe [deg/ms2]
 double t_Start;
 double t_End;
-double epsilon = 5 * 0.000001; //przyspieszenie katowe [deg/ms/ms]
-//Piny napedow
+
+
+///Konfiguracja napedow///
 const byte silnik_1_A = 2;
 const byte silnik_1_B = 5;
 const byte silnik_2_A = 3;
@@ -35,25 +40,23 @@ int wartosc_PWM_1_silnik_lewy = 0;
 int wartosc_PWM_1_silnik_prawy = 0;
 int PWM_max = 255;
 
-//silnik_1 lewy
-//silnik_2 prawy
+long long silnik_1; //Lewy silnik
+long long silnik_2; //Prawy silnik
 
-long long silnik_1;
-long long silnik_2;
+double kat_1; //Odczyt lewego enkodera
+double kat_2; //Odczyt prawego enkodera
 
-double kat_1;
-double kat_2;
-
-//stan obecny
+//Zmienne odczytu enkodera
 int state_1_A;
 int state_1_B;
 int state_2_A;
 int state_2_B;
 
+///Konfiguracja potencjometru///
 long potencjometr = 0;
 const byte pin_potencjometr = 5;
 
-//Lewy silnik PWM
+///Lewy silnik PWM konfiguracja///
 double suma_bledow_1 = 0;
 long long kat_obrot_1 = 0;
 float wartosc_PWM_1;
@@ -61,7 +64,7 @@ float uchyb_silnik_1 = 0;
 float last_uchyb_silnik_1 = 0;
 float szybk_bledow_1;
 
-//Prawy silnik PWM
+///Prawy silnik PWM konfiguracja///
 double suma_bledow_2 = 0;
 long long kat_obrot_2 = 0;
 float wartosc_PWM_2;
@@ -69,19 +72,36 @@ float uchyb_silnik_2 = 0;
 float last_uchyb_silnik_2 = 0;
 float szybk_bledow_2;
 
-double temp;
-
-//Kola
+///Parametry robota///
 const float d_kola = 42;
+const float rozstaw = 94;
+
+///Zmienne odometria///
 int dp1, dp2;
 int dp1_last, dp2_last;
 double Dl, Dp;
 double D, D_last;
 float rot = 0, rot_d = 0;
-const float rozstaw = 94;
 double x_n, y_n;
 
-//Czas w petli
+///Odbior///
+const int tabN = 20;
+struct Task {
+  uint8_t id;
+  uint16_t distance;
+  uint32_t _time;
+  uint16_t radius;
+  uint16_t orientation;
+
+};
+struct Task tablica[tabN]; //tablica do odbioru danych o zadaniu. {Nr zadania, dlugosc (prosta/luk) [mm], czas wykonania [ms], promien luku [mm], kat rotacji w miejscu [deg]}
+uint8_t tablica_empty_id = 0;
+float bufor[5] = {0, 0, 0, 0, 0};
+float T1, beta, delta, L_obr;
+uint16_t *L, *Mi;
+uint32_t *T0;
+
+///Pozostałe zmienne///
 double petla_t1 = 0;
 float Xt = 10;
 double zad_t = 0; //Czas rozpoczecia wykonywania zadania
@@ -92,24 +112,7 @@ double katP0;
 double L1, L2;
 int a;
 
-//Odbior
-const int tabN = 20;
-struct Task {
-  uint8_t id;
-  uint16_t distance;
-  uint32_t _time;
-  uint16_t radius;
-  uint16_t orientation;
-};
-struct Task tablica[tabN]; //tablica do odbioru danych o zadaniu. {Nr zadania, dlugosc (prosta/luk) [mm], czas wykonania [ms], promien luku [mm], kat rotacji w miejscu [deg]}
-uint8_t tablica_empty_id = 0;
-float bufor[5] = {0, 0, 0, 0, 0};
-float T1, beta, delta, L_obr;
-uint16_t *L, *Mi;
-uint32_t *T0;
-
 void setup() {
-  // put your setup code here, to run once:
   pinMode(silnik_1_A, INPUT_PULLUP);
   pinMode(silnik_2_A, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(silnik_1_A), odczyt_1, CHANGE);
@@ -128,7 +131,7 @@ void setup() {
 }
 
 void loop() {
-  //Petla co X ms, obsługa zadania
+  //Petla co Xt ms, obsługa zadania
   if ((millis() - petla_t1) >= Xt) {
     petla_t1 = millis();
     if (tablica_empty_id > 0) { //Czy jest komenda do wykonania?
@@ -161,7 +164,7 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -179,7 +182,7 @@ void loop() {
           if (*Mi > 0) a = 1; else a = -1;
           L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -198,7 +201,7 @@ void loop() {
           if (*Mi > 0) a = 1; else a = -1;
           L_obr = a**Mi / 180. * 3.1416 * rozstaw / 2;
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * L_obr;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -216,7 +219,7 @@ void loop() {
           zad_t = millis(); //Jeżeli zadanie jeszcze nie trwa, zapisz czas rozpoczecia
           //Parametry ruchu
           delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
-          if (delta < 0) Serial.println("Zle zadany ruch");
+          if (delta < 0) while(1);
           T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
           T1_now = zad_t + T1;
           T0_now = zad_t + *T0;
@@ -236,27 +239,10 @@ void loop() {
   delay(1);
 }
 
-void serialEvent() {
-  uint16_t ChSum = 0;
+///Obsługa wiadomości od XBee///
+void serialEvent() {F
+  uint16_t ChSum = 0; //Check Sum
   while (Serial.available() < 25);
-  //  delay(1000);
-  //  int rxlen = Serial.available();
-  //  if(rxlen == 2){
-  //    Serial.print("Odebrano: ");
-  //    Serial.read();
-  //    Serial.read();
-  //    Serial.print(tablica[0].id);
-  //    Serial.print(' ');
-  //    Serial.print(tablica[0].distance);
-  //    Serial.print(' ');
-  //    Serial.print(tablica[0]._time);
-  //    Serial.print(' ');
-  //    Serial.print(tablica[0].radius);
-  //    Serial.print(' ');
-  //    Serial.print(tablica[0].orientation);
-  //    Serial.println();
-  //    return;
-  //    }
   Serial.readBytes((char*)XbeeGetTab, 8);
   Serial.readBytes((char*)XbeeGetTab, 16);
   Serial.read();
@@ -276,7 +262,8 @@ void serialEvent() {
   }
 }
 
-void hardCodedProsto() {
+/*
+void HardCodedPelnaPizda() {
   delta = (epsilon * epsilon) * (*T0 * *T0) - 8 * epsilon / d_kola * *L;
   if (delta < 0) Serial.println("Zle zadany ruch");
   T1 = *T0 / 2. - sqrt(delta) / 2 / epsilon;
@@ -290,7 +277,7 @@ void hardCodedProsto() {
   tablica_empty_id = 1;
   prosto();
 }
-
+*/
 
 void luk() {
 

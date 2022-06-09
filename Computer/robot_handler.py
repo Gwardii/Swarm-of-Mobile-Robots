@@ -9,6 +9,7 @@ class Robot(object):
         self._radius = radius
         self._shape = obstacles.Circle(robot_id, position, orientation, radius)
         self._target = None
+        self.path = None
         return None
 
     def get_id(self):
@@ -22,6 +23,9 @@ class Robot(object):
     
     def get_shape(self):
         return self._shape
+
+    def get_path(self):
+        return self.path
 
     def set_target(self, target: list[float]) -> None:
         if len(target) == 2:

@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 
 class Xbee:
-    xbeePort = "COM8"
+    xbeePort = "COM4"
     xbBoudrate = "9600"
 
     def __init__(self, port=xbeePort, boudrate=xbBoudrate) -> None:
@@ -109,7 +109,7 @@ class xbee_frame():
 
 if __name__ == '__main__':
     frame = xbee_frame()
-    frame.send_msg(task_id=2, distance=70, task_time=2000,
+    frame.send_msg(task_id=2, distance=700, task_time=4000,
                    arc_radius=10, rotation_angle=30)
     xbee=Xbee()
     xbee.send_msg_unicast("0013A200415BA7CD",frame.full_msg)

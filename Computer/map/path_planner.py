@@ -1,3 +1,4 @@
+import numpy as np
 from map import map_generator
 import robot_handler
 
@@ -37,8 +38,51 @@ class PathPlanner(object):
     def _determine_paths(self) -> bool:
         unreachable_target_robots = list()
         for robot_id, robot in self._robots.items():
-            rated_cells, is_target_reachable = self._rate_cells(robot)
-            self._find_path(robot, rated_cells)
+            self.rated_cells, is_target_reachable = self._rate_cells(robot)
+            self._find_path(robot, self.rated_cells)
+
+    def _rasterize_line_between_cells(self, cell_1, cell_2):
+        def my_round(x):
+            n = int(x)
+            if(abs(x) % 1 > 0.5):
+                return n + x/abs(x)
+            return n
+        def my_round_2(x):
+            n = int(x)
+            if(abs(x) % 1 < 0.5):
+                return n
+            return n + x/abs(x)
+        x = cell_2[0] - cell_1[0]
+        y = cell_2[1] - cell_1[1]
+        if(x == 0):
+            y_sign = int(y/abs(y))
+            rasterized_line = {(cell_2[0], _y) for _y in range(cell_1[1],cell_2[1]+y_sign, y_sign)}
+        elif(y == 0):
+            x_sign = int(x/abs(x))
+            rasterized_line = {(_x, cell_2[1]) for _x in range(cell_1[0],cell_2[0]+x_sign, x_sign)}
+        elif(abs(y) > abs(x)):
+            x_sign = int(x/abs(x))
+            y_sign = int(y/abs(y))
+            y_x = y/x
+            _y0 = cell_1[1]
+            rasterized_line = set()
+            for i, _dx in enumerate(np.arange(0, abs(x), 0.5)):
+                _x = cell_1[0] + int(np.ceil(_dx)*x_sign)
+                _y1 = int(_y0 + my_round_2(0.5*i*y_x*x_sign))
+                _y2 = int(_y0 + my_round(0.5*(i+1)*y_x*x_sign))
+                rasterized_line.update({(_x, _y) for _y in range(_y1,_y2+x_sign, x_sign)})
+        else:
+            x_sign = int(x/abs(x))
+            y_sign = int(y/abs(y))
+            x_y = x/y
+            _x0 = cell_1[0]
+            rasterized_line = set()
+            for i, _dy in enumerate(np.arange(0, abs(y), 0.5)):
+                _y = cell_1[1] + int(np.ceil(_dy)*y_sign)
+                _x1 = int(_x0 + my_round_2(0.5*i*x_y*y_sign))
+                _x2 = int(_x0 + my_round(0.5*(i+1)*x_y)*y_sign)
+                rasterized_line.update({(_x, _y) for _x in range(_x1,_x2+x_sign, x_sign)})
+        return rasterized_line
 
     def _rate_cells(self, robot):
         def neighbours(cell):
@@ -120,6 +164,12 @@ class PathPlanner(object):
 
 
         starting_cell = self._position_to_cell(robot.get_coordinates()[0])
+        target_cell = self._position_to_cell(robot._target[0])
+        line = self._rasterize_line_between_cells(starting_cell, target_cell)
+        if(all([cell in rated_cells for cell in line])):
+            robot.path = [starting_cell, target_cell]
+            self._paths = robot.path
+            return
         paths = PathTree(Node(starting_cell, None))
         active_nodes = paths._last_nodes.copy()
         while bool(active_nodes):
@@ -137,8 +187,27 @@ class PathPlanner(object):
                         next_active_nodes.extend(_nodes_to_add)
             active_nodes = next_active_nodes
         for node in paths._last_nodes:
-            # print(paths._to_list(node))
-            self._paths=paths._to_list(node)
+            path = paths._to_list(node)
+            path = self._minimize_path(path)
+            robot.path = path
+        self._paths = robot.path
+
+    def _minimize_path(self, path):
+        size = len(path)
+        if(size < 3):
+            new_path = path
+        else:
+            cell_1 = path[0]
+            cell_3 = path[-1]
+            line = self._rasterize_line_between_cells(cell_1, cell_3)
+            if(all([cell in self.rated_cells for cell in line])):
+                new_path = [cell_1, cell_3]
+            else:
+                cell_2 = path[int(size/2)]
+                new_path = self._minimize_path([cell_1, cell_2])[0:-1]
+                new_path.extend(self._minimize_path([cell_2, cell_3]))
+        return new_path
+
 
     def _position_to_cell(self, position):
         x = int(position[0] / self._map._cell_size)
