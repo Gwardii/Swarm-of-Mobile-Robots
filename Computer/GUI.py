@@ -119,14 +119,14 @@ class GUI:
         self.line = 1
 
         # robot communication
-        self.xbee = Xbee()
-        if(self.xbee != None):
-            self.xbee_ready=True
-        # robots MAC
-        self.robots_MAC = {
-            "1": "0013A200415BA7CD",
-            "2": "0013A200415E861B"
-        }
+        # self.xbee = Xbee()
+        # if(self.xbee != None):
+        #     self.xbee_ready=True
+        # # robots MAC
+        # self.robots_MAC = {
+        #     "1": "0013A200415BA7CD",
+        #     "2": "0013A200415E861B"
+        # }
 
         # robot communication
         self.path = None
@@ -253,19 +253,21 @@ class GUI:
             obstacles = json.load(o)['obstacles']
         dict_of_obstacles = obs.load_obstacles(obstacles, figures)
         with open(".\Computer\\resources\\area.json") as a:
-            area = json.load(a) 
+            area = json.load(a)
         with open(".\Computer\\resources\\robots.json") as r:
-            robots_position=json.load(r)["robots"]
-        self.robot_position[0:2]=[robots_position[0]["position"]["x"],robots_position[0]["position"]["y"]]
-        self.robot_position[2]=robots_position[0]["orientation"]
+            robots_position = json.load(r)["robots"]
+        self.robot_position[0:2] = [
+            robots_position[0]["position"]["x"], robots_position[0]["position"]["y"]]
+        self.robot_position[2] = robots_position[0]["rotation"]
         wa = working_area.WorkingArea(area)
         return dict_of_obstacles, wa
 
     def robot_control(self):
         _msg = xbee_frame()
         if self.is_forward_pressed:
-            _msg.send_msg(task_id = 2, distance = 1000, task_time = 8000)
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            _msg.send_msg(task_id=2, distance=1000, task_time=8000)
+            self.xbee.send_msg_unicast(
+                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             R = self._rotation_matrix(self.robot_position[2]-90)
             local_vector = [0, 2]
             local_vector = R.dot(local_vector)
@@ -273,21 +275,24 @@ class GUI:
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_backward_pressed:
             R = self._rotation_matrix(self.robot_position[2]-90)
-            _msg.send_msg(task_id = 3, distance = 1000, task_time = 8000)
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            _msg.send_msg(task_id=3, distance=1000, task_time=8000)
+            self.xbee.send_msg_unicast(
+                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             local_vector = [0, -2]
             local_vector = R.dot(local_vector)
             self.robot_position[0:2] = [
                 self.robot_position[0]+local_vector[0], self.robot_position[1]+local_vector[1]]
         if self.is_rotate_right_pressed:
-            _msg.send_msg(task_id = 5, rotation_angle = 30, task_time = 1200)
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            _msg.send_msg(task_id=5, rotation_angle=30, task_time=1200)
+            self.xbee.send_msg_unicast(
+                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[2] = float(self.robot_position[2]-0.5)
         if self.is_rotate_left_pressed:
-            _msg.send_msg(task_id = 4, rotation_angle = 30, task_time = 1200)
-            self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            _msg.send_msg(task_id=4, rotation_angle=30, task_time=1200)
+            self.xbee.send_msg_unicast(
+                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[2] = float(self.robot_position[2]+0.5)
-        
+
         self.map.canvas.restore_region(self.background)
         self.robot_artist = self._draw_robot(
             self.robot_position[0:2], self.robot_position[2], self.controlled_robot_id)
@@ -385,52 +390,67 @@ class GUI:
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.background_without_path = self.map.canvas.copy_from_bbox(
             self.ax.bbox)
+
     def robots_command(self):
-        path=self.path
-        last_orientation=self.robot_position[2]
-        task_time=2000
-        task_id=0
+        path = self.path
+        last_orientation = self.robot_position[2]
+        task_time = 2000
+        task_id = 0
         frame = xbee_frame()
-        new_orientation=0
-        for i in range(1,len(path)):
+        new_orientation = 0
+        for i in range(1, len(path)):
             cell_size = self.cell_size
             center_i = tuple(i * cell_size for i in path[i])
             center_i_1 = tuple(i*cell_size for i in path[i-1])
-            x_data = center_i[0]- center_i_1[0]
-            y_data = center_i[1]- center_i_1[1]
-            target_orientation=math.degrees(math.atan2(y_data,x_data))
-            new_orientation=target_orientation-last_orientation #
-            last_orientation=target_orientation
-            distance = math.dist(center_i,center_i_1)
-            if(new_orientation==0):
-                task_id=2
-                frame.send_msg(task_id=task_id,distance=int(distance), task_time=int(task_time),arc_radius=0,rotation_angle=0)
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+            x_data = center_i[0] - center_i_1[0]
+            y_data = center_i[1] - center_i_1[1]
+            target_orientation = math.degrees(math.atan2(y_data, x_data))
+            new_orientation = target_orientation-last_orientation
+            last_orientation = target_orientation
+            distance = math.dist(center_i, center_i_1)
+            if(new_orientation == 0):
+                task_id = 2
+                frame.send_msg(task_id=task_id, distance=int(distance), task_time=int(
+                    task_time), arc_radius=0, rotation_angle=0)
+                print(
+                    f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                self.xbee.send_msg_unicast(
+                    self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
             else:
-                task_id=3
-                frame.send_msg(task_id=task_id,distance=0, task_time=int(task_time),arc_radius=0,rotation_angle=int(new_orientation))
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
-                task_id=2
-                frame.send_msg(task_id=task_id,distance=int(distance), task_time=int(task_time),arc_radius=0,rotation_angle=0)
-                print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
-        #set required orientation
-        task_id=3
-        distance=0
-        new_orientation=new_orientation-self.robot_target[2]
-        frame.send_msg(task_id=1,distance=int(distance), task_time=int(task_time),arc_radius=int(10),rotation_angle=int(new_orientation))
-        print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+                task_id = 3
+                frame.send_msg(task_id=task_id, distance=0, task_time=int(
+                    task_time), arc_radius=0, rotation_angle=int(new_orientation))
+                print(
+                    f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                self.xbee.send_msg_unicast(
+                    self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+                task_id = 2
+                frame.send_msg(task_id=task_id, distance=int(distance), task_time=int(
+                    task_time), arc_radius=0, rotation_angle=0)
+                print(
+                    f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+                self.xbee.send_msg_unicast(
+                    self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
+        # set required orientation
+        task_id = 3
+        distance = 0
+        new_orientation = new_orientation-self.robot_target[2]
+        frame.send_msg(task_id=1, distance=int(distance), task_time=int(
+            task_time), arc_radius=int(10), rotation_angle=int(new_orientation))
+        print(
+            f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
 
-        task_id=1
-        distance=0
-        new_orientation=0
-        frame.send_msg(task_id=1,distance=int(distance), task_time=int(task_time),arc_radius=10,rotation_angle=int(new_orientation))
-        print(f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
-        self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
-
+        task_id = 1
+        distance = 0
+        new_orientation = 0
+        frame.send_msg(task_id=1, distance=int(distance), task_time=int(
+            task_time), arc_radius=10, rotation_angle=int(new_orientation))
+        print(
+            f"task {task_id}, distance {distance}, rotattion angle {new_orientation}")
+        self.xbee.send_msg_unicast(
+            self.robots_MAC[str(self.controlled_robot_id)], frame.full_msg)
 
     def draw_path(self):
         self.robot.set_target(self.robot_target)
@@ -438,7 +458,7 @@ class GUI:
         self.pather.add_robot(0, self.robot)
         self.pather._determine_paths()
         path = self.pather.get_paths()
-        self.path=path
+        self.path = path
         # self.robots_command(path)
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.background = self.background_without_path

@@ -1,118 +1,49 @@
 {
   "figures": [
     {
-      "id":0,
-      "type": "triangle",
-      "point_1": {
-        "x": -100,
-        "y": 45
-      },
-      "point_2": {
-        "x": 0,
-        "y": 30
-      },
-      "point_3": {
-        "x": 200,
-        "y": 300
-      }
-    },
-    {
-      "id":1,
-      "type": "circle",
-      "radius": 150
-    },
-    {
-      "id":2,
-      "type": "rectangle",
-      "length_x": 150,
-      "length_y": 200
-    },
-    {
-      "id":3,
-      "type": "circle",
-      "radius": 150
-    },
-    {
-      "id":4,
-      "type": "triangle",
-      "point_1": {
-        "x": -100,
-        "y": 45
-      },
-      "point_2": {
-        "x": 0,
-        "y": 30
-      },
-      "point_3": {
-        "x": 200,
-        "y": 300
-      }
-    },
-    {
-      "id":5,
-      "type": "circle",
-      "radius": 150
-    },
-    {
-      "id":6,
-      "type": "rectangle",
-      "length_x": 150,
-      "length_y": 200
-    },
-    {
       "id":7,
-      "type": "triangle",
-      "point_1": {
-        "x": -100,
-        "y": 45
-      },
-      "point_2": {
-        "x": 0,
-        "y": 30
-      },
-      "point_3": {
-        "x": 200,
-        "y": 300
-      }
-    },
-    {
-      "id":8,
       "type": "circle",
-      "radius": 150
+      "radius": 100
     },
     {
       "id":9,
       "type": "rectangle",
       "length_x": 150,
-      "length_y": 200
+      "length_y": 220
     },
     {
       "id":10,
+      "type": "circle",
+      "radius": 80
+    },
+    {
+      "id":14,
+      "type": "rectangle",
+      "length_x": 280,
+      "length_y": 140
+    },
+    {
+      "id":15,
+      "type": "circle",
+      "radius": 120
+    },
+    {
+      "id":17,
       "type": "triangle",
       "point_1": {
-        "x": -100,
-        "y": 45
+        "x": -50,
+        "y": -110
       },
       "point_2": {
-        "x": 0,
+        "x": 150,
         "y": 30
       },
       "point_3": {
-        "x": 200,
-        "y": 300
+        "x": -50,
+        "y": 65
       }
-    },
-    {
-      "id":11,
-      "type": "circle",
-      "radius": 150
-    },
-    {
-      "id":12,
-      "type": "rectangle",
-      "length_x": 150,
-      "length_y": 200
     }
+
 
   ]
 }

@@ -27,8 +27,8 @@ FPS = 40
 TABLE_SIZE = {'long side': 1800, 'short side': 1400}
 
 # define which markers you use as robots, obstacles, and corners:
-robots_markers_ids = [13, 14, 15]
-obstacles_markers_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
+robots_markers_ids = [19, 18, 12, 13]
+obstacles_markers_ids = [7, 9, 10, 14, 15, 17]
 area_markers_ids = [0, 1, 2, 3]
 
 # define real size of a side of markers (in [mm]):
