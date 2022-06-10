@@ -4,7 +4,7 @@ import socket
 
 # --------------USER SETTINGS---------------
 
-RPI_IP = "192.168.108.76"
+RPI_IP = "192.168.152.76"
 RPI_PORT = 9999
 
 # -----------END OF USER SETTING-----------
@@ -103,15 +103,16 @@ def main():
         # some if statement to update widgets
         if app.rpi_communicatiom == True:
             app.gui.rpi_diode.configure(image=app.gui.diode["green"])
-        if app.gui.xbee_ready == True:
-            app.gui.robot_diode.configure(image=app.gui.diode["green"])
+        # if app.gui.xbee_ready == True:
+        #     app.gui.robot_diode.configure(image=app.gui.diode["green"])
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
             app.change_state(app.transitions.draw_path)
-            
-        # app.change_state(app.transitions.start_robot_communication)
 
-        # app.send_data_to_robot=True
+        if app.gui.map_update==True:
+            app.set_state(app.states.rpi_communication)
+            app.change_state(app.transitions.draw_obstacles)
+            app.gui.map_update=False
 
         if (time.time()*1000-tic > 30):
             app.change_state(app.transitions.robot_control)
