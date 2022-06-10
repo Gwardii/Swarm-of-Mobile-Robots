@@ -287,7 +287,7 @@ class Aruco_markers():
                         "x": self.detected_obstacles[id][0],
                         "y": self.detected_obstacles[id][1]
                     },
-                    "rotation": self.detected_obstacles[id][2],
+                    "rotation": -self.detected_obstacles[id][2]/np.pi*180,
                     "estimated_position": {
                         "x": self.coordinates_estimated[id][0],
                         "y": self.coordinates_estimated[id][1]
@@ -305,7 +305,7 @@ class Aruco_markers():
                         "x": self.detected_robots[id][0],
                         "y": self.detected_robots[id][1]
                     },
-                    "rotation": self.detected_robots[id][2],
+                    "rotation": -self.detected_robots[id][2]/np.pi*180,
                     "estimated_position": {
                         "x": self.coordinates_estimated[id][0],
                         "y": self.coordinates_estimated[id][1]

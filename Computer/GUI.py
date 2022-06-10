@@ -64,9 +64,7 @@ class GUI:
         self.new_robot_target = False
 
         # robot control - entry
-        # potem się to rozszerzy na N robotow
         self.robot_position = np.ndarray((number_of_robots, 3))
-        print(self.robot_position.shape)
         self.coord_entry = tk.Entry(fg='black', bg='white', width=20)
         self.coord_label = tk.Label(
             text="Enter target coordinates (x,y,rot):", bg="white", fg="black", font=12)
@@ -180,6 +178,7 @@ class GUI:
 
     def draw_figure(self):  # tworzenie pola do wykresów, skalowanie osi itp
         dict_of_obstales, wa = self._read_data()
+
         axis_step = self.cell_size
         extremes = wa.get_extremes()
         self.ax.set_xlim([0, extremes[1]])
@@ -263,10 +262,12 @@ class GUI:
             self.robot_position[i, 0:2] = [
                 robots_position[i]["position"]["x"], robots_position[i]["position"]["y"]]
             self.robot_position[i, 2] = robots_position[i]["rotation"]
+
         wa = working_area.WorkingArea(area)
         return dict_of_obstacles, wa
 
     def robot_control(self):
+
         _msg = xbee_frame()
         if self.is_forward_pressed:
             _msg.send_msg(task_id=2, distance=1000, task_time=8000)
@@ -301,6 +302,7 @@ class GUI:
 
         self.map.canvas.restore_region(self.background)
         for i in range(self.number_of_robots):
+
             self.robot_artist = self._draw_robot(
                 self.robot_position[i, 0:2], self.robot_position[i, 2], i+1)
             self.ax.draw_artist(self.robot_artist[0])
