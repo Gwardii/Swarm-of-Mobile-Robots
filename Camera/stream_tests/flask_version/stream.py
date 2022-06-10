@@ -47,7 +47,7 @@ def stream_main_fun():
         if frame is not None:
 
             # define quality of stream and code img as bytes:
-            frame = cv2.imencode('.JPEG', frame, [cv2.IMWRITE_JPEG_QUALITY, 50])[
+            frame = cv2.imencode('.JPEG', frame, [cv2.IMWRITE_JPEG_QUALITY, 90])[
                 1].tobytes()
 
             # yield is like return but without ending loop:

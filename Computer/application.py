@@ -6,6 +6,8 @@ import socket
 
 RPI_IP = "192.168.152.76"
 RPI_PORT = 9999
+NUMBER_OF_ROBOTS = 4
+XBEE = False
 
 # -----------END OF USER SETTING-----------
 
@@ -86,7 +88,7 @@ class Application(object):
 def main():
 
     app = Application(video_feed_ip=RPI_IP,
-                      rpi_port=RPI_PORT, number_of_robots=1)
+                      rpi_port=RPI_PORT, number_of_robots=NUMBER_OF_ROBOTS)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -122,7 +124,6 @@ def main():
         # update aplication's window:
         app.gui.window.update_idletasks()
         app.gui.window.update()
-
 
 
 if __name__ == "__main__":

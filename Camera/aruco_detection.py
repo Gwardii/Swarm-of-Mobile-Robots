@@ -10,6 +10,7 @@ import argparse
 from pynput import keyboard
 from RPI_client import RPI_Communication_Client
 import socket
+import time
 
 # This is main function for aruco markers detection.
 # It contains detection, saving into jsons files and
@@ -31,8 +32,8 @@ FPS = 40
 TABLE_SIZE = {'long side': 1800, 'short side': 1400}
 
 # define which markers you use as robots, obstacles, and corners:
-robots_markers_ids = [13, 14, 15]
-obstacles_markers_ids = [4, 5, 6, 7, 8, 9, 10, 11, 12]
+robots_markers_ids = [19, 18, 12, 13]
+obstacles_markers_ids = [7, 9, 10, 14, 15, 17]
 area_markers_ids = [0, 1, 2, 3]
 
 # define real size of a side of markers (in [mm]):
@@ -72,6 +73,9 @@ class Aruco_markers():
         self.detected_corners = {}
         self.detected_robots = {}
         self.detected_obstacles = {}
+        # time [s] for refreshing all lists. if something is not detected will be removed
+        self.refresh_time = 2
+        self.time_flag = time.time()
         self.X_shift = 0
         self.Y_shift = 0
         self.main_IMG = None
@@ -201,6 +205,12 @@ class Aruco_markers():
                 self.coordinates_px_resize_y = TABLE_SIZE["short side"]/(max(
                     self.detected_corners[id][1] for id in self.detected_corners.keys()) - self.coordinates_px_shift_y)
 
+        # once for refresh_time clear all list to remove nonexisting object:
+        if (time.time() - self.time_flag > self.refresh_time):
+            self.detected_robots.clear()
+            self.detected_obstacles.clear()
+            self.time_flag = time.time()
+
         for id in self.ids:
             # update coordinates after calculating corrections
             self.coordinates[id] = [(self.coordinates[id][0] - self.coordinates_px_shift_x) * self.coordinates_px_resize_x,
@@ -223,14 +233,16 @@ class Aruco_markers():
                     self.coordinates[id][0:2], self.orientations[id][2])
 
             # Drawing aruco boxes and texts:
-            top_left = [int(self.bbox[id][0, 0]) + 75,
-                        int(self.bbox[id][0, 1])]
-            aruco.drawAxis(
-                img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
-            cv2.putText(img, str(
-                f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
-            cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
-                        top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+            if(draw):
+                top_left = [int(self.bbox[id][0, 0]) + 75,
+                            int(self.bbox[id][0, 1])]
+                aruco.drawAxis(
+                    img, self.aruco_Cam_param[0], self.aruco_Cam_param[1], rvec[i], tvec[i], 60)
+
+                cv2.putText(img, str(
+                    f'x:{int(self.coordinates[id][0])} y: {int(self.coordinates[id][1])}'), top_left, cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
+                cv2.putText(img, str(f'x:{int(self.coordinates_estimated[id][0])} y: {int(self.coordinates_estimated[id][1])}'), [
+                    top_left[0], top_left[1]-25], cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
 
             self.main_IMG = img
 
@@ -279,7 +291,6 @@ class Aruco_markers():
                     "estimated_position": {
                         "x": self.coordinates_estimated[id][0],
                         "y": self.coordinates_estimated[id][1]
-
                     }
                 }
             )
@@ -294,7 +305,7 @@ class Aruco_markers():
                         "x": self.detected_robots[id][0],
                         "y": self.detected_robots[id][1]
                     },
-                    "orientation": self.detected_robots[id][2],
+                    "rotation": self.detected_robots[id][2],
                     "estimated_position": {
                         "x": self.coordinates_estimated[id][0],
                         "y": self.coordinates_estimated[id][1]
