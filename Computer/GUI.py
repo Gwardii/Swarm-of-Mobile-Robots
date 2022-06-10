@@ -117,6 +117,7 @@ class GUI:
             text="Execute line", width=10, font=12, command=self._get_command)
         self.command = ""
         self.line = 1
+        self.map_update=False
 
         # robot communication
         # self.xbee = Xbee()
@@ -165,6 +166,7 @@ class GUI:
         self.command = self.console.get(temp, tk.END)
         self.line += 1
         self.console.insert(tk.END, '\n')
+        self.map_update=True
 
     def _console_function(self):  # tutaj jest bląd i srednio dziala
         # self.console.place(x=620,y=400)
@@ -313,10 +315,8 @@ class GUI:
             self.robot_artist[1].remove()
             self.robot_artist[2].remove()
 
-        self.robot._position = self.robot_position[int(
-            self.controlled_robot_id)-1, 0:2]
-        self.robot._orientation = self.robot_position[int(
-            self.controlled_robot_id)-1, 2]
+        # self.robot._position = self.robot_position[int(self.controlled_robot_id)-1,0:2]
+        # self.robot._orientation = self.robot_position[int(self.controlled_robot_id)-1,2]
 
     def _draw_robot(self, position, rotation, id):
         # rysoanie kola ktore bedzei podstawa robota
@@ -338,7 +338,7 @@ class GUI:
         # dodanie opisu ktory to robot
         temp = "R "+str(id)
         label = self.ax.annotate(temp, xy=(
-            position[0], position[1]+75), fontsize=10, ha="center", va="center", weight='bold')  # ,rotation=rotation-90)
+            position[0], position[1]+75), fontsize=10, ha="center", va="center", weight='bold')#,rotation=rotation-90)
         robot = [circle, arrow, label]
         return robot
 
@@ -511,8 +511,7 @@ class GUI:
             self.ax.draw_artist(temp)
             self.map.canvas.blit(self.ax.bbox)
             self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
-        self.robot_position[int(self.controlled_robot_id) -
-                            1, 0:3] = self.robot_target
+        # self.robot_position[int(self.controlled_robot_id)-1,0:3]=self.robot_target
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.new_robot_target = False
 
