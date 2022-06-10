@@ -24,7 +24,7 @@ from xbee.xbee import Xbee, xbee_frame
 
 
 class GUI:
-    def __init__(self, cell_size: int = 50, number_of_robots: int = 10, video_feed=0):
+    def __init__(self, cell_size: int = 50, number_of_robots: int = 10, video_feed=0,xbee: bool = False):
         '''
         :param: cell_size: step in [mm] for map plotting. Should be chosen accordingly to area size.
         :number_of_robots: how many robots will be handled
@@ -122,14 +122,17 @@ class GUI:
         self.map_update=False
 
         # robot communication
-        # self.xbee = Xbee()
-        # if(self.xbee != None):
-        #     self.xbee_ready=True
-        # # robots MAC
-        # self.robots_MAC = {
-        #     "1": "0013A200415BA7CD",
-        #     "2": "0013A200415E861B"
-        # }
+        self.xbee=xbee
+        self.xbee_ready=False
+        if(self.xbee == True):
+            self.xbee = Xbee()
+            if(self.xbee != None):
+                self.xbee_ready=True
+            # robots MAC
+            self.robots_MAC = {
+                "1": "0013A200415BA7CD",
+                "2": "0013A200415E861B"
+            }
 
         # robot communication
         self.path = None
@@ -272,8 +275,8 @@ class GUI:
         _msg = xbee_frame()
         if self.is_forward_pressed:
             _msg.send_msg(task_id=2, distance=1000, task_time=8000)
-            self.xbee.send_msg_unicast(
-                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            if(self.xbee == True):
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             R = self._rotation_matrix(self.robot_position[2]-90)
             local_vector = [0, 2]
             local_vector = R.dot(local_vector)
@@ -282,22 +285,23 @@ class GUI:
         if self.is_backward_pressed:
             R = self._rotation_matrix(self.robot_position[2]-90)
             _msg.send_msg(task_id=3, distance=1000, task_time=8000)
-            self.xbee.send_msg_unicast(
-                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            
+            if(self.xbee == True):
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             local_vector = [0, -2]
             local_vector = R.dot(local_vector)
             self.robot_position[self.controlled_robot_id-1, 0:2] = [
                 self.robot_position[int(self.controlled_robot_id)-1, 0]+local_vector[0], self.robot_position[int(self.controlled_robot_id)-1, 1]+local_vector[1]]
         if self.is_rotate_right_pressed:
             _msg.send_msg(task_id=5, rotation_angle=30, task_time=1200)
-            self.xbee.send_msg_unicast(
-                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            if(self.xbee == True):
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[int(self.controlled_robot_id)-1, 2] = float(
                 self.robot_position[int(self.controlled_robot_id)-1, 2]-0.5)
         if self.is_rotate_left_pressed:
             _msg.send_msg(task_id=4, rotation_angle=30, task_time=1200)
-            self.xbee.send_msg_unicast(
-                self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
+            if(self.xbee == True):
+                self.xbee.send_msg_unicast(self.robots_MAC[str(self.controlled_robot_id)], _msg.full_msg)
             self.robot_position[int(self.controlled_robot_id)-1, 2] = float(
                 self.robot_position[int(self.controlled_robot_id)-1, 2]+0.5)
 
@@ -494,7 +498,8 @@ class GUI:
         self.pather._determine_paths()
         path = self.pather.get_paths()
         self.path = path
-        # self.robots_command(path)
+        if(self.xbee == True):
+            self.robots_command(path)
         self.background = self.map.canvas.copy_from_bbox(self.ax.bbox)
         self.background = self.background_without_path
         for i in range(1, len(path)):
