@@ -6,14 +6,14 @@ import socket
 
 RPI_IP = "192.168.0.52"
 RPI_PORT = 9999
-NUMBER_OF_ROBOTS = 4
+NUMBER_OF_ROBOTS = 2
 XBEE = False
 
 # -----------END OF USER SETTING-----------
 
 
 class Application(object):
-    def __init__(self, cell_size: int = 35, number_of_robots: int = 10, rpi_port: int = 9999, video_feed_ip=0) -> None:
+    def __init__(self, cell_size: int = 35, number_of_robots: int = 10, rpi_port: int = 9999, video_feed_ip=0, xbee: bool = False) -> None:
 
         self.state_machine = StateMachine(self)
         self.states = AllStates
@@ -25,7 +25,7 @@ class Application(object):
         self.cell_size = cell_size
         self.number_of_robots = number_of_robots
         self.gui = GUI(cell_size=cell_size,
-                       number_of_robots=number_of_robots, video_feed=video_feed_ip)
+                       number_of_robots=number_of_robots, video_feed=video_feed_ip, xbee=xbee)
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
         print(local_ip)
@@ -88,7 +88,7 @@ class Application(object):
 def main():
 
     app = Application(video_feed_ip=RPI_IP,
-                      rpi_port=RPI_PORT, number_of_robots=NUMBER_OF_ROBOTS)
+                      rpi_port=RPI_PORT, number_of_robots=NUMBER_OF_ROBOTS, xbee=XBEE)
     # start comunnication with raspberry pi:
     app.set_state(app.states.rpi_communication)
     app.rpi_communicatiom = True
@@ -105,8 +105,9 @@ def main():
         # some if statement to update widgets
         if app.rpi_communicatiom == True:
             app.gui.rpi_diode.configure(image=app.gui.diode["green"])
-        # if app.gui.xbee_ready == True:
-        #     app.gui.robot_diode.configure(image=app.gui.diode["green"])
+        if(app.gui.xbee == True):
+            if app.gui.xbee_ready == True:
+                app.gui.robot_diode.configure(image=app.gui.diode["green"])
         if app.gui.new_robot_target == True:
             app.change_state(app.transitions.set_target)
             app.change_state(app.transitions.draw_path)
