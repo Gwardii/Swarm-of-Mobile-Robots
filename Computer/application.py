@@ -6,7 +6,7 @@ import socket
 
 RPI_IP = "192.168.0.52"
 RPI_PORT = 9999
-NUMBER_OF_ROBOTS = 2
+NUMBER_OF_ROBOTS = 4
 XBEE = False
 
 # -----------END OF USER SETTING-----------
