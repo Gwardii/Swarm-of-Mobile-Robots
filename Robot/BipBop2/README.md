@@ -15,13 +15,15 @@ In order for the robot to move freely around the table to avoid obstacles, it mu
 
 ## Commands execution
 
+<img src="/Readme_img/wykresrobot.png" align="right" style = "width: 40% " />
+<br/>
+
 To be able to handle a sworm of robots, the way each one executes a command should be the same. For this to be possible, in addition to movement parameters such as distance or angle, the time for execution of the command is also given. 
 
 When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel.
 
 
-<img src="/Readme_img/wykresrobot.png" align="left" style = "width: 40% " />
-<br/>
+
 
 #### XBEE Data Frame
 The XBee board communicates with Arduino using Serial. When the message is received, Serial interrupt is used to stack it an array of robot commands. The frame of the message is shown below and is the same as the one schown in the "computer" part of the project.
