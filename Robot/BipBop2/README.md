@@ -1,7 +1,7 @@
 <img src="/Readme_img/logo.png" align="left" style = "width: 10rem"  />
 <img src="/Readme_img/Raspberry_Pi_Logo.svg" align="right" style = "width: 9rem"  />
 
-# TGS - Raspbery PI
+# TGS - Robot
 
 This page is all about how to configure and set up Raspberry PI, OpenCV. Also there is descriptions about functions and programs which runs on RPI.
 
