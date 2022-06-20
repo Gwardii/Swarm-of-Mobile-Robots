@@ -20,7 +20,7 @@ In order for the robot to move freely around the table to avoid obstacles, it mu
 
 To be able to handle a sworm of robots, the way each one executes a command should be the same. For this to be possible, in addition to movement parameters such as distance or angle, the time for execution of the command is also given. 
 
-When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel. The angular acceleration of robots is constant and equal 5 * 0.000001 [deg/ms2]. 
+When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel. The angular acceleration of robots is constant and equal 5 * 0.000001 deg/ms2. 
 
 <img src="/Readme_img/rownanie.png" align="left" style = "width: 30% " />
 <br/>
@@ -29,6 +29,7 @@ When given the command to move, the robot calculates the distance each of its wh
 
 By integrating the velocity diagram shown in the graph, we obtain the equation shown above. The only unknown in this equation is T1. It is worth mentioning that the discriminant of this equation (shown below) allows us to check whether it is possible to execute received command with given parameters.
 
+When executing the command every 30 ms the robot calculates what position each of its wheels should be in and turns them to that position using the PID controller.
 
 
 ## XBEE Communication
