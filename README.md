@@ -27,6 +27,8 @@ The main goal while programming robots was to make their path as deterministic a
 ## Path planning
 Implemented path planning algorithm finds the shortest feasible polygonal chain between target and actual position of a robot. The path planner requires a rasterized map of working area, thus it was also covered in the project. At the moment, the rasterization is provided for any polygon and circle, which are should be provided in the specified json format.
 
+<img src=/Readme_img/PP.jpg width=100%></img>
+
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
