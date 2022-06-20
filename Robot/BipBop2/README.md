@@ -1,5 +1,5 @@
 <img src="/Readme_img/logo.png" align="left" style = "width: 10rem"  />
-<img src="/Readme_img/Obraz4.jpg" align="right" style = "width: 10rem"  />
+<img src="/Readme_img/Obraz4.png" align="right" style = "width: 10rem"  />
 
 ## TGS - Robot
 
