@@ -1,5 +1,6 @@
 <img src="/Readme_img/logo.png" align="left" style = "width: 10rem"  />
 <img src="/Readme_img/robot_swarm.jpg" align="right" style = "width: 10rem"  />
+
 ## TGS - Robot
 
 This page is all about how to configure robot and communicate it with the server. The robot is shown on the picture on the right. It is based on the Arduino Uno board, has two wheels and communicate with the server via XBee.
