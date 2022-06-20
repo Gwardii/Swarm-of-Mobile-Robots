@@ -25,7 +25,7 @@ When given the command to move, the robot calculates the distance each of its wh
 <img src="/Readme_img/rownanie.png" align="left" style = "width: 30% " />
 <br/>
 
-#### XBEE Data Frame
+## XBEE Communication
 The XBee board communicates with Arduino using Serial. When the message is received, Serial interrupt is used to stack it an array of robot commands. The frame of the message is shown below and is the same as the one schown in the "computer" part of the project.
 
 Header (0x20 0x40) | Task_ID | Distance (mm) | Task Time (ms)| Radius (mm) | Rotation (deg)| Ender (0x50 0x60)  | Checksum   |
