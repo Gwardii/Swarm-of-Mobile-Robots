@@ -5,13 +5,21 @@
 
 This page is all about how to configure robot and communicate it with the server. The robot is shown on the picture on the right. It is based on the Arduino Uno board, has two wheels and communicate with the server via XBee.
 
-
-
 <br/>
 
 <br/>
 <img src="/Readme_img/wykresrobot.png" style = "width: 40% "  align=left />
 <br/>
+
+#### XBEE Data Frame
+The XBee board communicates with Arduino using Serial. When the message is received, Serial interrupt is used to stack it an array of robot commands. The frame of the message is shown below and is the same as the one schown in the "computer" part of the project.
+
+Header (0x20 0x40) | Task_ID | Distance (mm) | Task Time (ms)| Radius (mm) | Rotation (deg)| Ender (0x50 0x60)  | Checksum   |
+-------------------| --------|---------------|---------------|-------------|---------------|--------------------|------------|
+2 bytes            | 1 byte  | 2 bytes       | 3 bytes       | 2 bytes     | 2 bytes       | 2 bytes            | 2 bytes    |
+
+When the robot gets the first message It immediately starts to execute it. When the time allocated to execute the command passes, the robot starts executing the next command.
+
 
 
 ## Set up Raspberry Pi
