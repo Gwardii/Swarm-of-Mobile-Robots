@@ -24,8 +24,10 @@ When given the command to move, the robot calculates the distance each of its wh
 
 <img src="/Readme_img/rownanie.png" align="left" style = "width: 30% " />
 <br/>
+<br/>
+<br/>
 
-By integrating the velocity diagram shown in the graph, we obtain the equation shown on the left. The only unknown in this equation is T1. It is worth mentioning that the discriminant of this equation (shown below) allows us to check whether it is possible to execute received command with given parameters.
+By integrating the velocity diagram shown in the graph, we obtain the equation shown above. The only unknown in this equation is T1. It is worth mentioning that the discriminant of this equation (shown below) allows us to check whether it is possible to execute received command with given parameters.
 
 
 
