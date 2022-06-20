@@ -19,7 +19,7 @@ To be able to handle a sworm of robots, the way each one executes a command shou
 
 When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel.
 
-<br/>
+
 <img src="/Readme_img/wykresrobot.png" align="left" style = "width: 40% " />
 <br/>
 
