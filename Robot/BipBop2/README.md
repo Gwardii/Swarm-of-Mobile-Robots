@@ -22,10 +22,12 @@ To be able to handle a sworm of robots, the way each one executes a command shou
 
 When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel. The angular acceleration of robots is constant and equal 5 * 0.000001 [deg/ms2]. 
 
-By integrating the velocity diagram shown in the graph, we obtain the equation shown on the left. The only unknown in this equation is T1. It is worth mentioning that the discriminant of this equation (shown below) allows us to check whether it is possible to execute received command with given parameters.
-
 <img src="/Readme_img/rownanie.png" align="left" style = "width: 30% " />
 <br/>
+
+By integrating the velocity diagram shown in the graph, we obtain the equation shown on the left. The only unknown in this equation is T1. It is worth mentioning that the discriminant of this equation (shown below) allows us to check whether it is possible to execute received command with given parameters.
+
+
 
 ## XBEE Communication
 The XBee board communicates with Arduino using Serial. When the message is received, Serial interrupt is used to stack it an array of robot commands. The frame of the message is shown below and is the same as the one schown in the "computer" part of the project.
