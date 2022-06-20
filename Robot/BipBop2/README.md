@@ -5,7 +5,7 @@
 
 This page is all about how to configure robot and communicate it with the server. The robot is shown on the picture on the right. It is based on the Arduino Uno board, has two wheels and communicate with the server via XBee.
 
-<br/>
+
 
 <br/>
 <img src="/Readme_img/wykresrobot.png" style = "width: 40% "  align=left />
