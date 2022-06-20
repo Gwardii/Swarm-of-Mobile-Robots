@@ -22,7 +22,7 @@ To be able to handle a sworm of robots, the way each one executes a command shou
 
 When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel. The angular acceleration of robots is constant and equal 5 * 0.000001 [deg/ms2]. 
 
-<img src="/Readme_img/rownanie.png" align="left" style = "width: 40% " />
+<img src="/Readme_img/rownanie.png" align="left" style = "width: 20% " />
 <br/>
 
 #### XBEE Data Frame
