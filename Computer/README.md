@@ -46,7 +46,12 @@ GUI allows controlling each robot by controlling buttons and also by setting tar
 The displayed map is created based on JSON files received from RPI, and information about all possible obstacles read from the database. The application receives three JSON files: area.json, obstacles.json and robot.json. The area.json contains coordinates of all working area corners. Obstacles.json contains coordinates (x, y, rotation) and id of detected obstacles.  Robots.json contains coordinates (x,y, rotation) and id of detected robots. In the next step, the map is rasterized because path generation is based on a diffusion algorithm. The map is divided into cells with a given dimension (dimension can be set in application settings). Later each cell's weight is calculated and saved to a 2D array. These values are later used for path computation and visualisation of cells state (gradient informing about the distance to obstacles) 
 
 ### PATH COMPUTING
-Main idea behind creating paths for robots is......
+Path planning algorithm is divided into 3 steps.
+The first is some kind of pre-processing. Once a raster map is obtained, its cells are characterised by their distance from the nearest obstacle or workspace boundary. Next, for each of the robots in this map, available cells are determined based on the radius of the robot. If the robot does not have a circular shape it should be written in a circle and then represented by it. The first step should be processed at the begining or whenever the map changes.
+The second step may be called a solver. It is simply an implementation of a diffusion alghorithm for path finding. Before moving on, naively check if a path can be traced as a single line between a target and an actual location. If so, return the line as the path and do not include the robot in the diffusion path searching. For each robot an artificial potential field is created. The field has the highest value in the target cell and its values propagates from the cell onto another cells like a wave - assign neighbouring cells lower values and repeat for not assigned cells yet. Next, path is determined as a chain of cells where the first cell is an actual position of a robot and each successive cell is neighbour with the highest value.
+Last, but not least is preprocessing. The obtained paths are lists of particular cells, however the most optimal way to store and transmit paths is to describe them as polygonal chain. For the purpose a simple recursive minimalization of a route is implemented.
+
+<img src="/Readme_img/PP_algorithm.png" align="center" style = "width: 80%"  />
 
 ### ROBOT COMMUNICATION 
 #### XBEE INITIALIZATION
