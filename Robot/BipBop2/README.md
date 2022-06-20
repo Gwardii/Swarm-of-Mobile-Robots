@@ -1,9 +1,12 @@
 <img src="/Readme_img/logo.png" align="left" style = "width: 10rem"  />
-<img src="/Readme_img/Raspberry_Pi_Logo.svg" align="right" style = "width: 9rem"  />
 
 # TGS - Robot
 
-This page is all about how to configure and set up Raspberry PI, OpenCV. Also there is descriptions about functions and programs which runs on RPI.
+<br/>
+<img src="/Readme_img/wykresrobot.png" style = "width: 40% "  align=left />
+<br/>
+
+This page is all about how to configure robot and  communicate it with the server 
 
 <br/>
 
