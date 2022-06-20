@@ -9,8 +9,6 @@ Academic project of the swarm of mobile robots - system for controlling and moni
 A graphical user interface was created with the use of the Tkinter package. The application allows users to control the mobile robots with the help of control buttons and by assigning the coordinates of the target. In addition, GUI contains a preview of the created map and a preview from the camera mounted above the table where the robots were driving.
 ![alt text](https://github.com/Gwardii/Swarm-of-Mobile-Robots/blob/master/Readme_img/GUI_2.png?raw=true)
 
-The robot is finding a path to the target using a diffusion algorithm and raster map. Each cell of the raster map has a unique value of the potential which is dependent on the coordinates of the target and the location of the obstacles. Collaboration between robots was developed using genetic algorithms. 
-
 ## Raspberry Pi - vision and detection
 
 Raspberry Pi with a mounted camera detects ArUco markers and procces captured images. Four ArUco markers define corners, robots and obstacles are defined as another sets of markers. Coordiantes of all markers are calculated and send to main server. Live stream from Raspberry is load into local webpage (main application take it for visualization).
@@ -25,6 +23,10 @@ Robots were built around the Arduino Uno boards. Each of them has two wheels equ
 
 A robot can get the command to wait, move forward, rotate, and move around the given arc. Each command is built so the robot will drive a given distance or angle in a given amount of time.
 The main goal while programming robots was to make their path as deterministic as possible. To achieve this, each command consists of the path parametrs such as its length or radius and the time in with the path should be complited. Based on that robot calculates the path for each wheel and follows it using PID.
+
+## Path planning
+Implemented path planning algorithm finds the shortest feasible polygonal chain between target and actual position of a robot. The path planner requires a rasterized map of working area, thus it was also covered in the project. At the moment, the rasterization is provided for any polygon and circle, which are should be provided in the specified json format.
+
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
