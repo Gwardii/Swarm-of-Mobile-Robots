@@ -20,9 +20,7 @@ In order for the robot to move freely around the table to avoid obstacles, it mu
 
 To be able to handle a sworm of robots, the way each one executes a command should be the same. For this to be possible, in addition to movement parameters such as distance or angle, the time for execution of the command is also given. 
 
-When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel.
-
-
+When given the command to move, the robot calculates the distance each of its wheels must travel. Then calculates a trapezoidal velocity profile (shown on the figure) with its integral corresponding to the path of the wheel. The angular acceleration of robots is constant and equal 5 * 0.000001 [deg/ms2]. 
 
 
 #### XBEE Data Frame
