@@ -2,13 +2,14 @@
 
 # TGS - Robot
 
+This page is all about how to configure robot and communicate it with the server. The robot is shown on the picture on the right. It is based on the Arduino Uno board.
+
+<br/>
+
 <br/>
 <img src="/Readme_img/wykresrobot.png" style = "width: 40% "  align=left />
 <br/>
 
-This page is all about how to configure robot and  communicate it with the server 
-
-<br/>
 
 ## Set up Raspberry Pi
 
