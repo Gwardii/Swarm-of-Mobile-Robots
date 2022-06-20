@@ -4,7 +4,7 @@
 
 This page is all about how to configure robot and communicate it with the server. The robot is shown on the picture on the right. It is based on the Arduino Uno board.
 
-<img src="robot_swarm.jpg" align="right" style = "width: 10rem"  />
+<img src="/Readme_img/robot_swarm.jpg" align="right" style = "width: 10rem"  />
 
 <br/>
 
