@@ -46,7 +46,7 @@ Once you get IP of your RPI in network you can disconnect ethernet cable and use
 
 <img src="/Readme_img/python_opencv.png" style = "width: 40%" align = right /> 
 
-## Install OpenCV
+## Installing OpenCV
 
 There are a lot of tutorials how to do this and if you manage to do this with them good for you! 
 But if you are not familiar with RPI and python and linux and OpenCV (as I was) maybe these tips will be helpfull and save some of your time.
@@ -80,7 +80,7 @@ With some changes this was the right one. Follow steps and:
   
   The most important functionality of RPI is detecting Aruco markers and saving their coordinates. But     before you want use any camera with opencv you should calibrate  it.
   It is necessary step to reduce fish-eye effect and to achive good results in next steps.  
-  
+  Also, it is worth knowing that aruco markers should have some light frame around a black one or be mounted on a light background (necessary for detection of the black square).  
   ### Calibration
   
   First of all you need to take few pictures of calibration grid. You can use special script to do this:

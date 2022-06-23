@@ -7,9 +7,7 @@ Academic project of the swarm of mobile robots - system for controlling and moni
 
 ## Graphical User Interface
 A graphical user interface was created with the use of the Tkinter package. The application allows users to control the mobile robots with the help of control buttons and by assigning the coordinates of the target. In addition, GUI contains a preview of the created map and a preview from the camera mounted above the table where the robots were driving.
-![alt text](https://github.com/Gwardii/Swarm-of-Mobile-Robots/blob/master/Readme_img/GUI.png?raw=true)
-
-The robot is finding a path to the target using a diffusion algorithm and raster map. Each cell of the raster map has a unique value of the potential which is dependent on the coordinates of the target and the location of the obstacles. Collaboration between robots was developed using genetic algorithms. 
+![alt text](https://github.com/Gwardii/Swarm-of-Mobile-Robots/blob/master/Readme_img/GUI_2.png?raw=true)
 
 ## Raspberry Pi - vision and detection
 
@@ -25,6 +23,12 @@ Robots were built around the Arduino Uno boards. Each of them has two wheels equ
 
 A robot can get the command to wait, move forward, rotate, and move around the given arc. Each command is built so the robot will drive a given distance or angle in a given amount of time.
 The main goal while programming robots was to make their path as deterministic as possible. To achieve this, each command consists of the path parametrs such as its length or radius and the time in with the path should be complited. Based on that robot calculates the path for each wheel and follows it using PID.
+
+## Path planning
+Implemented path planning algorithm finds the shortest feasible polygonal chain between target and actual position of a robot. The path planner requires a rasterized map of working area, thus it was also covered in the project. At the moment, the rasterization is provided for any polygon and circle, which are should be provided in the specified json format.
+
+<img src=/Readme_img/PP.png width=70%></img>
+
 ## Authors
 
 - [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
