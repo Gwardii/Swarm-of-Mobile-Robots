@@ -31,7 +31,7 @@ Implemented path planning algorithm finds the shortest feasible polygonal chain 
 
 ## Authors
 
-- [Szymon Bielenin](https://github.com/SB-koperkowypiesek)
+- [Szymon Bielenin](https://github.com/symonb)
 - [Filip Gwardecki](https://github.com/Gwardii)
 - [Bazyli Leczkowski](https://github.com/S4uro0on)
 - [Norbert Prokopiuk](https://github.com/norbertprokopiuk)
